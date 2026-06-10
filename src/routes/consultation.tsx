@@ -1,0 +1,208 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { motion, AnimatePresence } from "framer-motion";
+import { Phone, Mail, MapPin, Clock, ArrowRight, CheckCircle2 } from "lucide-react";
+import { useState } from "react";
+import { SiteHeader } from "@/components/site-header";
+import { SiteFooter } from "@/components/site-footer";
+import { PageTransition } from "@/components/page-transition";
+
+export const Route = createFileRoute("/consultation")({
+  head: () => ({
+    meta: [
+      { title: "Request a Consultation — IG Sabroso Construction" },
+      { name: "description", content: "Let's create something extraordinary. Reach out to IG Sabroso Construction for residential, renovation, and civil works in Dasmariñas, Cavite." },
+      { property: "og:title", content: "Consultation — IG Sabroso Construction" },
+      { property: "og:description", content: "Tell us about your project — we'll get back to you shortly." },
+    ],
+  }),
+  component: ConsultationPage,
+});
+
+function ConsultationPage() {
+  const [submitted, setSubmitted] = useState(false);
+
+  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setSubmitted(true);
+    (e.target as HTMLFormElement).reset();
+    setTimeout(() => setSubmitted(false), 6000);
+  };
+
+  return (
+    <PageTransition>
+      <SiteHeader />
+      <main className="w-full">
+        <section className="relative py-20 md:py-28">
+          <div className="absolute inset-0 -z-10 overflow-hidden">
+            <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full gradient-brand opacity-20 blur-3xl" />
+            <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full gradient-brand opacity-15 blur-3xl" />
+          </div>
+
+          <div className="max-w-[1400px] mx-auto px-6 md:px-10">
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7 }}
+              className="text-center max-w-3xl mx-auto"
+            >
+              <div className="inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-primary font-semibold justify-center">
+                <span className="h-px w-8 bg-primary" /> Get In Touch
+              </div>
+              <h1 className="mt-4 text-4xl md:text-6xl lg:text-7xl font-display font-bold leading-[1.05]">
+                Let's create something <span className="text-gradient-brand">extraordinary.</span>
+              </h1>
+              <p className="mt-6 text-muted-foreground text-base md:text-lg">
+                Have a project in mind? Tell us a bit about it and our team will be in touch shortly.
+              </p>
+            </motion.div>
+
+            <div className="mt-16 grid lg:grid-cols-5 gap-8">
+              {/* Contact info */}
+              <motion.aside
+                initial={{ opacity: 0, x: -20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6 }}
+                className="lg:col-span-2 glass rounded-3xl p-8 shadow-card h-fit"
+              >
+                <h2 className="font-display font-bold text-2xl">Contact Details</h2>
+                <p className="text-sm text-muted-foreground mt-2">We're here Monday — Saturday.</p>
+
+                <div className="mt-8 space-y-5">
+                  <Info icon={Phone} label="Phone" value="+63 917 123 4567" />
+                  <Info icon={Mail} label="Email" value="info@igsabrosoconstruction.com" />
+                  <Info icon={MapPin} label="Location" value="Dasmariñas, Cavite, Philippines" />
+                  <Info icon={Clock} label="Business Hours" value="Mon – Sat · 8:00 AM – 5:00 PM" />
+                </div>
+
+                <div className="mt-8 p-5 rounded-2xl gradient-brand text-primary-foreground">
+                  <div className="text-xs uppercase tracking-wider opacity-80">Built to Last</div>
+                  <div className="mt-1 font-display font-bold text-lg leading-tight">
+                    Build with confidence,<br />build with Sabroso.
+                  </div>
+                </div>
+              </motion.aside>
+
+              {/* Form */}
+              <motion.div
+                initial={{ opacity: 0, x: 20 }}
+                whileInView={{ opacity: 1, x: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.6, delay: 0.1 }}
+                className="lg:col-span-3 glass rounded-3xl p-8 md:p-10 shadow-card relative overflow-hidden"
+              >
+                <h2 className="font-display font-bold text-2xl">Request a Consultation</h2>
+                <p className="text-sm text-muted-foreground mt-1">Fill out the form and we'll respond within one business day.</p>
+
+                <form onSubmit={onSubmit} className="mt-8 grid sm:grid-cols-2 gap-5">
+                  <Field label="Full Name" name="name" placeholder="Juan Dela Cruz" required />
+                  <Field label="Phone Number" name="phone" placeholder="+63 ..." required />
+                  <Field label="Email Address" name="email" type="email" placeholder="you@example.com" required className="sm:col-span-2" />
+
+                  <div className="sm:col-span-2">
+                    <Label>Project Type</Label>
+                    <select
+                      name="projectType"
+                      required
+                      defaultValue=""
+                      className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
+                    >
+                      <option value="" disabled>Select a service</option>
+                      <option>Residential Construction</option>
+                      <option>Renovation & Remodeling</option>
+                      <option>Civil Works</option>
+                      <option>Design-Build</option>
+                      <option>Architectural Drawings</option>
+                      <option>3D Rendering</option>
+                    </select>
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <Label>Project Details</Label>
+                    <textarea
+                      name="details"
+                      required
+                      rows={5}
+                      placeholder="Tell us about your project..."
+                      className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition resize-none"
+                    />
+                  </div>
+
+                  <div className="sm:col-span-2 flex justify-end">
+                    <button
+                      type="submit"
+                      className="group inline-flex items-center gap-3 gradient-brand text-primary-foreground rounded-full pl-7 pr-2 py-3 font-semibold shadow-glow hover:scale-[1.02] transition"
+                    >
+                      Request a Consultation
+                      <span className="bg-background/25 rounded-full p-2 group-hover:translate-x-1 transition-transform">
+                        <ArrowRight size={16} />
+                      </span>
+                    </button>
+                  </div>
+                </form>
+
+                <AnimatePresence>
+                  {submitted && (
+                    <motion.div
+                      initial={{ opacity: 0, y: 10 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0 }}
+                      className="mt-6 flex items-start gap-3 rounded-2xl border border-primary/30 bg-primary/10 p-5"
+                    >
+                      <CheckCircle2 className="text-primary shrink-0 mt-0.5" size={20} />
+                      <div className="text-sm">
+                        <div className="font-semibold">Thank you!</div>
+                        <div className="text-muted-foreground mt-1">
+                          Your consultation request has been received. Our team will contact you shortly.
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </motion.div>
+            </div>
+          </div>
+        </section>
+
+        <SiteFooter />
+      </main>
+    </PageTransition>
+  );
+}
+
+function Info({ icon: Icon, label, value }: { icon: React.ComponentType<{ size?: number; className?: string }>; label: string; value: string }) {
+  return (
+    <div className="flex items-start gap-4">
+      <div className="h-11 w-11 shrink-0 rounded-2xl gradient-brand text-primary-foreground flex items-center justify-center shadow-soft">
+        <Icon size={18} />
+      </div>
+      <div>
+        <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>
+        <div className="text-sm font-semibold mt-0.5">{value}</div>
+      </div>
+    </div>
+  );
+}
+
+function Label({ children }: { children: React.ReactNode }) {
+  return <label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">{children}</label>;
+}
+
+function Field({
+  label, name, type = "text", placeholder, required, className = "",
+}: {
+  label: string; name: string; type?: string; placeholder?: string; required?: boolean; className?: string;
+}) {
+  return (
+    <div className={className}>
+      <Label>{label}</Label>
+      <input
+        name={name}
+        type={type}
+        required={required}
+        placeholder={placeholder}
+        className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
+      />
+    </div>
+  );
+}
