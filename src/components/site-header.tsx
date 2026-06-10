@@ -5,14 +5,14 @@ import { motion, AnimatePresence } from "framer-motion";
 import logoAsset from "@/assets/logo.png.asset.json";
 import { useTheme } from "./theme-provider";
 
-const navItems = [
+const navItems: { to: "/" | "/details" | "/consultation"; label: string; hash?: string }[] = [
   { to: "/", label: "Home" },
   { to: "/details", label: "About", hash: "about" },
   { to: "/details", label: "Services", hash: "services" },
   { to: "/details", label: "Projects", hash: "projects" },
   { to: "/details", label: "Process", hash: "process" },
   { to: "/consultation", label: "Contact" },
-] as const;
+];
 
 export function SiteHeader({ floating = false }: { floating?: boolean }) {
   const { theme, toggle } = useTheme();
