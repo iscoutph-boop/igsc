@@ -81,51 +81,46 @@ function HomePage() {
           <StatCard delay={0.85} icon={<Building2 size={18} />} value="300+" label="Projects completed" />
         </div>
 
-        {/* "27 SABROSO" tile */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 1, duration: 0.6 }}
-          className="hidden md:block absolute left-1/2 -translate-x-1/2 bottom-44 z-10 glass rounded-2xl px-6 py-4 shadow-card"
-        >
-          <div className="flex items-center gap-4">
-            <div className="text-4xl font-display font-black leading-none">27</div>
-            <div className="leading-tight">
-              <div className="text-[10px] uppercase tracking-[0.2em] text-muted-foreground">Sabroso</div>
-              <div className="text-xs font-bold text-primary">BUILT TO LAST</div>
-            </div>
-          </div>
-        </motion.div>
-
-        {/* Bottom-left text + CTA */}
-        <div className="absolute left-0 right-0 bottom-0 z-10 px-5 md:px-12 pb-8 md:pb-12 flex flex-col md:flex-row items-start md:items-end justify-between gap-6">
+        {/* Bottom-left supporting tagline */}
+        <div className="absolute left-0 right-0 bottom-0 z-10 px-5 md:px-12 pb-8 md:pb-12 flex flex-col items-center gap-6">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.9, duration: 0.7 }}
+            className="hidden md:flex items-center gap-3 text-xs uppercase tracking-[0.32em] text-foreground/70"
           >
-            <Hammer className="text-primary mb-2" size={20} />
-            <p className="text-base md:text-lg font-display font-semibold leading-snug max-w-xs">
-              Build with confidence,<br />build with Sabroso.
-            </p>
+            <Hammer className="text-primary" size={14} />
+            <span>27 Sabroso</span>
+            <span className="h-px w-6 bg-primary/60" />
+            <span className="text-primary font-semibold">Built to Last</span>
           </motion.div>
 
+          {/* Primary centered CTA */}
           <motion.div
-            initial={{ opacity: 0, y: 20 }}
+            initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 1.1, duration: 0.7 }}
-            className="w-full md:w-auto"
+            transition={{ delay: 1.05, duration: 0.7 }}
           >
             <Link
               to="/details"
-              className="group inline-flex items-center gap-3 gradient-brand text-primary-foreground rounded-full pl-7 pr-2 py-2.5 font-semibold shadow-glow hover:scale-[1.02] transition-transform"
+              className="group relative inline-flex items-center gap-4 gradient-brand text-primary-foreground rounded-full pl-9 pr-3 py-4 text-base md:text-lg font-bold tracking-[0.18em] shadow-glow hover:scale-[1.03] transition-transform"
             >
-              View More
-              <span className="bg-background/25 rounded-full p-2 group-hover:translate-x-1 transition-transform">
-                <ArrowRight size={16} />
+              <span className="absolute inset-0 rounded-full ring-1 ring-white/20" />
+              DISCOVER MORE
+              <span className="bg-background/25 rounded-full p-2.5 group-hover:translate-x-1 transition-transform">
+                <ArrowRight size={18} />
               </span>
             </Link>
           </motion.div>
+
+          <motion.p
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 1.25, duration: 0.7 }}
+            className="text-[11px] md:text-xs uppercase tracking-[0.28em] text-muted-foreground"
+          >
+            Build with confidence — build with Sabroso.
+          </motion.p>
         </div>
       </main>
     </PageTransition>
