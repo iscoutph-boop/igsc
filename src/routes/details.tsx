@@ -1,12 +1,14 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
+import { useMemo, useState } from "react";
 import {
   ArrowRight, Home, Wrench, Building2, HardHat, Ruler, Box, PencilRuler,
-  Compass, Hammer, Layers, CheckCircle2,
+  Compass, Hammer, Layers, CheckCircle2, MapPin, Check, Sparkles,
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PageTransition } from "@/components/page-transition";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import aboutImg from "@/assets/about.jpg";
 import p1 from "@/assets/project-1.jpg";
 import p2 from "@/assets/project-2.jpg";
@@ -16,10 +18,10 @@ import p4 from "@/assets/project-4.jpg";
 export const Route = createFileRoute("/details")({
   head: () => ({
     meta: [
-      { title: "About, Services & Projects — IG Sabroso Construction" },
-      { name: "description", content: "Discover IG Sabroso Construction: residential builds, renovations, civil works, design-build services, and featured projects across Cavite." },
-      { property: "og:title", content: "About IG Sabroso Construction" },
-      { property: "og:description", content: "Built on trust. Driven by excellence. Creating lasting spaces." },
+      { title: "Packages & Portfolio — IG Sabroso Construction" },
+      { name: "description", content: "Explore IG Sabroso Construction's finish packages and full project portfolio across Cavite, Laguna, and Metro Manila." },
+      { property: "og:title", content: "IG Sabroso — Packages & Portfolio" },
+      { property: "og:description", content: "Basic, Elegant, and Luxury finish packages plus our completed and ongoing builds." },
     ],
   }),
   component: DetailsPage,
@@ -35,12 +37,73 @@ const services = [
   { icon: Box, title: "3D Rendering & Visualization", desc: "See your project in lifelike detail before we break ground." },
 ];
 
-const projects = [
-  { img: p1, title: "Modern Hillside Residence", tag: "Residential" },
-  { img: p2, title: "Urban Modern Home", tag: "Residential" },
-  { img: p3, title: "Contemporary Villa", tag: "Luxury" },
-  { img: p4, title: "Commercial Building", tag: "Commercial" },
+type ProjectType = "Residential" | "Apartment" | "Commercial" | "Renovation";
+type ProjectStatus = "Completed" | "Ongoing";
+type Project = {
+  id: string;
+  title: string;
+  status: ProjectStatus;
+  type: ProjectType;
+  location: string;
+  description: string;
+  highlights: string[];
+  number: string;
+  img: string;
+};
+
+const projects: Project[] = [
+  { id: "a-res", title: "A Residence", status: "Completed", type: "Residential", location: "Imus City, Cavite", number: "01", img: p1,
+    description: "A two-storey residence in modern contemporary style, defined by clean lines, layered volumes, and a balanced mix of glass and warm accent materials. Despite a compact 125 sqm footprint, it showcases efficient space planning that maximizes functionality and comfort.",
+    highlights: ["2-vehicle carport", "Living area", "Kitchen area", "Dining area", "3 Bedrooms", "4 Restrooms"] },
+  { id: "o-res", title: "O Residence", status: "Completed", type: "Residential", location: "Dasmariñas City, Cavite", number: "02", img: p2,
+    description: "A two-storey, 174 sqm residence with a classic space-planning approach — strong geometric volumes and bold structured massing. A high-ceiling living area enhances spatial openness and architectural presence.",
+    highlights: ["2-vehicle carport", "Living area", "Kitchen & service kitchen", "Dining area", "Office", "5 Bedrooms", "5 Restrooms"] },
+  { id: "g-res", title: "G Residence", status: "Completed", type: "Residential", location: "Imus City, Cavite", number: "03", img: p3,
+    description: "A refined residential build emphasizing premium materials and a contemporary palette tailored to family living.",
+    highlights: ["1-vehicle carport", "Living area", "Kitchen area", "Dining area", "4 Bedrooms", "3 Restrooms"] },
+  { id: "i-res", title: "I Residence", status: "Completed", type: "Residential", location: "Imus City, Cavite", number: "04", img: p4,
+    description: "A three-storey modern contemporary residence distinguished by exposed brick within a predominantly white interior palette. High-end materials and smart-home features are seamlessly integrated in this 222 sqm home.",
+    highlights: ["1-vehicle carport", "2 Living areas", "Kitchen & service kitchen", "Dining area", "6 Bedrooms", "5 Restrooms"] },
+  { id: "l-res", title: "L Residence", status: "Completed", type: "Renovation", location: "Pasig City", number: "05", img: p1,
+    description: "A three-storey renovation transformed into a modern contemporary residence with dark, Japanese-inspired interiors. The scope focused on premium-quality materials, interior design, and selected execution works.",
+    highlights: ["2-vehicle carport", "2 Living areas", "Kitchen", "Dining area", "Office & Jacuzzi", "Master Bedroom"] },
+  { id: "b-apt", title: "B Apartment", status: "Completed", type: "Apartment", location: "San Pedro City, Laguna", number: "06", img: p2,
+    description: "A two-storey, three-unit apartment building delivering durable, rentable units with clean modern detailing.",
+    highlights: ["1-vehicle carport", "Living area", "Kitchen area", "Dining area", "2 Bedrooms per unit", "1 Restroom per unit"] },
+  { id: "keystone", title: "Keystone Building", status: "Completed", type: "Commercial", location: "Dasmariñas City, Cavite", number: "07", img: p3,
+    description: "A three-storey commercial building designed for flexible tenancy and street-level visibility.",
+    highlights: ["2-vehicle carport", "6 commercial units", "3 Restrooms"] },
+  { id: "f-res", title: "F Residence", status: "Ongoing", type: "Residential", location: "Silang, Cavite", number: "08", img: p4,
+    description: "A two-storey residence designed as a multi-level home that responds to a steep site slope, carefully balancing spaces within a 232 sqm floor area. Features a modern contemporary interpretation of a Bali-inspired theme.",
+    highlights: ["2-vehicle carport", "2 Living areas", "Kitchen & service kitchen", "Dining area", "6 Bedrooms", "7 Restrooms"] },
+  { id: "k-res", title: "K Residence", status: "Ongoing", type: "Residential", location: "Dasmariñas City, Cavite", number: "09", img: p1,
+    description: "A contemporary family residence in progress, focused on natural light and tropical-modern detailing.",
+    highlights: ["2-vehicle carport", "Living area", "Kitchen area", "Dining area", "4 Bedrooms", "4 Restrooms"] },
+  { id: "a-res-2", title: "A Residence", status: "Ongoing", type: "Residential", location: "Imus City, Cavite", number: "10", img: p2,
+    description: "A new residential build with a modern aesthetic and efficient space planning for an expanding family.",
+    highlights: ["1-vehicle carport", "Living area", "Kitchen area", "Dining area", "3 Bedrooms", "3 Restrooms"] },
+  { id: "z-res", title: "Z Residence", status: "Ongoing", type: "Residential", location: "Dasmariñas City, Cavite", number: "11", img: p3,
+    description: "A bold modern residence in development — strong massing paired with warm material accents.",
+    highlights: ["2-vehicle carport", "Living area", "Kitchen area", "Dining area", "5 Bedrooms", "4 Restrooms"] },
+  { id: "a-res-reno", title: "A Residence Renovation / Extension", status: "Ongoing", type: "Renovation", location: "Dasmariñas City, Cavite", number: "12", img: p4,
+    description: "A residential renovation and extension upgrading layout, finishes, and additional living areas to suit evolving family needs.",
+    highlights: ["Structural extension", "Interior renovation", "Premium finishes", "Updated kitchen", "Additional bedroom"] },
+  { id: "v-res", title: "V Residence", status: "Ongoing", type: "Residential", location: "Imus City, Cavite", number: "13", img: p1,
+    description: "An ongoing residential project showcasing contemporary architecture and quality craftsmanship.",
+    highlights: ["2-vehicle carport", "Living area", "Kitchen area", "Dining area", "4 Bedrooms", "3 Restrooms"] },
 ];
+
+const packages = [
+  { tier: "BASIC", price: "₱35,000", note: "per square meter", featured: false,
+    features: ["Standard structural works", "Quality basic finishes", "Essential fixtures", "Standard electrical & plumbing", "Painted interior walls"] },
+  { tier: "ELEGANT", price: "₱40,000 – ₱45,000", note: "per square meter", featured: true,
+    features: ["Premium structural works", "Upgraded finishes & tiles", "Designer fixtures", "Enhanced electrical & plumbing", "Accent walls & cabinetry"] },
+  { tier: "LUXURY", price: "₱50,000", note: "per square meter", featured: false,
+    features: ["High-end structural works", "Luxury imported finishes", "Premium smart-home features", "Designer lighting & built-ins", "Custom millwork & detailing"] },
+];
+
+const filters = ["All", "Completed", "Ongoing", "Residential", "Apartment", "Commercial", "Renovation"] as const;
+type Filter = typeof filters[number];
 
 const steps = [
   { n: "01", title: "Consultation", desc: "Understanding your needs, vision, and budget.", icon: Compass },
@@ -50,6 +113,15 @@ const steps = [
 ];
 
 function DetailsPage() {
+  const [filter, setFilter] = useState<Filter>("All");
+  const [active, setActive] = useState<Project | null>(null);
+
+  const filtered = useMemo(() => {
+    if (filter === "All") return projects;
+    if (filter === "Completed" || filter === "Ongoing") return projects.filter((p) => p.status === filter);
+    return projects.filter((p) => p.type === filter);
+  }, [filter]);
+
   return (
     <PageTransition>
       <SiteHeader />
@@ -88,8 +160,6 @@ function DetailsPage() {
                   src={aboutImg}
                   alt="Premium home interior built by IG Sabroso"
                   loading="lazy"
-                  width={1400}
-                  height={1000}
                   className="relative rounded-3xl shadow-card w-full object-cover aspect-[4/3]"
                 />
                 <div className="absolute -bottom-6 -left-6 glass rounded-2xl p-5 shadow-card">
@@ -120,56 +190,148 @@ function DetailsPage() {
                   </div>
                   <h3 className="mt-5 text-lg font-display font-bold">{s.title}</h3>
                   <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
-                  <div className="mt-5 text-xs font-semibold text-primary inline-flex items-center gap-1 opacity-0 group-hover:opacity-100 transition">
-                    Learn more <ArrowRight size={12} />
-                  </div>
                 </div>
               </Reveal>
             ))}
           </div>
         </Section>
 
-        {/* Projects */}
-        <Section id="projects">
-          <Reveal className="flex flex-col md:flex-row md:items-end md:justify-between gap-4">
-            <div>
-              <Eyebrow>Featured Projects</Eyebrow>
-              <h2 className="mt-3 text-4xl md:text-5xl font-display font-bold leading-tight">
-                Spaces crafted <span className="text-gradient-brand">with purpose.</span>
-              </h2>
-            </div>
-            <p className="text-muted-foreground max-w-sm">
-              A glimpse of recent residences and commercial works we've proudly delivered.
+        {/* Finish Packages */}
+        <Section id="packages">
+          <Reveal className="text-center max-w-2xl mx-auto">
+            <Eyebrow center>Finish Packages</Eyebrow>
+            <h2 className="mt-3 text-4xl md:text-5xl font-display font-bold leading-tight">
+              Three tiers.<br />
+              <span className="text-gradient-brand">One standard of quality.</span>
+            </h2>
+            <p className="mt-5 text-muted-foreground">
+              Transparent starting rates per square meter — tailored to fit your vision and budget.
             </p>
           </Reveal>
 
-          <div className="mt-12 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {projects.map((p, i) => (
-              <Reveal key={p.title} delay={i * 0.08}>
-                <div className="group relative overflow-hidden rounded-3xl shadow-card cursor-pointer">
-                  <div className="aspect-[4/5] overflow-hidden">
-                    <img
-                      src={p.img}
-                      alt={p.title}
-                      loading="lazy"
-                      width={1200}
-                      height={1500}
-                      className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    />
+          <div className="mt-14 grid md:grid-cols-3 gap-6">
+            {packages.map((p, i) => (
+              <Reveal key={p.tier} delay={i * 0.08}>
+                <div
+                  className={`relative h-full rounded-3xl p-8 transition-all hover:-translate-y-1 ${
+                    p.featured
+                      ? "gradient-brand text-primary-foreground shadow-glow"
+                      : "glass shadow-card hover:shadow-card"
+                  }`}
+                >
+                  {p.featured && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 bg-background text-foreground rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.18em] font-bold shadow-card">
+                      <Sparkles size={12} className="text-primary" /> Most Popular
+                    </div>
+                  )}
+                  <div className={`text-[11px] uppercase tracking-[0.28em] font-bold ${p.featured ? "text-primary-foreground/80" : "text-primary"}`}>
+                    {p.tier}
                   </div>
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
-                  <div className="absolute bottom-0 left-0 right-0 p-5 text-white">
-                    <span className="inline-block px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider bg-primary/90 mb-2">{p.tag}</span>
-                    <h3 className="font-display font-bold text-lg leading-tight">{p.title}</h3>
+                  <div className="mt-4 flex items-baseline gap-2">
+                    <span className="text-[11px] uppercase tracking-widest opacity-70">Starts @</span>
                   </div>
+                  <div className="mt-1 text-3xl md:text-4xl font-display font-black leading-none">
+                    {p.price}
+                  </div>
+                  <div className={`mt-2 text-xs ${p.featured ? "text-primary-foreground/85" : "text-muted-foreground"}`}>
+                    {p.note}
+                  </div>
+                  <div className={`mt-6 h-px ${p.featured ? "bg-primary-foreground/25" : "bg-border"}`} />
+                  <ul className="mt-6 space-y-3">
+                    {p.features.map((f) => (
+                      <li key={f} className="flex items-start gap-3 text-sm">
+                        <span className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${p.featured ? "bg-primary-foreground/20" : "bg-primary/10 text-primary"}`}>
+                          <Check size={12} />
+                        </span>
+                        <span className={p.featured ? "" : "text-foreground/90"}>{f}</span>
+                      </li>
+                    ))}
+                  </ul>
+                  <Link
+                    to="/consultation"
+                    className={`mt-8 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition ${
+                      p.featured
+                        ? "bg-background text-foreground hover:scale-[1.02]"
+                        : "gradient-brand text-primary-foreground hover:scale-[1.02]"
+                    }`}
+                  >
+                    Request a Quote <ArrowRight size={14} />
+                  </Link>
                 </div>
               </Reveal>
             ))}
           </div>
+
+          <Reveal delay={0.2}>
+            <p className="mt-10 text-xs md:text-sm text-muted-foreground max-w-3xl mx-auto text-center leading-relaxed">
+              <span className="font-semibold text-foreground">Please note: </span>
+              Package prices are approximate estimates and may vary depending on project scope,
+              location, materials, site conditions, permits, professional fees, and customization requirements.
+            </p>
+          </Reveal>
+        </Section>
+
+        {/* Portfolio */}
+        <Section id="portfolio" muted>
+          <Reveal className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
+            <div>
+              <Eyebrow>Project Portfolio</Eyebrow>
+              <h2 className="mt-3 text-4xl md:text-5xl font-display font-bold leading-tight">
+                Our builds, <span className="text-gradient-brand">on the ground.</span>
+              </h2>
+            </div>
+            <p className="text-muted-foreground max-w-sm">
+              Completed and ongoing residences, apartments, commercial, and renovation works across Cavite, Laguna, and Metro Manila.
+            </p>
+          </Reveal>
+
+          {/* Filters */}
+          <Reveal delay={0.1}>
+            <div className="mt-10 flex flex-wrap gap-2">
+              {filters.map((f) => {
+                const isActive = filter === f;
+                return (
+                  <button
+                    key={f}
+                    onClick={() => setFilter(f)}
+                    className={`relative px-4 py-2 rounded-full text-xs md:text-sm font-semibold uppercase tracking-wider transition-all ${
+                      isActive
+                        ? "gradient-brand text-primary-foreground shadow-soft"
+                        : "glass hover:shadow-soft text-foreground/80"
+                    }`}
+                  >
+                    {f}
+                  </button>
+                );
+              })}
+            </div>
+          </Reveal>
+
+          {/* Grid */}
+          <motion.div layout className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <AnimatePresence mode="popLayout">
+              {filtered.map((p, i) => (
+                <motion.div
+                  key={p.id}
+                  layout
+                  initial={{ opacity: 0, y: 24 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  transition={{ duration: 0.45, delay: Math.min(i * 0.04, 0.3), ease: [0.22, 1, 0.36, 1] }}
+                >
+                  <ProjectCard project={p} onOpen={() => setActive(p)} />
+                </motion.div>
+              ))}
+            </AnimatePresence>
+          </motion.div>
+
+          {filtered.length === 0 && (
+            <p className="mt-10 text-center text-muted-foreground">No projects match this filter yet.</p>
+          )}
         </Section>
 
         {/* Process */}
-        <Section id="process" muted>
+        <Section id="process">
           <Reveal className="text-center max-w-2xl mx-auto">
             <Eyebrow center>Our Process</Eyebrow>
             <h2 className="mt-3 text-4xl md:text-5xl font-display font-bold leading-tight">
@@ -178,7 +340,7 @@ function DetailsPage() {
             </h2>
           </Reveal>
 
-          <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-5 relative">
+          <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {steps.map((s, i) => (
               <Reveal key={s.n} delay={i * 0.08}>
                 <div className="relative glass rounded-3xl p-7 h-full">
@@ -208,7 +370,96 @@ function DetailsPage() {
 
         <SiteFooter />
       </main>
+
+      {/* Project Detail Modal */}
+      <Dialog open={!!active} onOpenChange={(open) => !open && setActive(null)}>
+        <DialogContent className="max-w-3xl p-0 overflow-hidden bg-background border-border">
+          {active && (
+            <div className="flex flex-col">
+              <div className="relative h-56 md:h-72 overflow-hidden">
+                <img src={active.img} alt={active.title} className="h-full w-full object-cover" />
+                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                <div className="absolute top-4 left-4 flex flex-wrap gap-2">
+                  <span className={`px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold ${active.status === "Completed" ? "bg-emerald-500 text-white" : "bg-primary text-primary-foreground"}`}>
+                    {active.status}
+                  </span>
+                  <span className="px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold bg-background/90 text-foreground">
+                    {active.type}
+                  </span>
+                </div>
+                <div className="pointer-events-none absolute -right-2 -bottom-6 text-[9rem] leading-none font-display font-black text-white/15 select-none">
+                  {active.number}
+                </div>
+              </div>
+              <div className="p-6 md:p-8">
+                <DialogHeader>
+                  <DialogTitle className="text-2xl md:text-3xl font-display font-bold">{active.title}</DialogTitle>
+                  <DialogDescription className="flex items-center gap-1.5 text-sm">
+                    <MapPin size={14} className="text-primary" /> {active.location}
+                  </DialogDescription>
+                </DialogHeader>
+                <p className="mt-4 text-sm md:text-base text-muted-foreground leading-relaxed">
+                  {active.description}
+                </p>
+                <div className="mt-6">
+                  <div className="text-[11px] uppercase tracking-[0.22em] text-primary font-semibold mb-3">Highlights</div>
+                  <ul className="grid sm:grid-cols-2 gap-2">
+                    {active.highlights.map((h) => (
+                      <li key={h} className="flex items-start gap-2 text-sm">
+                        <Check size={14} className="mt-0.5 text-primary shrink-0" />
+                        <span>{h}</span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </PageTransition>
+  );
+}
+
+function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void }) {
+  return (
+    <div className="group relative h-full rounded-3xl overflow-hidden glass shadow-card hover:shadow-glow transition-all hover:-translate-y-1">
+      <div className="relative aspect-[4/3] overflow-hidden">
+        <img
+          src={project.img}
+          alt={project.title}
+          loading="lazy"
+          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
+        <div className="absolute top-3 left-3 flex flex-wrap gap-2">
+          <span className={`px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold ${project.status === "Completed" ? "bg-emerald-500 text-white" : "bg-primary text-primary-foreground"}`}>
+            {project.status}
+          </span>
+          <span className="px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold bg-background/90 text-foreground">
+            {project.type}
+          </span>
+        </div>
+        <div className="pointer-events-none absolute -right-2 -bottom-6 text-[7rem] leading-none font-display font-black text-white/20 select-none">
+          {project.number}
+        </div>
+      </div>
+      <div className="p-5">
+        <h3 className="font-display font-bold text-lg md:text-xl">{project.title}</h3>
+        <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
+          <MapPin size={12} className="text-primary" /> {project.location}
+        </div>
+        <p className="mt-3 text-sm text-muted-foreground line-clamp-2 leading-relaxed">
+          {project.description}
+        </p>
+        <button
+          onClick={onOpen}
+          className="mt-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary hover:gap-3 transition-all"
+        >
+          View Details <ArrowRight size={14} />
+        </button>
+      </div>
+    </div>
   );
 }
 
@@ -242,3 +493,7 @@ function Reveal({ children, delay = 0, className = "" }: { children: React.React
     </motion.div>
   );
 }
+
+// keep Building2/HardHat imports referenced (used in services array via icon component map)
+void Building2;
+void HardHat;
