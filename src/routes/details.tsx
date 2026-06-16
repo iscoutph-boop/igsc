@@ -493,7 +493,3 @@ function Reveal({ children, delay = 0, className = "" }: { children: React.React
     </motion.div>
   );
 }
-
-// keep Building2/HardHat imports referenced (used in services array via icon component map)
-void Building2;
-void HardHat;
