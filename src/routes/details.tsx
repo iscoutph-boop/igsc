@@ -10,10 +10,21 @@ import { SiteFooter } from "@/components/site-footer";
 import { PageTransition } from "@/components/page-transition";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
 import aboutImg from "@/assets/about.jpg";
-import p1 from "@/assets/project-1.jpg";
-import p2 from "@/assets/project-2.jpg";
-import p3 from "@/assets/project-3.jpg";
-import p4 from "@/assets/project-4.jpg";
+import aResAsset from "@/assets/proj-a-residence.jpg.asset.json";
+import oResAsset from "@/assets/proj-o-residence.jpg.asset.json";
+import iResAsset from "@/assets/proj-i-residence.jpg.asset.json";
+import lResAsset from "@/assets/proj-l-residence.jpg.asset.json";
+import bAptAsset from "@/assets/proj-b-apartment.jpg.asset.json";
+import keystoneAsset from "@/assets/proj-keystone.jpg.asset.json";
+import fResAsset from "@/assets/proj-f-residence.jpg.asset.json";
+
+const aRes = aResAsset.url;
+const oRes = oResAsset.url;
+const iRes = iResAsset.url;
+const lRes = lResAsset.url;
+const bApt = bAptAsset.url;
+const keystone = keystoneAsset.url;
+const fRes = fResAsset.url;
 
 export const Route = createFileRoute("/details")({
   head: () => ({
