@@ -2,7 +2,7 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { useMemo, useState } from "react";
 import {
-  ArrowRight, Home, Wrench, Building2, HardHat, Ruler, Box, PencilRuler,
+  ArrowRight, Home, Wrench, HardHat, Ruler, Box, PencilRuler,
   Compass, Hammer, Layers, CheckCircle2, MapPin, Check, Sparkles,
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
