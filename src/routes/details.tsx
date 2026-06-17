@@ -653,3 +653,266 @@ function Reveal({ children, delay = 0, className = "" }: { children: React.React
     </motion.div>
   );
 }
+
+function AboutSlideshow() {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setIdx((i) => (i + 1) % aboutSlides.length), 4500);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div className="relative">
+      <div className="absolute -inset-4 gradient-brand opacity-20 blur-3xl rounded-3xl" />
+      <div className="relative rounded-3xl shadow-card overflow-hidden aspect-[4/3]">
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={aboutSlides[idx]}
+            src={aboutSlides[idx]}
+            alt="IG Sabroso Construction project"
+            initial={{ opacity: 0, scale: 1.04 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        </AnimatePresence>
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
+          {aboutSlides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setIdx(i)}
+              aria-label={`Slide ${i + 1}`}
+              className={`h-1.5 rounded-full transition-all ${i === idx ? "w-8 bg-primary" : "w-3 bg-white/60"}`}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="absolute -bottom-6 -left-6 glass rounded-2xl p-5 shadow-card">
+        <div className="text-3xl font-display font-black">10+</div>
+        <div className="text-xs text-muted-foreground">Years building trust</div>
+      </div>
+    </div>
+  );
+}
+
+type Pkg = "Basic" | "Elegant" | "Luxury";
+const PKG_RATE: Record<Pkg, number> = { Basic: 22000, Elegant: 28000, Luxury: 38000 };
+const ADDONS = [
+  { id: "gate", label: "Gate & Fence", price: 180000 },
+  { id: "carport", label: "Carport", price: 250000 },
+  { id: "interior", label: "Interior Fit-Out", price: 350000 },
+  { id: "smart", label: "Smart Home Features", price: 150000 },
+] as const;
+
+function EstimatorSection() {
+  const [floors, setFloors] = useState(2);
+  const [area, setArea] = useState(150);
+  const [pkg, setPkg] = useState<Pkg>("Elegant");
+  const [bedrooms, setBedrooms] = useState(4);
+  const [bathrooms, setBathrooms] = useState(3);
+  const [site, setSite] = useState("Flat & Accessible");
+  const [addons, setAddons] = useState<string[]>(["gate", "carport", "interior"]);
+
+  const base = area * PKG_RATE[pkg];
+  const addonTotal = ADDONS.filter((a) => addons.includes(a.id)).reduce((s, a) => s + a.price, 0);
+  const low = Math.round((base + addonTotal) * 1.0);
+  const high = Math.round((base + addonTotal) * 1.18);
+  const fmt = (n: number) => "₱" + n.toLocaleString("en-PH");
+
+  const inclusions = ["Structural Works", "Doors & Windows", "Electrical & Plumbing", "Paint Works", "Roofing & Ceiling", "Basic Fixtures & Fittings", "Flooring & Wall Finishes"];
+
+  return (
+    <Section id="estimator">
+      <div className="grid lg:grid-cols-[1.1fr_1fr] gap-8 lg:gap-12 items-start">
+        <Reveal>
+          <Eyebrow>Price Estimator</Eyebrow>
+          <h2 className="mt-3 text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-[1.05]">
+            Estimate your build<br />
+            before you <span className="text-gradient-brand">begin.</span>
+          </h2>
+          <p className="mt-5 text-muted-foreground max-w-xl">
+            Get a quick and reliable estimated construction cost based on your project details.
+            Customize your preferences and see how your vision comes to life.
+          </p>
+
+          <div className="mt-8 glass rounded-3xl p-6 md:p-7 shadow-card space-y-5">
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Field label="Project Type">
+                <SelectInput value="Residential House" onChange={() => {}} options={["Residential House", "Apartment", "Commercial"]} icon={<Home size={16} />} />
+              </Field>
+              <Field label="Project Location">
+                <SelectInput value="Cavite, Philippines" onChange={() => {}} options={["Cavite, Philippines", "Laguna, Philippines", "Metro Manila"]} icon={<MapPin size={16} />} />
+              </Field>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Field label="Floor Area (sqm)">
+                <div className="flex items-center gap-2 bg-background rounded-xl border border-border px-4 py-3">
+                  <Square size={16} className="text-primary" />
+                  <input type="number" min={40} value={area} onChange={(e) => setArea(Math.max(40, Number(e.target.value) || 0))} className="bg-transparent w-full focus:outline-none" />
+                  <span className="text-xs text-muted-foreground px-2 py-0.5 rounded bg-muted">sqm</span>
+                </div>
+              </Field>
+              <Field label="Number of Floors">
+                <SelectInput value={`${floors} Floor${floors > 1 ? "s" : ""}`} onChange={(v) => setFloors(Number(v.split(" ")[0]))} options={["1 Floor", "2 Floors", "3 Floors"]} icon={<Layers size={16} />} />
+              </Field>
+            </div>
+
+            <Field label="Package Type">
+              <div className="grid sm:grid-cols-3 gap-3">
+                {(["Basic", "Elegant", "Luxury"] as Pkg[]).map((p) => {
+                  const active = pkg === p;
+                  return (
+                    <button
+                      key={p}
+                      onClick={() => setPkg(p)}
+                      className={`text-left rounded-2xl border-2 p-4 transition ${active ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"}`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className={`h-4 w-4 rounded-full border-2 ${active ? "border-primary bg-primary" : "border-muted-foreground/40"}`} />
+                        {p === "Basic" && <Home size={16} className="text-primary" />}
+                        {p === "Elegant" && <Star size={16} className="text-primary" />}
+                        {p === "Luxury" && <Sparkles size={16} className="text-primary" />}
+                        <span className="font-bold">{p}</span>
+                      </div>
+                      <div className="mt-1.5 text-xs text-muted-foreground">
+                        {p === "Basic" && "Essential finishes, great value"}
+                        {p === "Elegant" && "Quality materials, modern design"}
+                        {p === "Luxury" && "Premium finishes, luxury living"}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </Field>
+
+            <div className="grid sm:grid-cols-3 gap-4">
+              <Field label="Bedrooms">
+                <SelectInput value={String(bedrooms)} onChange={(v) => setBedrooms(Number(v))} options={["1", "2", "3", "4", "5", "6"]} icon={<Bed size={16} />} />
+              </Field>
+              <Field label="Bathrooms">
+                <SelectInput value={String(bathrooms)} onChange={(v) => setBathrooms(Number(v))} options={["1", "2", "3", "4", "5"]} icon={<Bath size={16} />} />
+              </Field>
+              <Field label="Site Condition">
+                <SelectInput value={site} onChange={setSite} options={["Flat & Accessible", "Sloped Site", "Tight Access"]} icon={<HardHat size={16} />} />
+              </Field>
+            </div>
+
+            <Field label="Optional Add-Ons">
+              <div className="grid sm:grid-cols-2 gap-2.5">
+                {ADDONS.map((a) => {
+                  const checked = addons.includes(a.id);
+                  return (
+                    <label key={a.id} className={`flex items-center gap-3 rounded-xl border-2 px-4 py-3 cursor-pointer transition ${checked ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"}`}>
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={(e) => setAddons((prev) => e.target.checked ? [...prev, a.id] : prev.filter((x) => x !== a.id))}
+                        className="accent-primary h-4 w-4"
+                      />
+                      <span className="flex-1 text-sm font-medium">{a.label}</span>
+                      <span className="text-xs text-muted-foreground">+ {fmt(a.price)}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </Field>
+          </div>
+        </Reveal>
+
+        {/* Summary */}
+        <Reveal delay={0.12}>
+          <div className="lg:sticky lg:top-24 glass rounded-3xl p-6 md:p-8 shadow-card">
+            <div className="flex items-center gap-2 text-primary">
+              <Calculator size={18} />
+              <span className="text-[11px] uppercase tracking-[0.22em] font-bold">Estimate Summary</span>
+            </div>
+            <div className="mt-5 pb-5 border-b border-border">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="font-bold">Base Rate ({pkg} Package)</div>
+                  <div className="text-xs text-muted-foreground">Based on selected floor area</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-primary font-bold">{fmt(PKG_RATE[pkg])} / sqm</div>
+                  <div className="text-xs text-muted-foreground">{area} sqm</div>
+                </div>
+              </div>
+            </div>
+            <div className="mt-5 pb-5 border-b border-border">
+              <div className="font-bold">Estimated Construction Range</div>
+              <div className="mt-1 text-2xl md:text-3xl font-display font-black text-primary">
+                {fmt(low)} – {fmt(high)}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">Based on project complexity and finishes</div>
+            </div>
+            <div className="mt-5">
+              <div className="flex items-center gap-2">
+                <Star size={16} className="text-primary" />
+                <span className="text-xs uppercase tracking-wider font-bold text-muted-foreground">Selected Package</span>
+              </div>
+              <div className="mt-1 font-display font-black text-xl">{pkg}</div>
+              <div className="text-xs text-muted-foreground">Quality materials, modern design</div>
+            </div>
+            <div className="mt-5">
+              <div className="font-bold mb-3">Inclusions Summary</div>
+              <ul className="grid sm:grid-cols-2 gap-2 text-sm">
+                {inclusions.map((i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <CheckCircle2 size={14} className="text-primary mt-0.5 shrink-0" />
+                    <span>{i}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="mt-6 rounded-2xl bg-primary/5 border border-primary/20 p-5 text-center">
+              <div className="text-[11px] uppercase tracking-[0.22em] font-bold text-muted-foreground">Estimated Total Budget</div>
+              <div className="mt-2 text-2xl md:text-3xl font-display font-black text-primary">
+                {fmt(low)} – {fmt(high)}
+              </div>
+              <div className="text-[11px] text-muted-foreground mt-1">This is an estimated budget only.</div>
+            </div>
+            <Link
+              to="/consultation"
+              className="mt-5 group w-full inline-flex items-center justify-center gap-3 gradient-brand text-primary-foreground rounded-full px-7 py-4 font-semibold shadow-glow hover:scale-[1.01] transition"
+            >
+              Get Detailed Estimate
+              <span className="bg-background/25 rounded-full p-2 group-hover:translate-x-1 transition-transform">
+                <ArrowRight size={16} />
+              </span>
+            </Link>
+            <p className="mt-3 text-[11px] text-muted-foreground text-center leading-relaxed">
+              Final cost may vary based on design, site condition, finishes, and scope of work.
+            </p>
+          </div>
+        </Reveal>
+      </div>
+    </Section>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <div className="text-xs font-bold mb-2">{label}</div>
+      {children}
+    </div>
+  );
+}
+
+function SelectInput({ value, onChange, options, icon }: { value: string; onChange: (v: string) => void; options: string[]; icon?: React.ReactNode }) {
+  return (
+    <div className="relative">
+      {icon && <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary">{icon}</span>}
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={`appearance-none w-full bg-background rounded-xl border border-border ${icon ? "pl-11" : "pl-4"} pr-10 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/40`}
+      >
+        {options.map((o) => <option key={o} value={o}>{o}</option>)}
+      </select>
+      <ChevronDown size={16} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+    </div>
+  );
+}
+
