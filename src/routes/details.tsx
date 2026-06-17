@@ -447,55 +447,139 @@ function DetailsPage() {
         <SiteFooter />
       </main>
 
-      {/* Project Detail Modal */}
+      {/* Project Detail Modal — styled like the About Page 3 reference */}
       <Dialog open={!!active} onOpenChange={(open) => !open && setActive(null)}>
-        <DialogContent className="max-w-3xl p-0 overflow-hidden bg-background border-border">
-          {active && (
-            <div className="flex flex-col">
-              <div className="relative h-56 md:h-72 overflow-hidden">
-                <img src={active.img} alt={active.title} className="h-full w-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                <div className="absolute top-4 left-4 flex flex-wrap gap-2">
-                  <span className={`px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold ${active.status === "Completed" ? "bg-emerald-500 text-white" : "bg-primary text-primary-foreground"}`}>
-                    {active.status}
-                  </span>
-                  <span className="px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold bg-background/90 text-foreground">
-                    {active.type}
-                  </span>
-                </div>
-                <div className="pointer-events-none absolute -right-2 -bottom-6 text-[9rem] leading-none font-display font-black text-white/15 select-none">
-                  {active.number}
-                </div>
-              </div>
-              <div className="p-6 md:p-8">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl md:text-3xl font-display font-bold">{active.title}</DialogTitle>
-                  <DialogDescription className="flex items-center gap-1.5 text-sm">
-                    <MapPin size={14} className="text-primary" /> {active.location}
-                  </DialogDescription>
-                </DialogHeader>
-                <p className="mt-4 text-sm md:text-base text-muted-foreground leading-relaxed">
-                  {active.description}
-                </p>
-                <div className="mt-6">
-                  <div className="text-[11px] uppercase tracking-[0.22em] text-primary font-semibold mb-3">Highlights</div>
-                  <ul className="grid sm:grid-cols-2 gap-2">
-                    {active.highlights.map((h) => (
-                      <li key={h} className="flex items-start gap-2 text-sm">
-                        <Check size={14} className="mt-0.5 text-primary shrink-0" />
-                        <span>{h}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
+        <DialogContent className="max-w-6xl p-0 overflow-hidden bg-background border-border max-h-[92vh] overflow-y-auto">
+          {active && <ProjectDetail project={active} onClose={() => setActive(null)} />}
         </DialogContent>
       </Dialog>
     </PageTransition>
   );
 }
+
+function ProjectDetail({ project, onClose }: { project: Project; onClose: () => void }) {
+  // Build a gallery using project hero + 4 rotating gallery images
+  const start = (Number(project.number) * 2) % galleryPool.length;
+  const gallery = [project.img, ...Array.from({ length: 5 }, (_, i) => galleryPool[(start + i) % galleryPool.length])];
+  const [hero, setHero] = useState(gallery[0]);
+
+  return (
+    <div className="p-5 md:p-8">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+        <button onClick={onClose} className="hover:text-foreground transition">Home</button>
+        <span>›</span>
+        <button onClick={onClose} className="hover:text-foreground transition">Projects</button>
+        <span>›</span>
+        <span className="text-primary font-semibold">{project.title}</span>
+      </nav>
+
+      <div className="mt-6 grid lg:grid-cols-2 gap-8 lg:gap-10">
+        {/* Left — gallery */}
+        <div>
+          <div className="relative rounded-3xl overflow-hidden shadow-card aspect-[4/3]">
+            <img src={hero} alt={project.title} className="h-full w-full object-cover" />
+            <div className="absolute bottom-4 left-4 inline-flex items-center gap-2 bg-background/90 backdrop-blur rounded-full px-4 py-2 text-xs font-semibold">
+              <ImageIcon size={14} className="text-primary" /> View Full Gallery
+            </div>
+          </div>
+          <div className="mt-4 grid grid-cols-6 gap-2 md:gap-3">
+            {gallery.slice(0, 5).map((g, i) => (
+              <button
+                key={i}
+                onClick={() => setHero(g)}
+                className={`relative aspect-square rounded-xl overflow-hidden transition ${hero === g ? "ring-2 ring-primary" : "opacity-80 hover:opacity-100"}`}
+              >
+                <img src={g} alt={`${project.title} ${i + 1}`} className="h-full w-full object-cover" />
+              </button>
+            ))}
+            <div className="aspect-square rounded-xl border-2 border-dashed border-primary/40 flex flex-col items-center justify-center text-primary">
+              <span className="text-lg font-bold">+</span>
+              <span className="text-[9px] uppercase tracking-wider mt-0.5">View More</span>
+            </div>
+          </div>
+          <div className="mt-5 glass rounded-2xl p-4 flex items-center gap-4">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full gradient-brand text-primary-foreground">
+              <Award size={18} />
+            </span>
+            <div>
+              <div className="text-sm font-bold">Built on Trust. Driven by Excellence.</div>
+              <div className="text-xs text-muted-foreground">Every project reflects our commitment to quality, transparency, and client satisfaction.</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right — meta */}
+        <div>
+          <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-primary font-semibold">
+            <span className="h-px w-8 bg-primary" /> Project
+          </div>
+          <h2 className="mt-3 text-4xl md:text-5xl font-display font-bold leading-[1.05]">{project.title}</h2>
+          <div className="mt-3 flex items-center gap-1.5 text-sm">
+            <MapPin size={16} className="text-primary" /> {project.location}
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold gradient-brand text-primary-foreground">
+              <Home size={12} /> {project.type}
+            </span>
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${project.status === "Completed" ? "border-emerald-500 text-emerald-600" : "border-primary text-primary"}`}>
+              {project.status}
+            </span>
+          </div>
+          <p className="mt-5 text-muted-foreground leading-relaxed">{project.description}</p>
+
+          <div className="mt-6 glass rounded-2xl p-5 grid grid-cols-2 gap-5">
+            <MetaItem icon={Building} label="Project Type" value={project.type} sub="New Construction" />
+            <MetaItem icon={Square} label="Floor Area" value="220.00 sqm" sub="Total Floor Area" />
+            <MetaItem icon={ClipboardCheck} label="Status" value={project.status} sub={project.status === "Completed" ? "Turned Over" : "In Progress"} />
+            <MetaItem icon={CalendarDays} label="Timeline" value="6 Months" sub="Jan 2024 – Jun 2024" />
+          </div>
+
+          <div className="mt-5 glass rounded-2xl p-5">
+            <div className="font-display font-bold mb-3">Project Features</div>
+            <ul className="grid sm:grid-cols-2 gap-2.5">
+              {project.highlights.map((h) => (
+                <li key={h} className="flex items-start gap-2 text-sm">
+                  <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <Check size={12} />
+                  </span>
+                  <span>{h}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <Link
+            to="/consultation"
+            onClick={onClose}
+            className="mt-6 group w-full inline-flex items-center justify-center gap-3 gradient-brand text-primary-foreground rounded-full px-7 py-4 font-semibold shadow-glow hover:scale-[1.01] transition"
+          >
+            Inquire Similar Project
+            <span className="bg-background/25 rounded-full p-2 group-hover:translate-x-1 transition-transform">
+              <ArrowRight size={16} />
+            </span>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MetaItem({ icon: Icon, label, value, sub }: { icon: typeof Building; label: string; value: string; sub: string }) {
+  return (
+    <div className="flex items-start gap-3">
+      <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <Icon size={18} />
+      </span>
+      <div className="min-w-0">
+        <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+        <div className="font-display font-bold text-base leading-tight">{value}</div>
+        <div className="text-xs text-muted-foreground mt-0.5">{sub}</div>
+      </div>
+    </div>
+  );
+}
+
 
 function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void }) {
   return (
