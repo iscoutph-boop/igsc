@@ -178,19 +178,7 @@ function DetailsPage() {
               </div>
             </Reveal>
             <Reveal delay={0.15}>
-              <div className="relative">
-                <div className="absolute -inset-4 gradient-brand opacity-20 blur-3xl rounded-3xl" />
-                <img
-                  src={aboutImg}
-                  alt="Premium home interior built by IG Sabroso"
-                  loading="lazy"
-                  className="relative rounded-3xl shadow-card w-full object-cover aspect-[4/3]"
-                />
-                <div className="absolute -bottom-6 -left-6 glass rounded-2xl p-5 shadow-card">
-                  <div className="text-3xl font-display font-black">10+</div>
-                  <div className="text-xs text-muted-foreground">Years building trust</div>
-                </div>
-              </div>
+              <AboutSlideshow />
             </Reveal>
           </div>
         </Section>
