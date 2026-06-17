@@ -136,15 +136,40 @@ const steps = [
   { n: "04", title: "Turnover", desc: "Delivering on time, with perfection.", icon: CheckCircle2 },
 ];
 
+type SortKey = "latest" | "completed" | "ongoing" | "name";
+
 function DetailsPage() {
   const [filter, setFilter] = useState<Filter>("All");
   const [active, setActive] = useState<Project | null>(null);
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<SortKey>("latest");
+  const [visible, setVisible] = useState(6);
 
   const filtered = useMemo(() => {
-    if (filter === "All") return projects;
-    if (filter === "Completed" || filter === "Ongoing") return projects.filter((p) => p.status === filter);
-    return projects.filter((p) => p.type === filter);
-  }, [filter]);
+    let list = projects;
+    if (filter !== "All") {
+      list = (filter === "Completed" || filter === "Ongoing")
+        ? list.filter((p) => p.status === filter)
+        : list.filter((p) => p.type === filter);
+    }
+    if (query.trim()) {
+      const q = query.toLowerCase();
+      list = list.filter((p) =>
+        p.title.toLowerCase().includes(q) ||
+        p.location.toLowerCase().includes(q) ||
+        p.type.toLowerCase().includes(q),
+      );
+    }
+    const sorted = [...list];
+    if (sort === "name") sorted.sort((a, b) => a.title.localeCompare(b.title));
+    else if (sort === "completed") sorted.sort((a, b) => (a.status === "Completed" ? -1 : 1));
+    else if (sort === "ongoing") sorted.sort((a, b) => (a.status === "Ongoing" ? -1 : 1));
+    else sorted.sort((a, b) => Number(b.number) - Number(a.number));
+    return sorted;
+  }, [filter, query, sort]);
+
+  useEffect(() => { setVisible(6); }, [filter, query, sort]);
+
 
   return (
     <PageTransition>
