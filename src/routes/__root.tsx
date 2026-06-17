@@ -126,6 +126,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <Outlet />
+        <FloatingContact />
       </ThemeProvider>
     </QueryClientProvider>
   );
