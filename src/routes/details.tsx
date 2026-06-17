@@ -310,44 +310,67 @@ function DetailsPage() {
 
         {/* Portfolio */}
         <Section id="portfolio" muted>
-          <Reveal className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-            <div>
-              <Eyebrow>Project Portfolio</Eyebrow>
-              <h2 className="mt-3 text-4xl md:text-5xl font-display font-bold leading-tight">
-                Our builds, <span className="text-gradient-brand">on the ground.</span>
-              </h2>
-            </div>
-            <p className="text-muted-foreground max-w-sm">
-              Completed and ongoing residences, apartments, commercial, and renovation works across Cavite, Laguna, and Metro Manila.
+          <Reveal>
+            <Eyebrow>Project Portfolio</Eyebrow>
+            <h2 className="mt-3 text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-[1.05]">
+              Explore all our <span className="text-gradient-brand">builds.</span>
+            </h2>
+            <p className="mt-5 text-muted-foreground max-w-2xl">
+              From modern homes to multi-unit developments and commercial spaces, explore our portfolio
+              of completed and ongoing projects built with quality, integrity, and purpose.
             </p>
           </Reveal>
 
-          {/* Filters */}
+          {/* Filters + Sort + Search */}
           <Reveal delay={0.1}>
-            <div className="mt-10 flex flex-wrap gap-2">
-              {filters.map((f) => {
-                const isActive = filter === f;
-                return (
-                  <button
-                    key={f}
-                    onClick={() => setFilter(f)}
-                    className={`relative px-4 py-2 rounded-full text-xs md:text-sm font-semibold uppercase tracking-wider transition-all ${
-                      isActive
-                        ? "gradient-brand text-primary-foreground shadow-soft"
-                        : "glass hover:shadow-soft text-foreground/80"
-                    }`}
-                  >
-                    {f}
-                  </button>
-                );
-              })}
+            <div className="mt-10 grid gap-4 lg:grid-cols-[1fr_auto_auto] lg:items-center">
+              <div className="flex flex-wrap gap-2 min-w-0">
+                {filters.map((f) => {
+                  const isActive = filter === f;
+                  return (
+                    <button
+                      key={f}
+                      onClick={() => setFilter(f)}
+                      className={`px-4 py-2 rounded-full text-xs md:text-sm font-semibold transition-all ${
+                        isActive
+                          ? "gradient-brand text-primary-foreground shadow-soft"
+                          : "glass hover:shadow-soft text-foreground/80"
+                      }`}
+                    >
+                      {f}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="relative">
+                <select
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value as SortKey)}
+                  className="appearance-none glass rounded-full pl-5 pr-10 py-2.5 text-sm font-medium cursor-pointer hover:shadow-soft transition w-full lg:w-auto"
+                >
+                  <option value="latest">Latest Projects</option>
+                  <option value="name">Project Name</option>
+                  <option value="completed">Completed First</option>
+                  <option value="ongoing">Ongoing First</option>
+                </select>
+                <ChevronDown size={16} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              </div>
+              <div className="relative">
+                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search projects..."
+                  className="glass rounded-full pl-11 pr-5 py-2.5 text-sm w-full lg:w-72 focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
+                />
+              </div>
             </div>
           </Reveal>
 
           {/* Grid */}
           <motion.div layout className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <AnimatePresence mode="popLayout">
-              {filtered.map((p, i) => (
+              {filtered.slice(0, visible).map((p, i) => (
                 <motion.div
                   key={p.id}
                   layout
@@ -363,9 +386,25 @@ function DetailsPage() {
           </motion.div>
 
           {filtered.length === 0 && (
-            <p className="mt-10 text-center text-muted-foreground">No projects match this filter yet.</p>
+            <p className="mt-10 text-center text-muted-foreground">No projects match your search.</p>
+          )}
+
+          {visible < filtered.length && (
+            <Reveal className="mt-12 flex justify-center">
+              <button
+                onClick={() => setVisible((v) => v + 6)}
+                className="inline-flex items-center gap-3 rounded-full px-7 py-3 text-sm font-semibold border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition"
+              >
+                Load More Projects
+                <ArrowRight size={16} />
+              </button>
+            </Reveal>
           )}
         </Section>
+
+        {/* Website Estimator */}
+        <EstimatorSection />
+
 
         {/* Process */}
         <Section id="process">
