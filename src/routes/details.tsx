@@ -1,15 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight, Home, Wrench, HardHat, Ruler, Box, PencilRuler,
   Compass, Hammer, Layers, CheckCircle2, MapPin, Check, Sparkles,
+  Search, ChevronDown, Calculator, Building, CalendarDays, ClipboardCheck,
+  Image as ImageIcon, Award, Star, Bed, Bath, Square,
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PageTransition } from "@/components/page-transition";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import aboutImg from "@/assets/about.jpg";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import aResAsset from "@/assets/proj-a-residence.jpg.asset.json";
 import oResAsset from "@/assets/proj-o-residence.jpg.asset.json";
 import iResAsset from "@/assets/proj-i-residence.jpg.asset.json";
@@ -17,6 +18,14 @@ import lResAsset from "@/assets/proj-l-residence.jpg.asset.json";
 import bAptAsset from "@/assets/proj-b-apartment.jpg.asset.json";
 import keystoneAsset from "@/assets/proj-keystone.jpg.asset.json";
 import fResAsset from "@/assets/proj-f-residence.jpg.asset.json";
+import igs1 from "@/assets/igs-1.jpg.asset.json";
+import igs2 from "@/assets/igs-2.jpg.asset.json";
+import igs3 from "@/assets/igs-3.jpg.asset.json";
+import igs4 from "@/assets/igs-4.jpg.asset.json";
+import igs6 from "@/assets/igs-6.jpg.asset.json";
+import igs7 from "@/assets/igs-7.jpg.asset.json";
+import igs8 from "@/assets/igs-8.jpg.asset.json";
+import igs9 from "@/assets/igs-9.jpg.asset.json";
 
 const aRes = aResAsset.url;
 const oRes = oResAsset.url;
@@ -25,6 +34,10 @@ const lRes = lResAsset.url;
 const bApt = bAptAsset.url;
 const keystone = keystoneAsset.url;
 const fRes = fResAsset.url;
+
+const aboutSlides = [igs1.url, igs2.url, igs3.url, igs4.url];
+const galleryPool = [igs1.url, igs2.url, igs3.url, igs4.url, igs6.url, igs7.url, igs8.url, igs9.url];
+
 
 export const Route = createFileRoute("/details")({
   head: () => ({
@@ -123,15 +136,40 @@ const steps = [
   { n: "04", title: "Turnover", desc: "Delivering on time, with perfection.", icon: CheckCircle2 },
 ];
 
+type SortKey = "latest" | "completed" | "ongoing" | "name";
+
 function DetailsPage() {
   const [filter, setFilter] = useState<Filter>("All");
   const [active, setActive] = useState<Project | null>(null);
+  const [query, setQuery] = useState("");
+  const [sort, setSort] = useState<SortKey>("latest");
+  const [visible, setVisible] = useState(6);
 
   const filtered = useMemo(() => {
-    if (filter === "All") return projects;
-    if (filter === "Completed" || filter === "Ongoing") return projects.filter((p) => p.status === filter);
-    return projects.filter((p) => p.type === filter);
-  }, [filter]);
+    let list = projects;
+    if (filter !== "All") {
+      list = (filter === "Completed" || filter === "Ongoing")
+        ? list.filter((p) => p.status === filter)
+        : list.filter((p) => p.type === filter);
+    }
+    if (query.trim()) {
+      const q = query.toLowerCase();
+      list = list.filter((p) =>
+        p.title.toLowerCase().includes(q) ||
+        p.location.toLowerCase().includes(q) ||
+        p.type.toLowerCase().includes(q),
+      );
+    }
+    const sorted = [...list];
+    if (sort === "name") sorted.sort((a, b) => a.title.localeCompare(b.title));
+    else if (sort === "completed") sorted.sort((a, b) => (a.status === "Completed" ? -1 : 1));
+    else if (sort === "ongoing") sorted.sort((a, b) => (a.status === "Ongoing" ? -1 : 1));
+    else sorted.sort((a, b) => Number(b.number) - Number(a.number));
+    return sorted;
+  }, [filter, query, sort]);
+
+  useEffect(() => { setVisible(6); }, [filter, query, sort]);
+
 
   return (
     <PageTransition>
@@ -165,19 +203,7 @@ function DetailsPage() {
               </div>
             </Reveal>
             <Reveal delay={0.15}>
-              <div className="relative">
-                <div className="absolute -inset-4 gradient-brand opacity-20 blur-3xl rounded-3xl" />
-                <img
-                  src={aboutImg}
-                  alt="Premium home interior built by IG Sabroso"
-                  loading="lazy"
-                  className="relative rounded-3xl shadow-card w-full object-cover aspect-[4/3]"
-                />
-                <div className="absolute -bottom-6 -left-6 glass rounded-2xl p-5 shadow-card">
-                  <div className="text-3xl font-display font-black">10+</div>
-                  <div className="text-xs text-muted-foreground">Years building trust</div>
-                </div>
-              </div>
+              <AboutSlideshow />
             </Reveal>
           </div>
         </Section>
@@ -284,44 +310,67 @@ function DetailsPage() {
 
         {/* Portfolio */}
         <Section id="portfolio" muted>
-          <Reveal className="flex flex-col md:flex-row md:items-end md:justify-between gap-6">
-            <div>
-              <Eyebrow>Project Portfolio</Eyebrow>
-              <h2 className="mt-3 text-4xl md:text-5xl font-display font-bold leading-tight">
-                Our builds, <span className="text-gradient-brand">on the ground.</span>
-              </h2>
-            </div>
-            <p className="text-muted-foreground max-w-sm">
-              Completed and ongoing residences, apartments, commercial, and renovation works across Cavite, Laguna, and Metro Manila.
+          <Reveal>
+            <Eyebrow>Project Portfolio</Eyebrow>
+            <h2 className="mt-3 text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-[1.05]">
+              Explore all our <span className="text-gradient-brand">builds.</span>
+            </h2>
+            <p className="mt-5 text-muted-foreground max-w-2xl">
+              From modern homes to multi-unit developments and commercial spaces, explore our portfolio
+              of completed and ongoing projects built with quality, integrity, and purpose.
             </p>
           </Reveal>
 
-          {/* Filters */}
+          {/* Filters + Sort + Search */}
           <Reveal delay={0.1}>
-            <div className="mt-10 flex flex-wrap gap-2">
-              {filters.map((f) => {
-                const isActive = filter === f;
-                return (
-                  <button
-                    key={f}
-                    onClick={() => setFilter(f)}
-                    className={`relative px-4 py-2 rounded-full text-xs md:text-sm font-semibold uppercase tracking-wider transition-all ${
-                      isActive
-                        ? "gradient-brand text-primary-foreground shadow-soft"
-                        : "glass hover:shadow-soft text-foreground/80"
-                    }`}
-                  >
-                    {f}
-                  </button>
-                );
-              })}
+            <div className="mt-10 grid gap-4 lg:grid-cols-[1fr_auto_auto] lg:items-center">
+              <div className="flex flex-wrap gap-2 min-w-0">
+                {filters.map((f) => {
+                  const isActive = filter === f;
+                  return (
+                    <button
+                      key={f}
+                      onClick={() => setFilter(f)}
+                      className={`px-4 py-2 rounded-full text-xs md:text-sm font-semibold transition-all ${
+                        isActive
+                          ? "gradient-brand text-primary-foreground shadow-soft"
+                          : "glass hover:shadow-soft text-foreground/80"
+                      }`}
+                    >
+                      {f}
+                    </button>
+                  );
+                })}
+              </div>
+              <div className="relative">
+                <select
+                  value={sort}
+                  onChange={(e) => setSort(e.target.value as SortKey)}
+                  className="appearance-none glass rounded-full pl-5 pr-10 py-2.5 text-sm font-medium cursor-pointer hover:shadow-soft transition w-full lg:w-auto"
+                >
+                  <option value="latest">Latest Projects</option>
+                  <option value="name">Project Name</option>
+                  <option value="completed">Completed First</option>
+                  <option value="ongoing">Ongoing First</option>
+                </select>
+                <ChevronDown size={16} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+              </div>
+              <div className="relative">
+                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                <input
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search projects..."
+                  className="glass rounded-full pl-11 pr-5 py-2.5 text-sm w-full lg:w-72 focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
+                />
+              </div>
             </div>
           </Reveal>
 
           {/* Grid */}
           <motion.div layout className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
             <AnimatePresence mode="popLayout">
-              {filtered.map((p, i) => (
+              {filtered.slice(0, visible).map((p, i) => (
                 <motion.div
                   key={p.id}
                   layout
@@ -337,9 +386,25 @@ function DetailsPage() {
           </motion.div>
 
           {filtered.length === 0 && (
-            <p className="mt-10 text-center text-muted-foreground">No projects match this filter yet.</p>
+            <p className="mt-10 text-center text-muted-foreground">No projects match your search.</p>
+          )}
+
+          {visible < filtered.length && (
+            <Reveal className="mt-12 flex justify-center">
+              <button
+                onClick={() => setVisible((v) => v + 6)}
+                className="inline-flex items-center gap-3 rounded-full px-7 py-3 text-sm font-semibold border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition"
+              >
+                Load More Projects
+                <ArrowRight size={16} />
+              </button>
+            </Reveal>
           )}
         </Section>
+
+        {/* Website Estimator */}
+        <EstimatorSection />
+
 
         {/* Process */}
         <Section id="process">
@@ -382,55 +447,139 @@ function DetailsPage() {
         <SiteFooter />
       </main>
 
-      {/* Project Detail Modal */}
+      {/* Project Detail Modal — styled like the About Page 3 reference */}
       <Dialog open={!!active} onOpenChange={(open) => !open && setActive(null)}>
-        <DialogContent className="max-w-3xl p-0 overflow-hidden bg-background border-border">
-          {active && (
-            <div className="flex flex-col">
-              <div className="relative h-56 md:h-72 overflow-hidden">
-                <img src={active.img} alt={active.title} className="h-full w-full object-cover" />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
-                <div className="absolute top-4 left-4 flex flex-wrap gap-2">
-                  <span className={`px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold ${active.status === "Completed" ? "bg-emerald-500 text-white" : "bg-primary text-primary-foreground"}`}>
-                    {active.status}
-                  </span>
-                  <span className="px-2.5 py-1 rounded-full text-[10px] uppercase tracking-wider font-bold bg-background/90 text-foreground">
-                    {active.type}
-                  </span>
-                </div>
-                <div className="pointer-events-none absolute -right-2 -bottom-6 text-[9rem] leading-none font-display font-black text-white/15 select-none">
-                  {active.number}
-                </div>
-              </div>
-              <div className="p-6 md:p-8">
-                <DialogHeader>
-                  <DialogTitle className="text-2xl md:text-3xl font-display font-bold">{active.title}</DialogTitle>
-                  <DialogDescription className="flex items-center gap-1.5 text-sm">
-                    <MapPin size={14} className="text-primary" /> {active.location}
-                  </DialogDescription>
-                </DialogHeader>
-                <p className="mt-4 text-sm md:text-base text-muted-foreground leading-relaxed">
-                  {active.description}
-                </p>
-                <div className="mt-6">
-                  <div className="text-[11px] uppercase tracking-[0.22em] text-primary font-semibold mb-3">Highlights</div>
-                  <ul className="grid sm:grid-cols-2 gap-2">
-                    {active.highlights.map((h) => (
-                      <li key={h} className="flex items-start gap-2 text-sm">
-                        <Check size={14} className="mt-0.5 text-primary shrink-0" />
-                        <span>{h}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              </div>
-            </div>
-          )}
+        <DialogContent className="max-w-6xl p-0 overflow-hidden bg-background border-border max-h-[92vh] overflow-y-auto">
+          {active && <ProjectDetail project={active} onClose={() => setActive(null)} />}
         </DialogContent>
       </Dialog>
     </PageTransition>
   );
 }
+
+function ProjectDetail({ project, onClose }: { project: Project; onClose: () => void }) {
+  // Build a gallery using project hero + 4 rotating gallery images
+  const start = (Number(project.number) * 2) % galleryPool.length;
+  const gallery = [project.img, ...Array.from({ length: 5 }, (_, i) => galleryPool[(start + i) % galleryPool.length])];
+  const [hero, setHero] = useState(gallery[0]);
+
+  return (
+    <div className="p-5 md:p-8">
+      {/* Breadcrumb */}
+      <nav className="flex items-center gap-2 text-xs md:text-sm text-muted-foreground">
+        <button onClick={onClose} className="hover:text-foreground transition">Home</button>
+        <span>›</span>
+        <button onClick={onClose} className="hover:text-foreground transition">Projects</button>
+        <span>›</span>
+        <span className="text-primary font-semibold">{project.title}</span>
+      </nav>
+
+      <div className="mt-6 grid lg:grid-cols-2 gap-8 lg:gap-10">
+        {/* Left — gallery */}
+        <div>
+          <div className="relative rounded-3xl overflow-hidden shadow-card aspect-[4/3]">
+            <img src={hero} alt={project.title} className="h-full w-full object-cover" />
+            <div className="absolute bottom-4 left-4 inline-flex items-center gap-2 bg-background/90 backdrop-blur rounded-full px-4 py-2 text-xs font-semibold">
+              <ImageIcon size={14} className="text-primary" /> View Full Gallery
+            </div>
+          </div>
+          <div className="mt-4 grid grid-cols-6 gap-2 md:gap-3">
+            {gallery.slice(0, 5).map((g, i) => (
+              <button
+                key={i}
+                onClick={() => setHero(g)}
+                className={`relative aspect-square rounded-xl overflow-hidden transition ${hero === g ? "ring-2 ring-primary" : "opacity-80 hover:opacity-100"}`}
+              >
+                <img src={g} alt={`${project.title} ${i + 1}`} className="h-full w-full object-cover" />
+              </button>
+            ))}
+            <div className="aspect-square rounded-xl border-2 border-dashed border-primary/40 flex flex-col items-center justify-center text-primary">
+              <span className="text-lg font-bold">+</span>
+              <span className="text-[9px] uppercase tracking-wider mt-0.5">View More</span>
+            </div>
+          </div>
+          <div className="mt-5 glass rounded-2xl p-4 flex items-center gap-4">
+            <span className="inline-flex h-10 w-10 items-center justify-center rounded-full gradient-brand text-primary-foreground">
+              <Award size={18} />
+            </span>
+            <div>
+              <div className="text-sm font-bold">Built on Trust. Driven by Excellence.</div>
+              <div className="text-xs text-muted-foreground">Every project reflects our commitment to quality, transparency, and client satisfaction.</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Right — meta */}
+        <div>
+          <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-primary font-semibold">
+            <span className="h-px w-8 bg-primary" /> Project
+          </div>
+          <h2 className="mt-3 text-4xl md:text-5xl font-display font-bold leading-[1.05]">{project.title}</h2>
+          <div className="mt-3 flex items-center gap-1.5 text-sm">
+            <MapPin size={16} className="text-primary" /> {project.location}
+          </div>
+          <div className="mt-4 flex flex-wrap gap-2">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold gradient-brand text-primary-foreground">
+              <Home size={12} /> {project.type}
+            </span>
+            <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold border ${project.status === "Completed" ? "border-emerald-500 text-emerald-600" : "border-primary text-primary"}`}>
+              {project.status}
+            </span>
+          </div>
+          <p className="mt-5 text-muted-foreground leading-relaxed">{project.description}</p>
+
+          <div className="mt-6 glass rounded-2xl p-5 grid grid-cols-2 gap-5">
+            <MetaItem icon={Building} label="Project Type" value={project.type} sub="New Construction" />
+            <MetaItem icon={Square} label="Floor Area" value="220.00 sqm" sub="Total Floor Area" />
+            <MetaItem icon={ClipboardCheck} label="Status" value={project.status} sub={project.status === "Completed" ? "Turned Over" : "In Progress"} />
+            <MetaItem icon={CalendarDays} label="Timeline" value="6 Months" sub="Jan 2024 – Jun 2024" />
+          </div>
+
+          <div className="mt-5 glass rounded-2xl p-5">
+            <div className="font-display font-bold mb-3">Project Features</div>
+            <ul className="grid sm:grid-cols-2 gap-2.5">
+              {project.highlights.map((h) => (
+                <li key={h} className="flex items-start gap-2 text-sm">
+                  <span className="mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                    <Check size={12} />
+                  </span>
+                  <span>{h}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <Link
+            to="/consultation"
+            onClick={onClose}
+            className="mt-6 group w-full inline-flex items-center justify-center gap-3 gradient-brand text-primary-foreground rounded-full px-7 py-4 font-semibold shadow-glow hover:scale-[1.01] transition"
+          >
+            Inquire Similar Project
+            <span className="bg-background/25 rounded-full p-2 group-hover:translate-x-1 transition-transform">
+              <ArrowRight size={16} />
+            </span>
+          </Link>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function MetaItem({ icon: Icon, label, value, sub }: { icon: typeof Building; label: string; value: string; sub: string }) {
+  return (
+    <div className="flex items-start gap-3">
+      <span className="inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10 text-primary">
+        <Icon size={18} />
+      </span>
+      <div className="min-w-0">
+        <div className="text-[10px] uppercase tracking-wider text-muted-foreground">{label}</div>
+        <div className="font-display font-bold text-base leading-tight">{value}</div>
+        <div className="text-xs text-muted-foreground mt-0.5">{sub}</div>
+      </div>
+    </div>
+  );
+}
+
 
 function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void }) {
   return (
@@ -504,3 +653,266 @@ function Reveal({ children, delay = 0, className = "" }: { children: React.React
     </motion.div>
   );
 }
+
+function AboutSlideshow() {
+  const [idx, setIdx] = useState(0);
+  useEffect(() => {
+    const t = setInterval(() => setIdx((i) => (i + 1) % aboutSlides.length), 4500);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div className="relative">
+      <div className="absolute -inset-4 gradient-brand opacity-20 blur-3xl rounded-3xl" />
+      <div className="relative rounded-3xl shadow-card overflow-hidden aspect-[4/3]">
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={aboutSlides[idx]}
+            src={aboutSlides[idx]}
+            alt="IG Sabroso Construction project"
+            initial={{ opacity: 0, scale: 1.04 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        </AnimatePresence>
+        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
+          {aboutSlides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setIdx(i)}
+              aria-label={`Slide ${i + 1}`}
+              className={`h-1.5 rounded-full transition-all ${i === idx ? "w-8 bg-primary" : "w-3 bg-white/60"}`}
+            />
+          ))}
+        </div>
+      </div>
+      <div className="absolute -bottom-6 -left-6 glass rounded-2xl p-5 shadow-card">
+        <div className="text-3xl font-display font-black">10+</div>
+        <div className="text-xs text-muted-foreground">Years building trust</div>
+      </div>
+    </div>
+  );
+}
+
+type Pkg = "Basic" | "Elegant" | "Luxury";
+const PKG_RATE: Record<Pkg, number> = { Basic: 22000, Elegant: 28000, Luxury: 38000 };
+const ADDONS = [
+  { id: "gate", label: "Gate & Fence", price: 180000 },
+  { id: "carport", label: "Carport", price: 250000 },
+  { id: "interior", label: "Interior Fit-Out", price: 350000 },
+  { id: "smart", label: "Smart Home Features", price: 150000 },
+] as const;
+
+function EstimatorSection() {
+  const [floors, setFloors] = useState(2);
+  const [area, setArea] = useState(150);
+  const [pkg, setPkg] = useState<Pkg>("Elegant");
+  const [bedrooms, setBedrooms] = useState(4);
+  const [bathrooms, setBathrooms] = useState(3);
+  const [site, setSite] = useState("Flat & Accessible");
+  const [addons, setAddons] = useState<string[]>(["gate", "carport", "interior"]);
+
+  const base = area * PKG_RATE[pkg];
+  const addonTotal = ADDONS.filter((a) => addons.includes(a.id)).reduce((s, a) => s + a.price, 0);
+  const low = Math.round((base + addonTotal) * 1.0);
+  const high = Math.round((base + addonTotal) * 1.18);
+  const fmt = (n: number) => "₱" + n.toLocaleString("en-PH");
+
+  const inclusions = ["Structural Works", "Doors & Windows", "Electrical & Plumbing", "Paint Works", "Roofing & Ceiling", "Basic Fixtures & Fittings", "Flooring & Wall Finishes"];
+
+  return (
+    <Section id="estimator">
+      <div className="grid lg:grid-cols-[1.1fr_1fr] gap-8 lg:gap-12 items-start">
+        <Reveal>
+          <Eyebrow>Price Estimator</Eyebrow>
+          <h2 className="mt-3 text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-[1.05]">
+            Estimate your build<br />
+            before you <span className="text-gradient-brand">begin.</span>
+          </h2>
+          <p className="mt-5 text-muted-foreground max-w-xl">
+            Get a quick and reliable estimated construction cost based on your project details.
+            Customize your preferences and see how your vision comes to life.
+          </p>
+
+          <div className="mt-8 glass rounded-3xl p-6 md:p-7 shadow-card space-y-5">
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Field label="Project Type">
+                <SelectInput value="Residential House" onChange={() => {}} options={["Residential House", "Apartment", "Commercial"]} icon={<Home size={16} />} />
+              </Field>
+              <Field label="Project Location">
+                <SelectInput value="Cavite, Philippines" onChange={() => {}} options={["Cavite, Philippines", "Laguna, Philippines", "Metro Manila"]} icon={<MapPin size={16} />} />
+              </Field>
+            </div>
+            <div className="grid sm:grid-cols-2 gap-4">
+              <Field label="Floor Area (sqm)">
+                <div className="flex items-center gap-2 bg-background rounded-xl border border-border px-4 py-3">
+                  <Square size={16} className="text-primary" />
+                  <input type="number" min={40} value={area} onChange={(e) => setArea(Math.max(40, Number(e.target.value) || 0))} className="bg-transparent w-full focus:outline-none" />
+                  <span className="text-xs text-muted-foreground px-2 py-0.5 rounded bg-muted">sqm</span>
+                </div>
+              </Field>
+              <Field label="Number of Floors">
+                <SelectInput value={`${floors} Floor${floors > 1 ? "s" : ""}`} onChange={(v) => setFloors(Number(v.split(" ")[0]))} options={["1 Floor", "2 Floors", "3 Floors"]} icon={<Layers size={16} />} />
+              </Field>
+            </div>
+
+            <Field label="Package Type">
+              <div className="grid sm:grid-cols-3 gap-3">
+                {(["Basic", "Elegant", "Luxury"] as Pkg[]).map((p) => {
+                  const active = pkg === p;
+                  return (
+                    <button
+                      key={p}
+                      onClick={() => setPkg(p)}
+                      className={`text-left rounded-2xl border-2 p-4 transition ${active ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"}`}
+                    >
+                      <div className="flex items-center gap-2">
+                        <span className={`h-4 w-4 rounded-full border-2 ${active ? "border-primary bg-primary" : "border-muted-foreground/40"}`} />
+                        {p === "Basic" && <Home size={16} className="text-primary" />}
+                        {p === "Elegant" && <Star size={16} className="text-primary" />}
+                        {p === "Luxury" && <Sparkles size={16} className="text-primary" />}
+                        <span className="font-bold">{p}</span>
+                      </div>
+                      <div className="mt-1.5 text-xs text-muted-foreground">
+                        {p === "Basic" && "Essential finishes, great value"}
+                        {p === "Elegant" && "Quality materials, modern design"}
+                        {p === "Luxury" && "Premium finishes, luxury living"}
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </Field>
+
+            <div className="grid sm:grid-cols-3 gap-4">
+              <Field label="Bedrooms">
+                <SelectInput value={String(bedrooms)} onChange={(v) => setBedrooms(Number(v))} options={["1", "2", "3", "4", "5", "6"]} icon={<Bed size={16} />} />
+              </Field>
+              <Field label="Bathrooms">
+                <SelectInput value={String(bathrooms)} onChange={(v) => setBathrooms(Number(v))} options={["1", "2", "3", "4", "5"]} icon={<Bath size={16} />} />
+              </Field>
+              <Field label="Site Condition">
+                <SelectInput value={site} onChange={setSite} options={["Flat & Accessible", "Sloped Site", "Tight Access"]} icon={<HardHat size={16} />} />
+              </Field>
+            </div>
+
+            <Field label="Optional Add-Ons">
+              <div className="grid sm:grid-cols-2 gap-2.5">
+                {ADDONS.map((a) => {
+                  const checked = addons.includes(a.id);
+                  return (
+                    <label key={a.id} className={`flex items-center gap-3 rounded-xl border-2 px-4 py-3 cursor-pointer transition ${checked ? "border-primary bg-primary/5" : "border-border hover:border-primary/40"}`}>
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        onChange={(e) => setAddons((prev) => e.target.checked ? [...prev, a.id] : prev.filter((x) => x !== a.id))}
+                        className="accent-primary h-4 w-4"
+                      />
+                      <span className="flex-1 text-sm font-medium">{a.label}</span>
+                      <span className="text-xs text-muted-foreground">+ {fmt(a.price)}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </Field>
+          </div>
+        </Reveal>
+
+        {/* Summary */}
+        <Reveal delay={0.12}>
+          <div className="lg:sticky lg:top-24 glass rounded-3xl p-6 md:p-8 shadow-card">
+            <div className="flex items-center gap-2 text-primary">
+              <Calculator size={18} />
+              <span className="text-[11px] uppercase tracking-[0.22em] font-bold">Estimate Summary</span>
+            </div>
+            <div className="mt-5 pb-5 border-b border-border">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <div className="font-bold">Base Rate ({pkg} Package)</div>
+                  <div className="text-xs text-muted-foreground">Based on selected floor area</div>
+                </div>
+                <div className="text-right">
+                  <div className="text-primary font-bold">{fmt(PKG_RATE[pkg])} / sqm</div>
+                  <div className="text-xs text-muted-foreground">{area} sqm</div>
+                </div>
+              </div>
+            </div>
+            <div className="mt-5 pb-5 border-b border-border">
+              <div className="font-bold">Estimated Construction Range</div>
+              <div className="mt-1 text-2xl md:text-3xl font-display font-black text-primary">
+                {fmt(low)} – {fmt(high)}
+              </div>
+              <div className="text-xs text-muted-foreground mt-1">Based on project complexity and finishes</div>
+            </div>
+            <div className="mt-5">
+              <div className="flex items-center gap-2">
+                <Star size={16} className="text-primary" />
+                <span className="text-xs uppercase tracking-wider font-bold text-muted-foreground">Selected Package</span>
+              </div>
+              <div className="mt-1 font-display font-black text-xl">{pkg}</div>
+              <div className="text-xs text-muted-foreground">Quality materials, modern design</div>
+            </div>
+            <div className="mt-5">
+              <div className="font-bold mb-3">Inclusions Summary</div>
+              <ul className="grid sm:grid-cols-2 gap-2 text-sm">
+                {inclusions.map((i) => (
+                  <li key={i} className="flex items-start gap-2">
+                    <CheckCircle2 size={14} className="text-primary mt-0.5 shrink-0" />
+                    <span>{i}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="mt-6 rounded-2xl bg-primary/5 border border-primary/20 p-5 text-center">
+              <div className="text-[11px] uppercase tracking-[0.22em] font-bold text-muted-foreground">Estimated Total Budget</div>
+              <div className="mt-2 text-2xl md:text-3xl font-display font-black text-primary">
+                {fmt(low)} – {fmt(high)}
+              </div>
+              <div className="text-[11px] text-muted-foreground mt-1">This is an estimated budget only.</div>
+            </div>
+            <Link
+              to="/consultation"
+              className="mt-5 group w-full inline-flex items-center justify-center gap-3 gradient-brand text-primary-foreground rounded-full px-7 py-4 font-semibold shadow-glow hover:scale-[1.01] transition"
+            >
+              Get Detailed Estimate
+              <span className="bg-background/25 rounded-full p-2 group-hover:translate-x-1 transition-transform">
+                <ArrowRight size={16} />
+              </span>
+            </Link>
+            <p className="mt-3 text-[11px] text-muted-foreground text-center leading-relaxed">
+              Final cost may vary based on design, site condition, finishes, and scope of work.
+            </p>
+          </div>
+        </Reveal>
+      </div>
+    </Section>
+  );
+}
+
+function Field({ label, children }: { label: string; children: React.ReactNode }) {
+  return (
+    <div>
+      <div className="text-xs font-bold mb-2">{label}</div>
+      {children}
+    </div>
+  );
+}
+
+function SelectInput({ value, onChange, options, icon }: { value: string; onChange: (v: string) => void; options: string[]; icon?: React.ReactNode }) {
+  return (
+    <div className="relative">
+      {icon && <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary">{icon}</span>}
+      <select
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        className={`appearance-none w-full bg-background rounded-xl border border-border ${icon ? "pl-11" : "pl-4"} pr-10 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/40`}
+      >
+        {options.map((o) => <option key={o} value={o}>{o}</option>)}
+      </select>
+      <ChevronDown size={16} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+    </div>
+  );
+}
+

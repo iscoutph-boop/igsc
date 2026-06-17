@@ -3,9 +3,7 @@ import { motion } from "framer-motion";
 import { ArrowRight, ShieldCheck, Building2, Hammer } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { PageTransition } from "@/components/page-transition";
-import { useTheme } from "@/components/theme-provider";
-import heroDark from "@/assets/hero-house.jpg";
-import heroLight from "@/assets/hero-house-light.jpg";
+import helmetAsset from "@/assets/helmet-hero.png.asset.json";
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -20,8 +18,7 @@ export const Route = createFileRoute("/")({
 });
 
 function HomePage() {
-  const { theme } = useTheme();
-  const hero = theme === "dark" ? heroDark : heroLight;
+  const hero = helmetAsset.url;
 
   return (
     <PageTransition>
@@ -31,23 +28,19 @@ function HomePage() {
           <motion.img
             key={hero}
             src={hero}
-            alt="Modern luxury residence built by IG Sabroso Construction"
+            alt="IG Sabroso Construction crew safety helmets lined up at golden hour"
             className="absolute inset-0 h-full w-full object-cover"
             initial={{ scale: 1.08, opacity: 0 }}
             animate={{ scale: 1, opacity: 1 }}
             transition={{ duration: 1.4, ease: [0.22, 1, 0.36, 1] }}
           />
-          <div className="absolute inset-0 hero-overlay" />
+          {/* Cinematic gradient overlay that complements the warm helmet image */}
+          <div className="absolute inset-0 bg-gradient-to-r from-background/85 via-background/35 to-background/10" />
+          <div className="absolute inset-0 bg-gradient-to-t from-background/90 via-background/10 to-background/30" />
         </div>
 
         <SiteHeader floating />
 
-        {/* Giant transparent brand text */}
-        <div className="pointer-events-none absolute left-0 right-0 top-[14%] md:top-[16%] flex justify-center px-4">
-          <h1 className="font-display font-black tracking-tighter text-center text-foreground/10 dark:text-white/[0.07] text-[18vw] sm:text-[16vw] md:text-[13vw] leading-none select-none whitespace-nowrap">
-            IG SABROSO
-          </h1>
-        </div>
 
         {/* Left tagline */}
         <motion.div
