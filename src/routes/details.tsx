@@ -1,15 +1,16 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   ArrowRight, Home, Wrench, HardHat, Ruler, Box, PencilRuler,
   Compass, Hammer, Layers, CheckCircle2, MapPin, Check, Sparkles,
+  Search, ChevronDown, Calculator, Building, CalendarDays, ClipboardCheck,
+  Image as ImageIcon, Award, Star, Bed, Bath, Square,
 } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PageTransition } from "@/components/page-transition";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog";
-import aboutImg from "@/assets/about.jpg";
+import { Dialog, DialogContent } from "@/components/ui/dialog";
 import aResAsset from "@/assets/proj-a-residence.jpg.asset.json";
 import oResAsset from "@/assets/proj-o-residence.jpg.asset.json";
 import iResAsset from "@/assets/proj-i-residence.jpg.asset.json";
@@ -17,6 +18,14 @@ import lResAsset from "@/assets/proj-l-residence.jpg.asset.json";
 import bAptAsset from "@/assets/proj-b-apartment.jpg.asset.json";
 import keystoneAsset from "@/assets/proj-keystone.jpg.asset.json";
 import fResAsset from "@/assets/proj-f-residence.jpg.asset.json";
+import igs1 from "@/assets/igs-1.jpg.asset.json";
+import igs2 from "@/assets/igs-2.jpg.asset.json";
+import igs3 from "@/assets/igs-3.jpg.asset.json";
+import igs4 from "@/assets/igs-4.jpg.asset.json";
+import igs6 from "@/assets/igs-6.jpg.asset.json";
+import igs7 from "@/assets/igs-7.jpg.asset.json";
+import igs8 from "@/assets/igs-8.jpg.asset.json";
+import igs9 from "@/assets/igs-9.jpg.asset.json";
 
 const aRes = aResAsset.url;
 const oRes = oResAsset.url;
@@ -25,6 +34,10 @@ const lRes = lResAsset.url;
 const bApt = bAptAsset.url;
 const keystone = keystoneAsset.url;
 const fRes = fResAsset.url;
+
+const aboutSlides = [igs1.url, igs2.url, igs3.url, igs4.url];
+const galleryPool = [igs1.url, igs2.url, igs3.url, igs4.url, igs6.url, igs7.url, igs8.url, igs9.url];
+
 
 export const Route = createFileRoute("/details")({
   head: () => ({
