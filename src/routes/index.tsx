@@ -90,7 +90,34 @@ function HomePage() {
 
 
         {/* Bottom-left supporting tagline */}
-        <div className="absolute left-0 right-0 bottom-0 z-10 px-5 md:px-12 pb-8 md:pb-12 flex flex-col items-center gap-6">
+        <div className="absolute left-0 right-0 bottom-0 z-10 px-4 sm:px-5 md:px-12 pb-6 sm:pb-8 md:pb-12 flex flex-col items-center gap-5 sm:gap-6">
+          {/* Mobile inline stat row */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7, duration: 0.6 }}
+            className="md:hidden grid grid-cols-2 gap-3 w-full max-w-[420px]"
+          >
+            <div className="glass rounded-2xl px-3 py-2.5 shadow-card flex items-center gap-2 min-w-0">
+              <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg gradient-brand text-primary-foreground">
+                <ShieldCheck size={14} />
+              </span>
+              <div className="min-w-0">
+                <div className="text-lg font-display font-black leading-none">10+</div>
+                <div className="text-[10px] text-muted-foreground leading-tight truncate">Years experience</div>
+              </div>
+            </div>
+            <div className="glass rounded-2xl px-3 py-2.5 shadow-card flex items-center gap-2 min-w-0">
+              <span className="inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-lg gradient-brand text-primary-foreground">
+                <Building2 size={14} />
+              </span>
+              <div className="min-w-0">
+                <div className="text-lg font-display font-black leading-none">300+</div>
+                <div className="text-[10px] text-muted-foreground leading-tight truncate">Projects completed</div>
+              </div>
+            </div>
+          </motion.div>
+
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -113,12 +140,12 @@ function HomePage() {
             <Link
               to="/details"
               hash="about"
-              className="group relative inline-flex items-center gap-4 gradient-brand text-primary-foreground rounded-full pl-9 pr-3 py-4 text-base md:text-lg font-bold tracking-[0.18em] shadow-glow hover:scale-[1.03] transition-transform"
+              className="group relative inline-flex items-center gap-3 sm:gap-4 gradient-brand text-primary-foreground rounded-full pl-7 sm:pl-9 pr-2.5 sm:pr-3 py-3 sm:py-4 text-sm sm:text-base md:text-lg font-bold tracking-[0.18em] shadow-glow hover:scale-[1.03] transition-transform"
             >
               <span className="absolute inset-0 rounded-full ring-1 ring-white/20" />
               DISCOVER MORE
-              <span className="bg-background/25 rounded-full p-2.5 group-hover:translate-x-1 transition-transform">
-                <ArrowRight size={18} />
+              <span className="bg-background/25 rounded-full p-2 sm:p-2.5 group-hover:translate-x-1 transition-transform">
+                <ArrowRight size={16} />
               </span>
             </Link>
           </motion.div>
@@ -127,11 +154,12 @@ function HomePage() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 1.25, duration: 0.7 }}
-            className="text-[11px] md:text-xs uppercase tracking-[0.28em] text-muted-foreground"
+            className="text-[10px] sm:text-[11px] md:text-xs uppercase tracking-[0.24em] sm:tracking-[0.28em] text-muted-foreground text-center px-2"
           >
             Build with confidence — build with Sabroso.
           </motion.p>
         </div>
+
       </main>
 
       <CheckBookingModal open={bookingOpen} onClose={() => setBookingOpen(false)} />
