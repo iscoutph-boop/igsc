@@ -150,7 +150,7 @@ export function SiteHeader({ floating = false }: { floating?: boolean }) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="lg:hidden overflow-hidden glass border-t border-border"
+            className="xl:hidden overflow-hidden glass border-t border-border"
           >
             <div className="px-6 py-4 flex flex-col gap-1">
               {navItems.map((item) => (
