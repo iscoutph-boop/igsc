@@ -1,6 +1,6 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Facebook, Instagram, Linkedin, Moon, Sun, ArrowRight, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import logoAsset from "@/assets/logo.png.asset.json";
 import { useTheme } from "./theme-provider";
@@ -9,7 +9,7 @@ const navItems: { to: "/" | "/details" | "/consultation"; label: string; hash?: 
   { to: "/", label: "Home" },
   { to: "/details", label: "About", hash: "about" },
   { to: "/details", label: "Services", hash: "services" },
-  { to: "/details", label: "Projects", hash: "projects" },
+  { to: "/details", label: "Projects", hash: "portfolio" },
   { to: "/details", label: "Process", hash: "process" },
   { to: "/consultation", label: "Contact" },
 ];
@@ -17,7 +17,43 @@ const navItems: { to: "/" | "/details" | "/consultation"; label: string; hash?: 
 export function SiteHeader({ floating = false }: { floating?: boolean }) {
   const { theme, toggle } = useTheme();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const routerHash = useRouterState({ select: (s) => s.location.hash });
+  const [activeHash, setActiveHash] = useState<string>(routerHash || "");
   const [open, setOpen] = useState(false);
+
+  // Track section in view on /details for active pill highlighting
+  useEffect(() => {
+    if (pathname !== "/details") return;
+    const ids = ["about", "services", "portfolio", "process"];
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+        if (visible) setActiveHash(visible.target.id);
+      },
+      { rootMargin: "-40% 0px -50% 0px", threshold: [0, 0.25, 0.5, 1] },
+    );
+    ids.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+    return () => observer.disconnect();
+  }, [pathname]);
+
+  useEffect(() => {
+    if (routerHash) setActiveHash(routerHash);
+  }, [routerHash]);
+
+  const isActive = (item: { to: string; hash?: string }) => {
+    if (item.to === "/") return pathname === "/";
+    if (item.to === "/consultation") return pathname.startsWith("/consultation");
+    if (item.to === "/details") {
+      if (pathname !== "/details") return false;
+      return (activeHash || "about") === item.hash;
+    }
+    return false;
+  };
 
   return (
     <header
@@ -32,14 +68,14 @@ export function SiteHeader({ floating = false }: { floating?: boolean }) {
           <img src={logoAsset.url} alt="IG Sabroso Construction" className="h-11 w-11 md:h-12 md:w-12 object-contain transition-transform group-hover:scale-105" />
           <div className="hidden sm:block leading-tight">
             <div className="font-display font-bold tracking-tight text-[15px] md:text-base">IG SABROSO CONSTRUCTION</div>
-            <div className="text-[11px] md:text-xs text-muted-foreground">Your Dependable Building Partner</div>
+            <div className="text-[11px] md:text-xs text-muted-foreground">Elevate Your Lifestyle</div>
           </div>
         </Link>
 
         {/* Center pill nav */}
         <nav className="hidden lg:flex mx-auto items-center gap-1 glass rounded-full p-1.5 shadow-soft">
           {navItems.map((item) => {
-            const active = item.to === "/" ? pathname === "/" : pathname.startsWith(item.to);
+            const active = isActive(item);
             return (
               <Link
                 key={item.label}

@@ -48,17 +48,25 @@ function HomePage() {
         <SiteHeader floating />
 
 
-        {/* Left tagline */}
+        {/* Left tagline + Check Booking CTA */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.5, duration: 0.7 }}
-          className="absolute top-32 md:top-40 left-5 md:left-12 max-w-[240px] z-10"
+          className="absolute top-32 md:top-40 left-5 md:left-12 max-w-[260px] z-10"
         >
           <div className="h-0.5 w-10 gradient-brand rounded-full mb-3" />
           <p className="text-xs md:text-sm text-foreground/85 font-medium leading-relaxed">
             Dependable building solutions for homes, renovations, and civil works.
           </p>
+          <button
+            onClick={() => setBookingOpen(true)}
+            aria-label="Check Booking Status"
+            className="mt-6 group inline-flex items-center gap-2.5 rounded-full px-5 py-3 text-sm font-semibold tracking-wide bg-white/85 dark:bg-white/10 backdrop-blur-md text-foreground border border-white/40 shadow-card hover:bg-white hover:scale-[1.02] transition"
+          >
+            <CalendarCheck size={16} className="text-primary" />
+            Check Booking
+          </button>
         </motion.div>
 
         {/* Right tagline */}
@@ -99,10 +107,11 @@ function HomePage() {
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.05, duration: 0.7 }}
-            className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4"
+            className="flex items-center"
           >
             <Link
               to="/details"
+              hash="about"
               className="group relative inline-flex items-center gap-4 gradient-brand text-primary-foreground rounded-full pl-9 pr-3 py-4 text-base md:text-lg font-bold tracking-[0.18em] shadow-glow hover:scale-[1.03] transition-transform"
             >
               <span className="absolute inset-0 rounded-full ring-1 ring-white/20" />
@@ -111,16 +120,6 @@ function HomePage() {
                 <ArrowRight size={18} />
               </span>
             </Link>
-
-
-            <button
-              onClick={() => setBookingOpen(true)}
-              aria-label="Check Booking Status"
-              className="group inline-flex items-center gap-2.5 rounded-full px-6 py-3.5 text-sm font-semibold tracking-wide bg-white/85 dark:bg-white/10 backdrop-blur-md text-foreground border border-white/40 shadow-card hover:bg-white hover:scale-[1.02] transition"
-            >
-              <CalendarCheck size={16} className="text-primary" />
-              Check Booking
-            </button>
           </motion.div>
 
           <motion.p
