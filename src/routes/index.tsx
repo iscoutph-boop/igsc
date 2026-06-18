@@ -101,8 +101,8 @@ function HomePage() {
             transition={{ delay: 1.05, duration: 0.7 }}
             className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4"
           >
-            <button
-              onClick={() => setConsultOpen(true)}
+            <Link
+              to="/details"
               className="group relative inline-flex items-center gap-4 gradient-brand text-primary-foreground rounded-full pl-9 pr-3 py-4 text-base md:text-lg font-bold tracking-[0.18em] shadow-glow hover:scale-[1.03] transition-transform"
             >
               <span className="absolute inset-0 rounded-full ring-1 ring-white/20" />
@@ -110,7 +110,8 @@ function HomePage() {
               <span className="bg-background/25 rounded-full p-2.5 group-hover:translate-x-1 transition-transform">
                 <ArrowRight size={18} />
               </span>
-            </button>
+            </Link>
+
 
             <button
               onClick={() => setBookingOpen(true)}
