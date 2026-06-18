@@ -28,7 +28,7 @@ function HomePage() {
 
   return (
     <PageTransition>
-      <main className="relative w-screen min-h-screen overflow-hidden bg-background">
+      <main className="relative w-full min-h-screen overflow-hidden bg-background">
         {/* Background image */}
         <div className="absolute inset-0">
           <motion.img
