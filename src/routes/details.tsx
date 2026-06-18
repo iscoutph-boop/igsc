@@ -619,7 +619,19 @@ function MetaItem({ icon: Icon, label, value, sub }: { icon: typeof Building; la
 }
 
 
+function extractMeta(highlights: string[]) {
+  const find = (re: RegExp) => {
+    for (const h of highlights) { const m = h.match(re); if (m) return m[1]; }
+    return null;
+  };
+  const beds = find(/(\d+)\s*Bedroom/i);
+  const baths = find(/(\d+)\s*(Restroom|Bathroom)/i);
+  const cars = find(/(\d+)[-\s]?vehicle\s*carport/i);
+  return { beds, baths, cars };
+}
+
 function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void }) {
+  const meta = extractMeta(project.highlights);
   return (
     <div className="group relative h-full rounded-3xl overflow-hidden glass shadow-card hover:shadow-glow transition-all hover:-translate-y-1">
       <div className="relative aspect-[4/3] overflow-hidden">
@@ -647,6 +659,25 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void
         <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
           <MapPin size={12} className="text-primary" /> {project.location}
         </div>
+        {(meta.beds || meta.baths || meta.cars) && (
+          <div className="mt-3 flex items-center gap-3 text-xs">
+            {meta.beds && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-foreground font-semibold">
+                <Bed size={13} className="text-primary" /> {meta.beds}
+              </span>
+            )}
+            {meta.baths && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-foreground font-semibold">
+                <Bath size={13} className="text-primary" /> {meta.baths}
+              </span>
+            )}
+            {meta.cars && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-foreground font-semibold">
+                <HardHat size={13} className="text-primary" /> {meta.cars}
+              </span>
+            )}
+          </div>
+        )}
         <p className="mt-3 text-sm text-muted-foreground line-clamp-2 leading-relaxed">
           {project.description}
         </p>
