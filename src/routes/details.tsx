@@ -813,8 +813,8 @@ function AboutSlideshow() {
 
 
 
-type Pkg = "Basic" | "Elegant" | "Luxury";
-const PKG_RATE: Record<Pkg, number> = { Basic: 22000, Elegant: 28000, Luxury: 38000 };
+type Pkg = "Standard" | "Semi-elegant" | "Elegant" | "Luxury";
+const PKG_RATE: Record<Pkg, number> = { Standard: 32000, "Semi-elegant": 37000, Elegant: 42500, Luxury: 55000 };
 const ADDONS = [
   { id: "gate", label: "Gate & Fence", price: 180000 },
   { id: "carport", label: "Carport", price: 250000 },
