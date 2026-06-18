@@ -73,7 +73,7 @@ export function SiteHeader({ floating = false }: { floating?: boolean }) {
         </Link>
 
         {/* Center pill nav */}
-        <nav className="hidden lg:flex mx-auto items-center gap-1 glass rounded-full p-1.5 shadow-soft">
+        <nav className="hidden xl:flex mx-auto items-center gap-1 glass rounded-full p-1.5 shadow-soft">
           {navItems.map((item) => {
             const active = isActive(item);
             return (
