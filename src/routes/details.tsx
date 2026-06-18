@@ -135,11 +135,13 @@ const projects: Project[] = [
 ];
 
 const packages = [
-  { tier: "BASIC", price: "₱35,000", note: "per square meter", featured: false,
+  { tier: "STANDARD FINISH", price: "₱30,000 – ₱34,000", note: "per square meter", featured: false, badge: "",
     features: ["Standard structural works", "Quality basic finishes", "Essential fixtures", "Standard electrical & plumbing", "Painted interior walls"] },
-  { tier: "ELEGANT", price: "₱40,000 – ₱45,000", note: "per square meter", featured: true,
-    features: ["Premium structural works", "Upgraded finishes & tiles", "Designer fixtures", "Enhanced electrical & plumbing", "Accent walls & cabinetry"] },
-  { tier: "LUXURY", price: "₱50,000", note: "per square meter", featured: false,
+  { tier: "SEMI-ELEGANT FINISH", price: "₱35,000 – ₱39,000", note: "per square meter", featured: true, badge: "Popular Pick",
+    features: ["Reinforced structural works", "Upgraded floor & wall tiles", "Better fixtures & cabinetry", "Quality electrical & plumbing", "Accent walls & ceiling details"] },
+  { tier: "ELEGANT FINISH", price: "₱40,000 – ₱45,000", note: "per square meter", featured: true, badge: "Most Recommended",
+    features: ["Premium structural works", "Designer finishes & tiles", "High-grade fixtures", "Enhanced electrical & plumbing", "Custom cabinetry & built-ins"] },
+  { tier: "LUXURY", price: "Starts @ ₱50,000", note: "depending on design complexity", featured: false, badge: "",
     features: ["High-end structural works", "Luxury imported finishes", "Premium smart-home features", "Designer lighting & built-ins", "Custom millwork & detailing"] },
 ];
 
