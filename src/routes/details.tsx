@@ -936,7 +936,7 @@ function AboutSlideshow() {
             ))}
           </div>
           <div className="px-1 pt-2 pb-0.5 text-[10px] uppercase tracking-[0.16em] font-bold text-white/90">
-            Exterior Showcase
+            CLIENT COLLABORATION
           </div>
         </div>
       </div>
