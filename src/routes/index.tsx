@@ -135,7 +135,7 @@ function HomePage() {
       </main>
 
       <CheckBookingModal open={bookingOpen} onClose={() => setBookingOpen(false)} />
-      <ConsultationModal open={consultOpen} onClose={() => setConsultOpen(false)} />
+      
     </PageTransition>
   );
 }
