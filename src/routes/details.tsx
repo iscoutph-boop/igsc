@@ -635,7 +635,7 @@ function ProjectDetail({ project, onClose }: { project: Project; onClose: () => 
               <ImageIcon size={14} className="text-primary" /> View Full Gallery
             </div>
           </div>
-          <div className="mt-4 grid grid-cols-6 gap-2 md:gap-3">
+          <div className="mt-4 grid grid-cols-4 sm:grid-cols-6 gap-2 md:gap-3">
             {gallery.slice(0, 5).map((g, i) => (
               <button
                 key={i}
