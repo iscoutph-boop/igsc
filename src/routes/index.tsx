@@ -94,14 +94,15 @@ function HomePage() {
             <span className="text-primary font-semibold">Built to Last</span>
           </motion.div>
 
-          {/* Primary centered CTA */}
+          {/* Primary + secondary CTAs */}
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.05, duration: 0.7 }}
+            className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4"
           >
-            <Link
-              to="/details"
+            <button
+              onClick={() => setConsultOpen(true)}
               className="group relative inline-flex items-center gap-4 gradient-brand text-primary-foreground rounded-full pl-9 pr-3 py-4 text-base md:text-lg font-bold tracking-[0.18em] shadow-glow hover:scale-[1.03] transition-transform"
             >
               <span className="absolute inset-0 rounded-full ring-1 ring-white/20" />
@@ -109,7 +110,16 @@ function HomePage() {
               <span className="bg-background/25 rounded-full p-2.5 group-hover:translate-x-1 transition-transform">
                 <ArrowRight size={18} />
               </span>
-            </Link>
+            </button>
+
+            <button
+              onClick={() => setBookingOpen(true)}
+              aria-label="Check Booking Status"
+              className="group inline-flex items-center gap-2.5 rounded-full px-6 py-3.5 text-sm font-semibold tracking-wide bg-white/85 dark:bg-white/10 backdrop-blur-md text-foreground border border-white/40 shadow-card hover:bg-white hover:scale-[1.02] transition"
+            >
+              <CalendarCheck size={16} className="text-primary" />
+              Check Booking
+            </button>
           </motion.div>
 
           <motion.p
@@ -122,9 +132,13 @@ function HomePage() {
           </motion.p>
         </div>
       </main>
+
+      <CheckBookingModal open={bookingOpen} onClose={() => setBookingOpen(false)} />
+      <ConsultationModal open={consultOpen} onClose={() => setConsultOpen(false)} />
     </PageTransition>
   );
 }
+
 
 function StatCard({
   icon, value, label, delay,
