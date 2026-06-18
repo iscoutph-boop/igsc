@@ -135,7 +135,7 @@ export function SiteHeader({ floating = false }: { floating?: boolean }) {
           </Link>
 
           <button
-            className="lg:hidden p-2 rounded-full glass"
+            className="xl:hidden p-2 rounded-full glass"
             aria-label="Menu"
             onClick={() => setOpen((v) => !v)}
           >
