@@ -219,7 +219,7 @@ function DetailsPage() {
                 {[
                   { icon: Home, label: "Residential Builds", filter: "Residential" as Filter },
                   { icon: Wrench, label: "Renovation Works", filter: "Renovation" as Filter },
-                  { icon: Layers, label: "Construction Management", filter: "All" as Filter },
+                  { icon: Layers, label: "Construction Management", filter: "Commercial" as Filter },
                 ].map((f) => (
                   <button
                     key={f.label}
