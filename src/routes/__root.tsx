@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { ThemeProvider } from "../components/theme-provider";
 import { FloatingContact } from "../components/floating-contact";
+import { LoadingScreen } from "../components/loading-screen";
 
 function NotFoundComponent() {
   return (
