@@ -51,7 +51,7 @@ const interiorSlides = [up6.url, up7.url, up12.url, up10.url, up9.url, up11.url]
 // Exterior images for the mini floating preview card
 const exteriorImages = [up3.url, up4.url, up5.url, up8.url];
 
-const aboutSlides = [igs1.url, igs2.url, igs3.url, igs4.url];
+
 const galleryPool = [igs1.url, igs2.url, igs3.url, igs4.url, igs6.url, igs7.url, igs8.url, igs9.url];
 
 
