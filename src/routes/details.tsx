@@ -279,36 +279,33 @@ function DetailsPage() {
           <Reveal className="text-center max-w-2xl mx-auto">
             <Eyebrow center>Finish Packages</Eyebrow>
             <h2 className="mt-3 text-4xl md:text-5xl font-display font-bold leading-tight">
-              Three tiers.<br />
+              Four finish tiers.<br />
               <span className="text-gradient-brand">One standard of quality.</span>
             </h2>
             <p className="mt-5 text-muted-foreground">
-              Transparent starting rates per square meter — tailored to fit your vision and budget.
+              Transparent rates per square meter — tailored to fit your vision and budget.
             </p>
           </Reveal>
 
-          <div className="mt-14 grid md:grid-cols-3 gap-6">
+          <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {packages.map((p, i) => (
               <Reveal key={p.tier} delay={i * 0.08}>
                 <div
-                  className={`relative h-full rounded-3xl p-8 transition-all hover:-translate-y-1 ${
+                  className={`relative h-full rounded-3xl p-7 transition-all hover:-translate-y-1 ${
                     p.featured
                       ? "gradient-brand text-primary-foreground shadow-glow"
                       : "glass shadow-card hover:shadow-card"
                   }`}
                 >
-                  {p.featured && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 bg-background text-foreground rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.18em] font-bold shadow-card">
-                      <Sparkles size={12} className="text-primary" /> Most Popular
+                  {p.featured && p.badge && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 bg-background text-foreground rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.18em] font-bold shadow-card whitespace-nowrap">
+                      <Sparkles size={12} className="text-primary" /> {p.badge}
                     </div>
                   )}
-                  <div className={`text-[11px] uppercase tracking-[0.28em] font-bold ${p.featured ? "text-primary-foreground/80" : "text-primary"}`}>
+                  <div className={`text-[11px] uppercase tracking-[0.22em] font-bold ${p.featured ? "text-primary-foreground/80" : "text-primary"}`}>
                     {p.tier}
                   </div>
-                  <div className="mt-4 flex items-baseline gap-2">
-                    <span className="text-[11px] uppercase tracking-widest opacity-70">Starts @</span>
-                  </div>
-                  <div className="mt-1 text-3xl md:text-4xl font-display font-black leading-none">
+                  <div className="mt-4 text-2xl md:text-[1.75rem] font-display font-black leading-none">
                     {p.price}
                   </div>
                   <div className={`mt-2 text-xs ${p.featured ? "text-primary-foreground/85" : "text-muted-foreground"}`}>
