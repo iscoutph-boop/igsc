@@ -36,7 +36,14 @@ import up9 from "@/assets/up-9.jpg.asset.json";
 import up10 from "@/assets/up-10.jpg.asset.json";
 import up11 from "@/assets/up-11.jpg.asset.json";
 import up12 from "@/assets/up-12.jpg.asset.json";
-import { ChevronLeft } from "lucide-react";
+import meeting1 from "@/assets/meeting-472871.jpg.asset.json";
+import meeting2 from "@/assets/meeting-615890.jpg.asset.json";
+import meeting3 from "@/assets/meeting-616099.jpg.asset.json";
+import meeting4 from "@/assets/meeting-619956.jpg.asset.json";
+import meeting5 from "@/assets/meeting-622434.jpg.asset.json";
+import meeting6 from "@/assets/meeting-626269.jpg.asset.json";
+import meeting7 from "@/assets/meeting-628710.jpg.asset.json";
+import { ChevronLeft, MessageSquareQuote, Users, Handshake } from "lucide-react";
 
 const aRes = aResAsset.url;
 const oRes = oResAsset.url;
