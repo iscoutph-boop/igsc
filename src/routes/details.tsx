@@ -224,19 +224,19 @@ function DetailsPage() {
         {/* About */}
         <section id="about" className="scroll-mt-24 py-20 md:py-28">
           <div className="max-w-[1760px] mx-auto px-6 md:px-10 xl:px-14 2xl:px-20">
-            <div className="grid lg:grid-cols-12 gap-10 lg:gap-14 items-center">
-              <Reveal className="lg:col-span-4 xl:col-start-2 xl:col-span-4">
+            <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+              <Reveal className="lg:col-span-4 xl:col-span-3">
                 <Eyebrow>About Us</Eyebrow>
-                <h2 className="mt-3 text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-[1.05]">
+                <h2 className="mt-3 text-4xl md:text-5xl lg:text-[3.25rem] font-display font-bold leading-[1.05]">
                   Built on trust.<br />
                   Driven by <span className="text-gradient-brand">excellence.</span>
                 </h2>
-                <p className="mt-6 text-muted-foreground text-base md:text-lg leading-relaxed max-w-xl">
+                <p className="mt-6 text-muted-foreground text-base leading-relaxed">
                   IG Sabroso Construction is a full-service construction company committed to
                   delivering high-quality, dependable, and efficient building solutions. From
                   concept to completion, we bring expertise, transparency, and dedication to every project.
                 </p>
-                <div className="mt-8 grid sm:grid-cols-3 gap-4">
+                <div className="mt-8 grid grid-cols-1 gap-3">
                   {[
                     { icon: Home, label: "Residential Builds", filter: "Residential" as Filter },
                     { icon: Wrench, label: "Renovation Works", filter: "Renovation" as Filter },
@@ -250,16 +250,17 @@ function DetailsPage() {
                       className="group text-left glass rounded-2xl p-4 hover:shadow-soft transition-all hover:-translate-y-1 cursor-pointer"
                     >
                       <div className="flex items-center justify-between">
-                        <f.icon className="text-primary" size={20} />
+                        <div className="flex items-center gap-3">
+                          <f.icon className="text-primary" size={20} />
+                          <div className="text-sm font-semibold">{f.label}</div>
+                        </div>
                         <ArrowRight size={14} className="text-primary opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
                       </div>
-                      <div className="mt-3 text-sm font-semibold">{f.label}</div>
-                      <div className="mt-1 text-[11px] text-muted-foreground">View related projects →</div>
                     </button>
                   ))}
                 </div>
               </Reveal>
-              <Reveal delay={0.15} className="lg:col-span-8 xl:col-span-6">
+              <Reveal delay={0.15} className="lg:col-span-8 xl:col-span-9">
                 <AboutSlideshow />
               </Reveal>
             </div>
