@@ -128,6 +128,7 @@ function RootComponent() {
       <ThemeProvider>
         <Outlet />
         <FloatingContact />
+        <LoadingScreen />
       </ThemeProvider>
     </QueryClientProvider>
   );
