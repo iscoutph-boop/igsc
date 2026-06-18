@@ -208,14 +208,24 @@ function DetailsPage() {
               </p>
               <div className="mt-8 grid sm:grid-cols-3 gap-4">
                 {[
-                  { icon: Home, label: "Residential Builds" },
-                  { icon: Wrench, label: "Renovation Works" },
-                  { icon: Layers, label: "Construction Management" },
+                  { icon: Home, label: "Residential Builds", filter: "Residential" as Filter },
+                  { icon: Wrench, label: "Renovation Works", filter: "Renovation" as Filter },
+                  { icon: Layers, label: "Construction Management", filter: "All" as Filter },
                 ].map((f) => (
-                  <div key={f.label} className="glass rounded-2xl p-4 hover:shadow-soft transition">
-                    <f.icon className="text-primary" size={20} />
+                  <button
+                    key={f.label}
+                    type="button"
+                    onClick={() => handleServiceClick(f.filter)}
+                    aria-label={`View ${f.label} projects`}
+                    className="group text-left glass rounded-2xl p-4 hover:shadow-soft transition-all hover:-translate-y-1 cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between">
+                      <f.icon className="text-primary" size={20} />
+                      <ArrowRight size={14} className="text-primary opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                    </div>
                     <div className="mt-3 text-sm font-semibold">{f.label}</div>
-                  </div>
+                    <div className="mt-1 text-[11px] text-muted-foreground">View related projects →</div>
+                  </button>
                 ))}
               </div>
             </Reveal>
@@ -224,6 +234,7 @@ function DetailsPage() {
             </Reveal>
           </div>
         </Section>
+
 
         {/* Services */}
         <Section id="services" muted>
