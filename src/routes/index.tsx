@@ -1,9 +1,12 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, ShieldCheck, Building2, Hammer } from "lucide-react";
+import { ArrowRight, ShieldCheck, Building2, Hammer, CalendarCheck } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { PageTransition } from "@/components/page-transition";
+import { CheckBookingModal } from "@/components/booking-modals";
 import helmetAsset from "@/assets/helmet-hero.png.asset.json";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -19,6 +22,9 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const hero = helmetAsset.url;
+  const [bookingOpen, setBookingOpen] = useState(false);
+  
+
 
   return (
     <PageTransition>
@@ -88,11 +94,12 @@ function HomePage() {
             <span className="text-primary font-semibold">Built to Last</span>
           </motion.div>
 
-          {/* Primary centered CTA */}
+          {/* Primary + secondary CTAs */}
           <motion.div
             initial={{ opacity: 0, y: 24 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 1.05, duration: 0.7 }}
+            className="flex flex-col sm:flex-row items-center gap-3 sm:gap-4"
           >
             <Link
               to="/details"
@@ -104,6 +111,16 @@ function HomePage() {
                 <ArrowRight size={18} />
               </span>
             </Link>
+
+
+            <button
+              onClick={() => setBookingOpen(true)}
+              aria-label="Check Booking Status"
+              className="group inline-flex items-center gap-2.5 rounded-full px-6 py-3.5 text-sm font-semibold tracking-wide bg-white/85 dark:bg-white/10 backdrop-blur-md text-foreground border border-white/40 shadow-card hover:bg-white hover:scale-[1.02] transition"
+            >
+              <CalendarCheck size={16} className="text-primary" />
+              Check Booking
+            </button>
           </motion.div>
 
           <motion.p
@@ -116,9 +133,13 @@ function HomePage() {
           </motion.p>
         </div>
       </main>
+
+      <CheckBookingModal open={bookingOpen} onClose={() => setBookingOpen(false)} />
+      
     </PageTransition>
   );
 }
+
 
 function StatCard({
   icon, value, label, delay,

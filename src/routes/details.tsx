@@ -26,6 +26,17 @@ import igs6 from "@/assets/igs-6.jpg.asset.json";
 import igs7 from "@/assets/igs-7.jpg.asset.json";
 import igs8 from "@/assets/igs-8.jpg.asset.json";
 import igs9 from "@/assets/igs-9.jpg.asset.json";
+import up3 from "@/assets/up-3.jpg.asset.json";
+import up4 from "@/assets/up-4.jpg.asset.json";
+import up5 from "@/assets/up-5.jpg.asset.json";
+import up6 from "@/assets/up-6.jpg.asset.json";
+import up7 from "@/assets/up-7.jpg.asset.json";
+import up8 from "@/assets/up-8.jpg.asset.json";
+import up9 from "@/assets/up-9.jpg.asset.json";
+import up10 from "@/assets/up-10.jpg.asset.json";
+import up11 from "@/assets/up-11.jpg.asset.json";
+import up12 from "@/assets/up-12.jpg.asset.json";
+import { ChevronLeft } from "lucide-react";
 
 const aRes = aResAsset.url;
 const oRes = oResAsset.url;
@@ -35,8 +46,14 @@ const bApt = bAptAsset.url;
 const keystone = keystoneAsset.url;
 const fRes = fResAsset.url;
 
-const aboutSlides = [igs1.url, igs2.url, igs3.url, igs4.url];
+// Interior images for the large slideshow
+const interiorSlides = [up6.url, up7.url, up12.url, up10.url, up9.url, up11.url];
+// Exterior images for the mini floating preview card
+const exteriorImages = [up3.url, up4.url, up5.url, up8.url];
+
+
 const galleryPool = [igs1.url, igs2.url, igs3.url, igs4.url, igs6.url, igs7.url, igs8.url, igs9.url];
+
 
 
 export const Route = createFileRoute("/details")({
@@ -170,6 +187,15 @@ function DetailsPage() {
 
   useEffect(() => { setVisible(6); }, [filter, query, sort]);
 
+  const handleServiceClick = (f: Filter) => {
+    setFilter(f);
+    requestAnimationFrame(() => {
+      document.getElementById("portfolio")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
+
+
+
 
   return (
     <PageTransition>
@@ -191,14 +217,24 @@ function DetailsPage() {
               </p>
               <div className="mt-8 grid sm:grid-cols-3 gap-4">
                 {[
-                  { icon: Home, label: "Residential Builds" },
-                  { icon: Wrench, label: "Renovation Works" },
-                  { icon: Layers, label: "Construction Management" },
+                  { icon: Home, label: "Residential Builds", filter: "Residential" as Filter },
+                  { icon: Wrench, label: "Renovation Works", filter: "Renovation" as Filter },
+                  { icon: Layers, label: "Construction Management", filter: "Commercial" as Filter },
                 ].map((f) => (
-                  <div key={f.label} className="glass rounded-2xl p-4 hover:shadow-soft transition">
-                    <f.icon className="text-primary" size={20} />
+                  <button
+                    key={f.label}
+                    type="button"
+                    onClick={() => handleServiceClick(f.filter)}
+                    aria-label={`View ${f.label} projects`}
+                    className="group text-left glass rounded-2xl p-4 hover:shadow-soft transition-all hover:-translate-y-1 cursor-pointer"
+                  >
+                    <div className="flex items-center justify-between">
+                      <f.icon className="text-primary" size={20} />
+                      <ArrowRight size={14} className="text-primary opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                    </div>
                     <div className="mt-3 text-sm font-semibold">{f.label}</div>
-                  </div>
+                    <div className="mt-1 text-[11px] text-muted-foreground">View related projects →</div>
+                  </button>
                 ))}
               </div>
             </Reveal>
@@ -207,6 +243,7 @@ function DetailsPage() {
             </Reveal>
           </div>
         </Section>
+
 
         {/* Services */}
         <Section id="services" muted>
@@ -656,45 +693,125 @@ function Reveal({ children, delay = 0, className = "" }: { children: React.React
 
 function AboutSlideshow() {
   const [idx, setIdx] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [exterior, setExterior] = useState(exteriorImages[0]);
+
   useEffect(() => {
-    const t = setInterval(() => setIdx((i) => (i + 1) % aboutSlides.length), 4500);
+    if (paused) return;
+    const t = setInterval(() => setIdx((i) => (i + 1) % interiorSlides.length), 4500);
     return () => clearInterval(t);
-  }, []);
+  }, [paused]);
+
+  const prev = () => setIdx((i) => (i - 1 + interiorSlides.length) % interiorSlides.length);
+  const next = () => setIdx((i) => (i + 1) % interiorSlides.length);
+
+  const thumbs = exteriorImages.filter((e) => e !== exterior).slice(0, 3);
+
   return (
-    <div className="relative">
-      <div className="absolute -inset-4 gradient-brand opacity-20 blur-3xl rounded-3xl" />
-      <div className="relative rounded-3xl shadow-card overflow-hidden aspect-[4/3]">
+    <div className="relative pb-24 sm:pb-0 sm:pr-0 lg:pr-28 xl:pr-32">
+      <div className="absolute -inset-4 gradient-brand opacity-15 blur-3xl rounded-3xl pointer-events-none" />
+
+      {/* Main slideshow */}
+      <div
+        className="relative rounded-3xl shadow-card overflow-hidden aspect-[4/3] group"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+      >
         <AnimatePresence mode="wait">
           <motion.img
-            key={aboutSlides[idx]}
-            src={aboutSlides[idx]}
-            alt="IG Sabroso Construction project"
+            key={interiorSlides[idx]}
+            src={interiorSlides[idx]}
+            alt={`IG Sabroso interior project ${idx + 1}`}
             initial={{ opacity: 0, scale: 1.04 }}
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.9, ease: [0.22, 1, 0.36, 1] }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
             className="absolute inset-0 h-full w-full object-cover"
           />
         </AnimatePresence>
-        <div className="absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/60 to-transparent" />
+        <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/55 to-transparent" />
+
+        {/* Autoplay badge */}
+        <div className="absolute top-4 right-4 inline-flex items-center gap-1.5 bg-background/85 backdrop-blur rounded-full px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] font-bold shadow-soft">
+          <span className={`h-1.5 w-1.5 rounded-full ${paused ? "bg-muted-foreground" : "bg-emerald-500 animate-pulse"}`} />
+          {paused ? "Paused" : "Autoplay"}
+        </div>
+
+        {/* Arrows */}
+        <button
+          onClick={prev}
+          aria-label="Previous slide"
+          className="absolute left-3 top-1/2 -translate-y-1/2 inline-flex h-10 w-10 items-center justify-center rounded-full bg-background/85 backdrop-blur shadow-soft hover:bg-background transition opacity-0 group-hover:opacity-100"
+        >
+          <ChevronLeft size={18} />
+        </button>
+        <button
+          onClick={next}
+          aria-label="Next slide"
+          className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex h-10 w-10 items-center justify-center rounded-full bg-background/85 backdrop-blur shadow-soft hover:bg-background transition opacity-0 group-hover:opacity-100"
+        >
+          <ArrowRight size={18} />
+        </button>
+
+        {/* Dots */}
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
-          {aboutSlides.map((_, i) => (
+          {interiorSlides.map((_, i) => (
             <button
               key={i}
               onClick={() => setIdx(i)}
               aria-label={`Slide ${i + 1}`}
-              className={`h-1.5 rounded-full transition-all ${i === idx ? "w-8 bg-primary" : "w-3 bg-white/60"}`}
+              className={`h-1.5 rounded-full transition-all ${i === idx ? "w-8 bg-primary" : "w-3 bg-white/60 hover:bg-white"}`}
             />
           ))}
         </div>
       </div>
-      <div className="absolute -bottom-6 -left-6 glass rounded-2xl p-5 shadow-card">
+
+      {/* Years badge */}
+      <div className="absolute -bottom-6 -left-6 glass rounded-2xl p-5 shadow-card hidden md:block">
         <div className="text-3xl font-display font-black">10+</div>
         <div className="text-xs text-muted-foreground">Years building trust</div>
+      </div>
+
+      {/* Mini exterior preview card */}
+      <div className="absolute right-0 bottom-0 sm:-right-4 sm:bottom-auto sm:top-1/2 sm:-translate-y-1/2 lg:right-0 w-[260px] sm:w-[240px] lg:w-[260px] bg-background rounded-3xl shadow-glow border border-border p-3 z-10">
+        <div className="relative rounded-2xl overflow-hidden aspect-[4/3]">
+          <AnimatePresence mode="wait">
+            <motion.img
+              key={exterior}
+              src={exterior}
+              alt="IG Sabroso exterior"
+              initial={{ opacity: 0, scale: 1.03 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.45 }}
+              className="absolute inset-0 h-full w-full object-cover"
+            />
+          </AnimatePresence>
+        </div>
+        <div className="px-1 pt-3 pb-1">
+          <p className="text-sm font-display font-bold leading-snug">
+            Built with quality.<br />
+            Finished with <span className="text-primary">care.</span>
+          </p>
+          <div className="mt-3 grid grid-cols-3 gap-2">
+            {thumbs.map((t) => (
+              <button
+                key={t}
+                onClick={() => setExterior(t)}
+                aria-label="Preview exterior"
+                className="relative aspect-square rounded-lg overflow-hidden ring-1 ring-border hover:ring-primary transition"
+              >
+                <img src={t} alt="" className="h-full w-full object-cover" />
+              </button>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
 }
+
+
 
 type Pkg = "Basic" | "Elegant" | "Luxury";
 const PKG_RATE: Record<Pkg, number> = { Basic: 22000, Elegant: 28000, Luxury: 38000 };
