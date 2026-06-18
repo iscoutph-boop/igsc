@@ -847,7 +847,7 @@ function AboutSlideshow() {
   const thumbs = exteriorImages.filter((e) => e !== exterior).slice(0, 3);
 
   return (
-    <div className="relative">
+    <div className="relative mx-auto w-[85%]">
       <div className="absolute -inset-6 gradient-brand opacity-10 blur-3xl rounded-[2rem] pointer-events-none" />
 
       {/* Main slideshow — full width */}
