@@ -529,7 +529,7 @@ function DetailsPage() {
             {meetingImages.map((src, i) => (
               <Reveal key={src} delay={Math.min(i * 0.05, 0.3)}>
                 <div className={`relative rounded-2xl overflow-hidden shadow-card group ${i === 0 ? "col-span-2 row-span-2 aspect-[4/3] md:aspect-[4/5]" : "aspect-square"}`}>
-                  <img src={src} alt={`IG Sabroso client meeting ${i + 1}`} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  <img src={src} alt={`IG Sabroso client meeting ${i + 1}`} loading="lazy" decoding="async" sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 720px" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition" />
                 </div>
               </Reveal>
@@ -630,7 +630,7 @@ function ProjectDetail({ project, onClose }: { project: Project; onClose: () => 
         {/* Left — gallery */}
         <div>
           <div className="relative rounded-3xl overflow-hidden shadow-card aspect-[4/3]">
-            <img src={hero} alt={project.title} className="h-full w-full object-cover" />
+            <img src={hero} alt={project.title} decoding="async" sizes="(max-width: 1024px) 96vw, 640px" className="h-full w-full object-cover" />
             <div className="absolute bottom-4 left-4 inline-flex items-center gap-2 bg-background/90 backdrop-blur rounded-full px-4 py-2 text-xs font-semibold">
               <ImageIcon size={14} className="text-primary" /> View Full Gallery
             </div>
@@ -642,7 +642,7 @@ function ProjectDetail({ project, onClose }: { project: Project; onClose: () => 
                 onClick={() => setHero(g)}
                 className={`relative aspect-square rounded-xl overflow-hidden transition ${hero === g ? "ring-2 ring-primary" : "opacity-80 hover:opacity-100"}`}
               >
-                <img src={g} alt={`${project.title} ${i + 1}`} className="h-full w-full object-cover" />
+                <img src={g} alt={`${project.title} ${i + 1}`} loading="lazy" decoding="async" sizes="(max-width: 640px) 25vw, 120px" className="h-full w-full object-cover" />
               </button>
             ))}
             <div className="aspect-square rounded-xl border-2 border-dashed border-primary/40 flex flex-col items-center justify-center text-primary">
@@ -933,7 +933,7 @@ function AboutSlideshow() {
                 aria-label="Preview exterior"
                 className="relative aspect-square rounded-md overflow-hidden ring-1 ring-white/30 hover:ring-primary transition"
               >
-                <img src={t} alt="" className="h-full w-full object-cover" />
+                <img src={t} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
               </button>
             ))}
           </div>

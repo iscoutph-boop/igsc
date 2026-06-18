@@ -73,7 +73,7 @@ export function SiteHeader({ floating = false }: { floating?: boolean }) {
         </Link>
 
         {/* Center pill nav */}
-        <nav className="hidden lg:flex mx-auto items-center gap-1 glass rounded-full p-1.5 shadow-soft">
+        <nav className="hidden xl:flex mx-auto items-center gap-1 glass rounded-full p-1.5 shadow-soft">
           {navItems.map((item) => {
             const active = isActive(item);
             return (
@@ -135,7 +135,7 @@ export function SiteHeader({ floating = false }: { floating?: boolean }) {
           </Link>
 
           <button
-            className="lg:hidden p-2 rounded-full glass"
+            className="xl:hidden p-2 rounded-full glass"
             aria-label="Menu"
             onClick={() => setOpen((v) => !v)}
           >
@@ -150,7 +150,7 @@ export function SiteHeader({ floating = false }: { floating?: boolean }) {
             initial={{ height: 0, opacity: 0 }}
             animate={{ height: "auto", opacity: 1 }}
             exit={{ height: 0, opacity: 0 }}
-            className="lg:hidden overflow-hidden glass border-t border-border"
+            className="xl:hidden overflow-hidden glass border-t border-border"
           >
             <div className="px-6 py-4 flex flex-col gap-1">
               {navItems.map((item) => (
