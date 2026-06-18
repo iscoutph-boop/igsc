@@ -14,7 +14,7 @@ export function SiteFooter() {
               <div className="text-[11px] text-muted-foreground">CONSTRUCTION</div>
             </div>
           </div>
-          <p className="mt-4 text-sm text-muted-foreground">Your Dependable Building Partner. Built on trust, driven by excellence.</p>
+          <p className="mt-4 text-sm text-muted-foreground">Elevate Your Lifestyle. Built on trust, driven by excellence.</p>
           <div className="mt-5 flex items-center gap-2 text-muted-foreground">
             <a href="#" aria-label="Facebook" className="p-2 rounded-full hover:text-primary hover:bg-accent transition"><Facebook size={16} /></a>
             <a href="#" aria-label="Instagram" className="p-2 rounded-full hover:text-primary hover:bg-accent transition"><Instagram size={16} /></a>
