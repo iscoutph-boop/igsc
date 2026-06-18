@@ -36,7 +36,14 @@ import up9 from "@/assets/up-9.jpg.asset.json";
 import up10 from "@/assets/up-10.jpg.asset.json";
 import up11 from "@/assets/up-11.jpg.asset.json";
 import up12 from "@/assets/up-12.jpg.asset.json";
-import { ChevronLeft } from "lucide-react";
+import meeting1 from "@/assets/meeting-472871.jpg.asset.json";
+import meeting2 from "@/assets/meeting-615890.jpg.asset.json";
+import meeting3 from "@/assets/meeting-616099.jpg.asset.json";
+import meeting4 from "@/assets/meeting-619956.jpg.asset.json";
+import meeting5 from "@/assets/meeting-622434.jpg.asset.json";
+import meeting6 from "@/assets/meeting-626269.jpg.asset.json";
+import meeting7 from "@/assets/meeting-628710.jpg.asset.json";
+import { ChevronLeft, MessageSquareQuote, Users, Handshake } from "lucide-react";
 
 const aRes = aResAsset.url;
 const oRes = oResAsset.url;
@@ -53,6 +60,17 @@ const exteriorImages = [up3.url, up4.url, up5.url, up8.url];
 
 
 const galleryPool = [igs1.url, igs2.url, igs3.url, igs4.url, igs6.url, igs7.url, igs8.url, igs9.url];
+
+const meetingImages = [meeting1.url, meeting2.url, meeting3.url, meeting4.url, meeting5.url, meeting6.url, meeting7.url];
+
+const testimonials = [
+  { name: "The Kim Family", project: "Kim Residence — Two-Storey Home", location: "Dasmariñas, Cavite", rating: 5,
+    quote: "From the first consultation to turnover, the IG Sabroso team handled every detail with professionalism. The transparency in pricing and the quality of finishes exceeded our expectations." },
+  { name: "Mr. & Mrs. Wong", project: "Wong Residence — Two-Storey Residential", location: "Imus, Cavite", rating: 5,
+    quote: "They truly listened to our vision and turned it into a real home we are proud of. Honest communication, on-time milestones, and craftsmanship you can feel walking through every room." },
+  { name: "The Prudencio Family", project: "Prudencio Residence — Four Bedrooms", location: "San Agustin, Cavite", rating: 5,
+    quote: "What stood out was how organized the build was. Site updates, material recommendations, and design refinements — everything was thoughtful. Highly recommended." },
+];
 
 
 
@@ -135,11 +153,13 @@ const projects: Project[] = [
 ];
 
 const packages = [
-  { tier: "BASIC", price: "₱35,000", note: "per square meter", featured: false,
+  { tier: "STANDARD FINISH", price: "₱30,000 – ₱34,000", note: "per square meter", featured: false, badge: "",
     features: ["Standard structural works", "Quality basic finishes", "Essential fixtures", "Standard electrical & plumbing", "Painted interior walls"] },
-  { tier: "ELEGANT", price: "₱40,000 – ₱45,000", note: "per square meter", featured: true,
-    features: ["Premium structural works", "Upgraded finishes & tiles", "Designer fixtures", "Enhanced electrical & plumbing", "Accent walls & cabinetry"] },
-  { tier: "LUXURY", price: "₱50,000", note: "per square meter", featured: false,
+  { tier: "SEMI-ELEGANT FINISH", price: "₱35,000 – ₱39,000", note: "per square meter", featured: true, badge: "Popular Pick",
+    features: ["Reinforced structural works", "Upgraded floor & wall tiles", "Better fixtures & cabinetry", "Quality electrical & plumbing", "Accent walls & ceiling details"] },
+  { tier: "ELEGANT FINISH", price: "₱40,000 – ₱45,000", note: "per square meter", featured: true, badge: "Most Recommended",
+    features: ["Premium structural works", "Designer finishes & tiles", "High-grade fixtures", "Enhanced electrical & plumbing", "Custom cabinetry & built-ins"] },
+  { tier: "LUXURY", price: "Starts @ ₱50,000", note: "depending on design complexity", featured: false, badge: "",
     features: ["High-end structural works", "Luxury imported finishes", "Premium smart-home features", "Designer lighting & built-ins", "Custom millwork & detailing"] },
 ];
 
@@ -203,9 +223,9 @@ function DetailsPage() {
       <main className="w-full">
         {/* About */}
         <section id="about" className="scroll-mt-24 py-20 md:py-28">
-          <div className="max-w-[1600px] mx-auto px-6 md:px-10 xl:px-16">
-            <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
-              <Reveal className="lg:col-span-5">
+          <div className="max-w-[1760px] mx-auto px-6 md:px-10 xl:px-14 2xl:px-20">
+            <div className="grid lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+              <Reveal className="lg:col-span-4 xl:col-start-2 xl:col-span-4">
                 <Eyebrow>About Us</Eyebrow>
                 <h2 className="mt-3 text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-[1.05]">
                   Built on trust.<br />
@@ -239,7 +259,7 @@ function DetailsPage() {
                   ))}
                 </div>
               </Reveal>
-              <Reveal delay={0.15} className="lg:col-span-7">
+              <Reveal delay={0.15} className="lg:col-span-8 xl:col-span-6">
                 <AboutSlideshow />
               </Reveal>
             </div>
@@ -277,36 +297,33 @@ function DetailsPage() {
           <Reveal className="text-center max-w-2xl mx-auto">
             <Eyebrow center>Finish Packages</Eyebrow>
             <h2 className="mt-3 text-4xl md:text-5xl font-display font-bold leading-tight">
-              Three tiers.<br />
+              Four finish tiers.<br />
               <span className="text-gradient-brand">One standard of quality.</span>
             </h2>
             <p className="mt-5 text-muted-foreground">
-              Transparent starting rates per square meter — tailored to fit your vision and budget.
+              Transparent rates per square meter — tailored to fit your vision and budget.
             </p>
           </Reveal>
 
-          <div className="mt-14 grid md:grid-cols-3 gap-6">
+          <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {packages.map((p, i) => (
               <Reveal key={p.tier} delay={i * 0.08}>
                 <div
-                  className={`relative h-full rounded-3xl p-8 transition-all hover:-translate-y-1 ${
+                  className={`relative h-full rounded-3xl p-7 transition-all hover:-translate-y-1 ${
                     p.featured
                       ? "gradient-brand text-primary-foreground shadow-glow"
                       : "glass shadow-card hover:shadow-card"
                   }`}
                 >
-                  {p.featured && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 bg-background text-foreground rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.18em] font-bold shadow-card">
-                      <Sparkles size={12} className="text-primary" /> Most Popular
+                  {p.featured && p.badge && (
+                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 bg-background text-foreground rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.18em] font-bold shadow-card whitespace-nowrap">
+                      <Sparkles size={12} className="text-primary" /> {p.badge}
                     </div>
                   )}
-                  <div className={`text-[11px] uppercase tracking-[0.28em] font-bold ${p.featured ? "text-primary-foreground/80" : "text-primary"}`}>
+                  <div className={`text-[11px] uppercase tracking-[0.22em] font-bold ${p.featured ? "text-primary-foreground/80" : "text-primary"}`}>
                     {p.tier}
                   </div>
-                  <div className="mt-4 flex items-baseline gap-2">
-                    <span className="text-[11px] uppercase tracking-widest opacity-70">Starts @</span>
-                  </div>
-                  <div className="mt-1 text-3xl md:text-4xl font-display font-black leading-none">
+                  <div className="mt-4 text-2xl md:text-[1.75rem] font-display font-black leading-none">
                     {p.price}
                   </div>
                   <div className={`mt-2 text-xs ${p.featured ? "text-primary-foreground/85" : "text-muted-foreground"}`}>
@@ -441,8 +458,96 @@ function DetailsPage() {
           )}
         </Section>
 
+        {/* Client Reviews */}
+        <Section id="reviews">
+          <Reveal className="text-center max-w-2xl mx-auto">
+            <Eyebrow center>Client Reviews</Eyebrow>
+            <h2 className="mt-3 text-4xl md:text-5xl font-display font-bold leading-tight">
+              Trusted by families.<br />
+              <span className="text-gradient-brand">Proven by results.</span>
+            </h2>
+            <p className="mt-5 text-muted-foreground">
+              Real feedback from clients we have built with — from the first consultation to turnover day.
+            </p>
+          </Reveal>
+
+          <div className="mt-14 grid md:grid-cols-3 gap-6">
+            {testimonials.map((t, i) => (
+              <Reveal key={t.name} delay={i * 0.08}>
+                <div className="relative h-full glass rounded-3xl p-7 shadow-card hover:shadow-glow transition-all hover:-translate-y-1">
+                  <MessageSquareQuote className="text-primary/30 absolute top-5 right-5" size={36} />
+                  <div className="flex items-center gap-1 text-primary">
+                    {Array.from({ length: t.rating }).map((_, k) => (
+                      <Star key={k} size={14} className="fill-primary" />
+                    ))}
+                  </div>
+                  <p className="mt-5 text-sm md:text-base text-foreground/90 leading-relaxed italic">
+                    “{t.quote}”
+                  </p>
+                  <div className="mt-6 pt-5 border-t border-border flex items-center gap-3">
+                    <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full gradient-brand text-primary-foreground font-display font-black">
+                      {t.name.split(" ").slice(-1)[0]?.[0] ?? "C"}
+                    </span>
+                    <div className="min-w-0">
+                      <div className="font-display font-bold text-sm truncate">{t.name}</div>
+                      <div className="text-[11px] text-muted-foreground truncate">{t.project}</div>
+                      <div className="text-[11px] text-primary mt-0.5 flex items-center gap-1"><MapPin size={10} /> {t.location}</div>
+                    </div>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </Section>
+
         {/* Website Estimator */}
         <EstimatorSection />
+
+        {/* Client & Team Meetings */}
+        <Section id="meetings" muted>
+          <Reveal className="max-w-3xl">
+            <Eyebrow><Handshake size={12} className="inline mr-1" /> Client & Team Meetings</Eyebrow>
+            <h2 className="mt-3 text-4xl md:text-5xl font-display font-bold leading-[1.05]">
+              Understanding your vision,<br />
+              <span className="text-gradient-brand">together.</span>
+            </h2>
+            <p className="mt-5 text-muted-foreground max-w-2xl">
+              Every project starts with a real conversation. We sit with our clients, review plans
+              and materials, and align with our team — so what we build truly reflects how you want to live.
+            </p>
+          </Reveal>
+
+          <div className="mt-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
+            {meetingImages.map((src, i) => (
+              <Reveal key={src} delay={Math.min(i * 0.05, 0.3)}>
+                <div className={`relative rounded-2xl overflow-hidden shadow-card group ${i === 0 ? "col-span-2 row-span-2 aspect-square md:aspect-[4/5]" : "aspect-square"}`}>
+                  <img src={src} alt={`IG Sabroso client meeting ${i + 1}`} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition" />
+                </div>
+              </Reveal>
+            ))}
+          </div>
+
+          <Reveal className="mt-10 grid sm:grid-cols-3 gap-4">
+            {[
+              { icon: Compass, title: "Consultation", desc: "We listen first — your needs, vision, and budget guide every decision." },
+              { icon: Users, title: "Collaboration", desc: "Our team, designers, and engineers work side by side with you." },
+              { icon: ClipboardCheck, title: "Aligned Execution", desc: "Clear plans, regular updates, no surprises during the build." },
+            ].map((c) => (
+              <div key={c.title} className="glass rounded-2xl p-5 flex items-start gap-4">
+                <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-xl gradient-brand text-primary-foreground">
+                  <c.icon size={18} />
+                </span>
+                <div className="min-w-0">
+                  <div className="font-display font-bold">{c.title}</div>
+                  <div className="text-sm text-muted-foreground mt-1 leading-relaxed">{c.desc}</div>
+                </div>
+              </div>
+            ))}
+          </Reveal>
+        </Section>
+
+
 
 
         {/* Process */}
@@ -620,7 +725,19 @@ function MetaItem({ icon: Icon, label, value, sub }: { icon: typeof Building; la
 }
 
 
+function extractMeta(highlights: string[]) {
+  const find = (re: RegExp) => {
+    for (const h of highlights) { const m = h.match(re); if (m) return m[1]; }
+    return null;
+  };
+  const beds = find(/(\d+)\s*Bedroom/i);
+  const baths = find(/(\d+)\s*(Restroom|Bathroom)/i);
+  const cars = find(/(\d+)[-\s]?vehicle\s*carport/i);
+  return { beds, baths, cars };
+}
+
 function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void }) {
+  const meta = extractMeta(project.highlights);
   return (
     <div className="group relative h-full rounded-3xl overflow-hidden glass shadow-card hover:shadow-glow transition-all hover:-translate-y-1">
       <div className="relative aspect-[4/3] overflow-hidden">
@@ -648,6 +765,25 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void
         <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
           <MapPin size={12} className="text-primary" /> {project.location}
         </div>
+        {(meta.beds || meta.baths || meta.cars) && (
+          <div className="mt-3 flex items-center gap-3 text-xs">
+            {meta.beds && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-foreground font-semibold">
+                <Bed size={13} className="text-primary" /> {meta.beds}
+              </span>
+            )}
+            {meta.baths && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-foreground font-semibold">
+                <Bath size={13} className="text-primary" /> {meta.baths}
+              </span>
+            )}
+            {meta.cars && (
+              <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-primary/10 text-foreground font-semibold">
+                <HardHat size={13} className="text-primary" /> {meta.cars}
+              </span>
+            )}
+          </div>
+        )}
         <p className="mt-3 text-sm text-muted-foreground line-clamp-2 leading-relaxed">
           {project.description}
         </p>
@@ -814,8 +950,8 @@ function AboutSlideshow() {
 
 
 
-type Pkg = "Basic" | "Elegant" | "Luxury";
-const PKG_RATE: Record<Pkg, number> = { Basic: 22000, Elegant: 28000, Luxury: 38000 };
+type Pkg = "Standard" | "Semi-elegant" | "Elegant" | "Luxury";
+const PKG_RATE: Record<Pkg, number> = { Standard: 32000, "Semi-elegant": 37000, Elegant: 42500, Luxury: 55000 };
 const ADDONS = [
   { id: "gate", label: "Gate & Fence", price: 180000 },
   { id: "carport", label: "Carport", price: 250000 },
@@ -877,8 +1013,8 @@ function EstimatorSection() {
             </div>
 
             <Field label="Package Type">
-              <div className="grid sm:grid-cols-3 gap-3">
-                {(["Basic", "Elegant", "Luxury"] as Pkg[]).map((p) => {
+              <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-3">
+                {(["Standard", "Semi-elegant", "Elegant", "Luxury"] as Pkg[]).map((p) => {
                   const active = pkg === p;
                   return (
                     <button
@@ -888,15 +1024,17 @@ function EstimatorSection() {
                     >
                       <div className="flex items-center gap-2">
                         <span className={`h-4 w-4 rounded-full border-2 ${active ? "border-primary bg-primary" : "border-muted-foreground/40"}`} />
-                        {p === "Basic" && <Home size={16} className="text-primary" />}
+                        {p === "Standard" && <Home size={16} className="text-primary" />}
+                        {p === "Semi-elegant" && <Layers size={16} className="text-primary" />}
                         {p === "Elegant" && <Star size={16} className="text-primary" />}
                         {p === "Luxury" && <Sparkles size={16} className="text-primary" />}
-                        <span className="font-bold">{p}</span>
+                        <span className="font-bold text-sm">{p}</span>
                       </div>
-                      <div className="mt-1.5 text-xs text-muted-foreground">
-                        {p === "Basic" && "Essential finishes, great value"}
-                        {p === "Elegant" && "Quality materials, modern design"}
-                        {p === "Luxury" && "Premium finishes, luxury living"}
+                      <div className="mt-1.5 text-[11px] text-muted-foreground">
+                        {p === "Standard" && "₱30k–34k / sqm — essentials"}
+                        {p === "Semi-elegant" && "₱35k–39k / sqm — upgraded"}
+                        {p === "Elegant" && "₱40k–45k / sqm — premium"}
+                        {p === "Luxury" && "₱50k+ / sqm — high-end"}
                       </div>
                     </button>
                   );
