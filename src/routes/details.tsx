@@ -601,7 +601,7 @@ function DetailsPage() {
 
       {/* Project Detail Modal — styled like the About Page 3 reference */}
       <Dialog open={!!active} onOpenChange={(open) => !open && setActive(null)}>
-        <DialogContent className="max-w-6xl p-0 overflow-hidden bg-background border-border max-h-[92vh] overflow-y-auto">
+        <DialogContent className="w-[96vw] sm:w-auto max-w-6xl p-0 overflow-hidden bg-background border-border max-h-[92vh] overflow-y-auto">
           {active && <ProjectDetail project={active} onClose={() => setActive(null)} />}
         </DialogContent>
       </Dialog>
