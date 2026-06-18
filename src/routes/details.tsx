@@ -43,6 +43,11 @@ import meeting4 from "@/assets/meeting-619956.jpg.asset.json";
 import meeting5 from "@/assets/meeting-622434.jpg.asset.json";
 import meeting6 from "@/assets/meeting-626269.jpg.asset.json";
 import meeting7 from "@/assets/meeting-628710.jpg.asset.json";
+import carousel1 from "@/assets/carousel-1.jpg.asset.json";
+import carousel2 from "@/assets/carousel-2.jpg.asset.json";
+import carousel3 from "@/assets/carousel-3.jpg.asset.json";
+import carousel4 from "@/assets/carousel-4.jpg.asset.json";
+import carousel5 from "@/assets/carousel-5.jpg.asset.json";
 import { ChevronLeft, MessageSquareQuote, Users, Handshake } from "lucide-react";
 
 const aRes = aResAsset.url;
@@ -53,8 +58,9 @@ const bApt = bAptAsset.url;
 const keystone = keystoneAsset.url;
 const fRes = fResAsset.url;
 
-// Interior images for the large slideshow
-const interiorSlides = [up6.url, up7.url, up12.url, up10.url, up9.url, up11.url];
+// Project images for the large slideshow
+const interiorSlides = [carousel1.url, carousel2.url, carousel3.url, carousel4.url, carousel5.url];
+
 // Exterior images for the mini floating preview card
 const exteriorImages = [up3.url, up4.url, up5.url, up8.url];
 
