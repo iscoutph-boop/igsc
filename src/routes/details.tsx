@@ -61,6 +61,17 @@ const exteriorImages = [up3.url, up4.url, up5.url, up8.url];
 
 const galleryPool = [igs1.url, igs2.url, igs3.url, igs4.url, igs6.url, igs7.url, igs8.url, igs9.url];
 
+const meetingImages = [meeting1.url, meeting2.url, meeting3.url, meeting4.url, meeting5.url, meeting6.url, meeting7.url];
+
+const testimonials = [
+  { name: "The Kim Family", project: "Kim Residence — Two-Storey Home", location: "Dasmariñas, Cavite", rating: 5,
+    quote: "From the first consultation to turnover, the IG Sabroso team handled every detail with professionalism. The transparency in pricing and the quality of finishes exceeded our expectations." },
+  { name: "Mr. & Mrs. Wong", project: "Wong Residence — Two-Storey Residential", location: "Imus, Cavite", rating: 5,
+    quote: "They truly listened to our vision and turned it into a real home we are proud of. Honest communication, on-time milestones, and craftsmanship you can feel walking through every room." },
+  { name: "The Prudencio Family", project: "Prudencio Residence — Four Bedrooms", location: "San Agustin, Cavite", rating: 5,
+    quote: "What stood out was how organized the build was. Site updates, material recommendations, and design refinements — everything was thoughtful. Highly recommended." },
+];
+
 
 
 export const Route = createFileRoute("/details")({
