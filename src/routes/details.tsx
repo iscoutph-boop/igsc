@@ -61,8 +61,8 @@ const fRes = fResAsset.url;
 // Project images for the large slideshow
 const interiorSlides = [carousel1.url, carousel2.url, carousel3.url, carousel4.url, carousel5.url];
 
-// Exterior images for the mini floating preview card
-const exteriorImages = [up3.url, up4.url, up5.url, up8.url];
+// Images for the mini floating preview card
+const exteriorImages = [miniPreview1.url, miniPreview2.url, miniPreview3.url, miniPreview4.url];
 
 
 const galleryPool = [igs1.url, igs2.url, igs3.url, igs4.url, igs6.url, igs7.url, igs8.url, igs9.url];
