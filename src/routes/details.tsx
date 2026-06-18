@@ -850,68 +850,60 @@ function AboutSlideshow() {
     <div className="relative">
       <div className="absolute -inset-6 gradient-brand opacity-10 blur-3xl rounded-[2rem] pointer-events-none" />
 
-      <div className="relative grid grid-cols-1 md:grid-cols-[1fr_240px] lg:grid-cols-[1fr_260px] gap-5 items-stretch">
-        {/* Main slideshow */}
-        <div
-          className="relative rounded-3xl shadow-card overflow-hidden aspect-[4/3] md:aspect-[5/4] lg:aspect-[16/11] group"
-          onMouseEnter={() => setPaused(true)}
-          onMouseLeave={() => setPaused(false)}
-        >
-          <AnimatePresence mode="wait">
-            <motion.img
-              key={interiorSlides[idx]}
-              src={interiorSlides[idx]}
-              alt={`IG Sabroso interior project ${idx + 1}`}
-              initial={{ opacity: 0, scale: 1.04 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.98 }}
-              transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
-              className="absolute inset-0 h-full w-full object-cover"
-            />
-          </AnimatePresence>
-          <div className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-black/55 to-transparent" />
+      {/* Main slideshow — full width */}
+      <div
+        className="relative rounded-3xl shadow-card overflow-hidden aspect-[4/3] md:aspect-[16/10] lg:aspect-[16/9] group"
+        onMouseEnter={() => setPaused(true)}
+        onMouseLeave={() => setPaused(false)}
+      >
+        <AnimatePresence mode="wait">
+          <motion.img
+            key={interiorSlides[idx]}
+            src={interiorSlides[idx]}
+            alt={`IG Sabroso interior project ${idx + 1}`}
+            initial={{ opacity: 0, scale: 1.04 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.8, ease: [0.22, 1, 0.36, 1] }}
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        </AnimatePresence>
+        <div className="absolute inset-x-0 bottom-0 h-32 bg-gradient-to-t from-black/60 to-transparent" />
 
-          <div className="absolute top-4 right-4 inline-flex items-center gap-1.5 bg-background/85 backdrop-blur rounded-full px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] font-bold shadow-soft">
-            <span className={`h-1.5 w-1.5 rounded-full ${paused ? "bg-muted-foreground" : "bg-emerald-500 animate-pulse"}`} />
-            {paused ? "Paused" : "Autoplay"}
-          </div>
-
-          <button
-            onClick={prev}
-            aria-label="Previous slide"
-            className="absolute left-3 top-1/2 -translate-y-1/2 inline-flex h-10 w-10 items-center justify-center rounded-full bg-background/85 backdrop-blur shadow-soft hover:bg-background transition opacity-0 group-hover:opacity-100"
-          >
-            <ChevronLeft size={18} />
-          </button>
-          <button
-            onClick={next}
-            aria-label="Next slide"
-            className="absolute right-3 top-1/2 -translate-y-1/2 inline-flex h-10 w-10 items-center justify-center rounded-full bg-background/85 backdrop-blur shadow-soft hover:bg-background transition opacity-0 group-hover:opacity-100"
-          >
-            <ArrowRight size={18} />
-          </button>
-
-          <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1.5">
-            {interiorSlides.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setIdx(i)}
-                aria-label={`Slide ${i + 1}`}
-                className={`h-1.5 rounded-full transition-all ${i === idx ? "w-8 bg-primary" : "w-3 bg-white/60 hover:bg-white"}`}
-              />
-            ))}
-          </div>
-
-          {/* Years badge */}
-          <div className="absolute -bottom-5 -left-5 glass rounded-2xl p-4 shadow-card hidden md:block">
-            <div className="text-2xl font-display font-black leading-none">10+</div>
-            <div className="mt-1 text-[11px] text-muted-foreground">Years building trust</div>
-          </div>
+        <div className="absolute top-4 right-4 inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-xl border border-white/25 text-white rounded-full px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] font-bold shadow-soft">
+          <span className={`h-1.5 w-1.5 rounded-full ${paused ? "bg-white/70" : "bg-emerald-400 animate-pulse"}`} />
+          {paused ? "Paused" : "Autoplay"}
         </div>
 
-        {/* Mini exterior preview card — reserved column, no overlap */}
-        <div className="self-center bg-background rounded-3xl shadow-glow border border-border p-3">
-          <div className="relative rounded-2xl overflow-hidden aspect-[4/3]">
+        <button
+          onClick={prev}
+          aria-label="Previous slide"
+          className="absolute left-4 top-1/2 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/15 backdrop-blur-xl border border-white/25 text-white shadow-soft hover:bg-white/25 transition opacity-0 group-hover:opacity-100"
+        >
+          <ChevronLeft size={20} />
+        </button>
+        <button
+          onClick={next}
+          aria-label="Next slide"
+          className="absolute right-4 top-1/2 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/15 backdrop-blur-xl border border-white/25 text-white shadow-soft hover:bg-white/25 transition opacity-0 group-hover:opacity-100"
+        >
+          <ArrowRight size={20} />
+        </button>
+
+        <div className="absolute bottom-5 left-1/2 -translate-x-1/2 flex gap-1.5">
+          {interiorSlides.map((_, i) => (
+            <button
+              key={i}
+              onClick={() => setIdx(i)}
+              aria-label={`Slide ${i + 1}`}
+              className={`h-1.5 rounded-full transition-all ${i === idx ? "w-8 bg-primary" : "w-3 bg-white/60 hover:bg-white"}`}
+            />
+          ))}
+        </div>
+
+        {/* Mini exterior preview card — glass overlay inside the carousel */}
+        <div className="absolute bottom-5 right-5 hidden sm:block w-[180px] md:w-[210px] lg:w-[240px] bg-white/15 backdrop-blur-xl border border-white/25 rounded-2xl p-2.5 shadow-card">
+          <div className="relative rounded-xl overflow-hidden aspect-[4/3]">
             <AnimatePresence mode="wait">
               <motion.img
                 key={exterior}
@@ -925,23 +917,20 @@ function AboutSlideshow() {
               />
             </AnimatePresence>
           </div>
-          <div className="px-1 pt-3 pb-1">
-            <p className="text-sm font-display font-bold leading-snug">
-              Built with quality.<br />
-              Finished with <span className="text-primary">care.</span>
-            </p>
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              {thumbs.map((t) => (
-                <button
-                  key={t}
-                  onClick={() => setExterior(t)}
-                  aria-label="Preview exterior"
-                  className="relative aspect-square rounded-lg overflow-hidden ring-1 ring-border hover:ring-primary transition"
-                >
-                  <img src={t} alt="" className="h-full w-full object-cover" />
-                </button>
-              ))}
-            </div>
+          <div className="mt-2 grid grid-cols-3 gap-1.5">
+            {thumbs.map((t) => (
+              <button
+                key={t}
+                onClick={() => setExterior(t)}
+                aria-label="Preview exterior"
+                className="relative aspect-square rounded-md overflow-hidden ring-1 ring-white/30 hover:ring-primary transition"
+              >
+                <img src={t} alt="" className="h-full w-full object-cover" />
+              </button>
+            ))}
+          </div>
+          <div className="px-1 pt-2 pb-0.5 text-[10px] uppercase tracking-[0.16em] font-bold text-white/90">
+            Exterior Showcase
           </div>
         </div>
       </div>
