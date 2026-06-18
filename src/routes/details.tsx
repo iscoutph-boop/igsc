@@ -807,9 +807,10 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void
 
 function Section({ id, children, muted = false }: { id?: string; children: React.ReactNode; muted?: boolean }) {
   return (
-    <section id={id} className={`scroll-mt-24 py-20 md:py-28 ${muted ? "bg-surface/40" : ""}`}>
-      <div className="max-w-[1400px] mx-auto px-6 md:px-10">{children}</div>
+    <section id={id} className={`scroll-mt-24 py-14 sm:py-20 md:py-28 ${muted ? "bg-surface/40" : ""}`}>
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10">{children}</div>
     </section>
+
   );
 }
 
