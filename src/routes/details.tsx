@@ -642,7 +642,7 @@ function ProjectDetail({ project, onClose }: { project: Project; onClose: () => 
                 onClick={() => setHero(g)}
                 className={`relative aspect-square rounded-xl overflow-hidden transition ${hero === g ? "ring-2 ring-primary" : "opacity-80 hover:opacity-100"}`}
               >
-                <img src={g} alt={`${project.title} ${i + 1}`} className="h-full w-full object-cover" />
+                <img src={g} alt={`${project.title} ${i + 1}`} loading="lazy" decoding="async" sizes="(max-width: 640px) 25vw, 120px" className="h-full w-full object-cover" />
               </button>
             ))}
             <div className="aspect-square rounded-xl border-2 border-dashed border-primary/40 flex flex-col items-center justify-center text-primary">
