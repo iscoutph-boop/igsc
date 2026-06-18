@@ -22,6 +22,9 @@ export const Route = createFileRoute("/")({
 
 function HomePage() {
   const hero = helmetAsset.url;
+  const [bookingOpen, setBookingOpen] = useState(false);
+  const [consultOpen, setConsultOpen] = useState(false);
+
 
   return (
     <PageTransition>
