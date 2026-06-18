@@ -9,7 +9,7 @@ const navItems: { to: "/" | "/details" | "/consultation"; label: string; hash?: 
   { to: "/", label: "Home" },
   { to: "/details", label: "About", hash: "about" },
   { to: "/details", label: "Services", hash: "services" },
-  { to: "/details", label: "Projects", hash: "projects" },
+  { to: "/details", label: "Projects", hash: "portfolio" },
   { to: "/details", label: "Process", hash: "process" },
   { to: "/consultation", label: "Contact" },
 ];
