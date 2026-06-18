@@ -630,7 +630,7 @@ function ProjectDetail({ project, onClose }: { project: Project; onClose: () => 
         {/* Left — gallery */}
         <div>
           <div className="relative rounded-3xl overflow-hidden shadow-card aspect-[4/3]">
-            <img src={hero} alt={project.title} className="h-full w-full object-cover" />
+            <img src={hero} alt={project.title} decoding="async" sizes="(max-width: 1024px) 96vw, 640px" className="h-full w-full object-cover" />
             <div className="absolute bottom-4 left-4 inline-flex items-center gap-2 bg-background/90 backdrop-blur rounded-full px-4 py-2 text-xs font-semibold">
               <ImageIcon size={14} className="text-primary" /> View Full Gallery
             </div>
