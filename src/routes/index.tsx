@@ -53,7 +53,7 @@ function HomePage() {
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.5, duration: 0.7 }}
-          className="absolute top-32 md:top-40 left-5 md:left-12 max-w-[260px] z-10"
+          className="absolute top-28 sm:top-32 md:top-40 left-4 sm:left-5 md:left-12 max-w-[78vw] sm:max-w-[260px] z-10"
         >
           <div className="h-0.5 w-10 gradient-brand rounded-full mb-3" />
           <p className="text-xs md:text-sm text-foreground/85 font-medium leading-relaxed">
@@ -62,7 +62,7 @@ function HomePage() {
           <button
             onClick={() => setBookingOpen(true)}
             aria-label="Check Booking Status"
-            className="mt-6 group inline-flex items-center gap-2.5 rounded-full px-5 py-3 text-sm font-semibold tracking-wide bg-white/85 dark:bg-white/10 backdrop-blur-md text-foreground border border-white/40 shadow-card hover:bg-white hover:scale-[1.02] transition"
+            className="mt-5 group inline-flex items-center gap-2.5 rounded-full px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold tracking-wide bg-white/85 dark:bg-white/10 backdrop-blur-md text-foreground border border-white/40 shadow-card hover:bg-white hover:scale-[1.02] transition"
           >
             <CalendarCheck size={16} className="text-primary" />
             Check Booking
@@ -82,11 +82,12 @@ function HomePage() {
           <div className="h-0.5 w-10 gradient-brand rounded-full mt-3 ml-auto" />
         </motion.div>
 
-        {/* Floating stat cards */}
-        <div className="absolute right-4 md:right-12 top-1/2 -translate-y-1/2 flex flex-col gap-4 md:gap-5 z-10">
+        {/* Floating stat cards — desktop/tablet only to avoid overlap on mobile */}
+        <div className="hidden md:flex absolute right-4 md:right-12 top-1/2 -translate-y-1/2 flex-col gap-4 md:gap-5 z-10">
           <StatCard delay={0.7} icon={<ShieldCheck size={18} />} value="10+" label="Years of construction experience" />
           <StatCard delay={0.85} icon={<Building2 size={18} />} value="300+" label="Projects completed" />
         </div>
+
 
         {/* Bottom-left supporting tagline */}
         <div className="absolute left-0 right-0 bottom-0 z-10 px-5 md:px-12 pb-8 md:pb-12 flex flex-col items-center gap-6">
