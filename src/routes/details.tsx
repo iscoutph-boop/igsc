@@ -26,6 +26,17 @@ import igs6 from "@/assets/igs-6.jpg.asset.json";
 import igs7 from "@/assets/igs-7.jpg.asset.json";
 import igs8 from "@/assets/igs-8.jpg.asset.json";
 import igs9 from "@/assets/igs-9.jpg.asset.json";
+import up3 from "@/assets/up-3.jpg.asset.json";
+import up4 from "@/assets/up-4.jpg.asset.json";
+import up5 from "@/assets/up-5.jpg.asset.json";
+import up6 from "@/assets/up-6.jpg.asset.json";
+import up7 from "@/assets/up-7.jpg.asset.json";
+import up8 from "@/assets/up-8.jpg.asset.json";
+import up9 from "@/assets/up-9.jpg.asset.json";
+import up10 from "@/assets/up-10.jpg.asset.json";
+import up11 from "@/assets/up-11.jpg.asset.json";
+import up12 from "@/assets/up-12.jpg.asset.json";
+import { ChevronLeft } from "lucide-react";
 
 const aRes = aResAsset.url;
 const oRes = oResAsset.url;
@@ -35,8 +46,14 @@ const bApt = bAptAsset.url;
 const keystone = keystoneAsset.url;
 const fRes = fResAsset.url;
 
+// Interior images for the large slideshow
+const interiorSlides = [up6.url, up7.url, up12.url, up10.url, up9.url, up11.url];
+// Exterior images for the mini floating preview card
+const exteriorImages = [up3.url, up4.url, up5.url, up8.url];
+
 const aboutSlides = [igs1.url, igs2.url, igs3.url, igs4.url];
 const galleryPool = [igs1.url, igs2.url, igs3.url, igs4.url, igs6.url, igs7.url, igs8.url, igs9.url];
+
 
 
 export const Route = createFileRoute("/details")({
