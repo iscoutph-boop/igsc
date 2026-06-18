@@ -228,8 +228,9 @@ function DetailsPage() {
       <SiteHeader />
       <main className="w-full">
         {/* About */}
-        <section id="about" className="scroll-mt-24 py-20 md:py-28">
-          <div className="max-w-[1760px] mx-auto px-6 md:px-10 xl:px-14 2xl:px-20">
+        <section id="about" className="scroll-mt-24 py-14 sm:py-20 md:py-28">
+          <div className="max-w-[1760px] mx-auto px-4 sm:px-6 md:px-10 xl:px-14 2xl:px-20">
+
             <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
               <Reveal className="lg:col-span-4 xl:col-span-3">
                 <Eyebrow>About Us</Eyebrow>
@@ -527,7 +528,7 @@ function DetailsPage() {
           <div className="mt-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
             {meetingImages.map((src, i) => (
               <Reveal key={src} delay={Math.min(i * 0.05, 0.3)}>
-                <div className={`relative rounded-2xl overflow-hidden shadow-card group ${i === 0 ? "col-span-2 row-span-2 aspect-square md:aspect-[4/5]" : "aspect-square"}`}>
+                <div className={`relative rounded-2xl overflow-hidden shadow-card group ${i === 0 ? "col-span-2 row-span-2 aspect-[4/3] md:aspect-[4/5]" : "aspect-square"}`}>
                   <img src={src} alt={`IG Sabroso client meeting ${i + 1}`} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition" />
                 </div>
@@ -600,7 +601,7 @@ function DetailsPage() {
 
       {/* Project Detail Modal — styled like the About Page 3 reference */}
       <Dialog open={!!active} onOpenChange={(open) => !open && setActive(null)}>
-        <DialogContent className="max-w-6xl p-0 overflow-hidden bg-background border-border max-h-[92vh] overflow-y-auto">
+        <DialogContent className="w-[96vw] sm:w-auto max-w-6xl p-0 overflow-hidden bg-background border-border max-h-[92vh] overflow-y-auto">
           {active && <ProjectDetail project={active} onClose={() => setActive(null)} />}
         </DialogContent>
       </Dialog>
@@ -634,7 +635,7 @@ function ProjectDetail({ project, onClose }: { project: Project; onClose: () => 
               <ImageIcon size={14} className="text-primary" /> View Full Gallery
             </div>
           </div>
-          <div className="mt-4 grid grid-cols-6 gap-2 md:gap-3">
+          <div className="mt-4 grid grid-cols-4 sm:grid-cols-6 gap-2 md:gap-3">
             {gallery.slice(0, 5).map((g, i) => (
               <button
                 key={i}
@@ -807,9 +808,10 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void
 
 function Section({ id, children, muted = false }: { id?: string; children: React.ReactNode; muted?: boolean }) {
   return (
-    <section id={id} className={`scroll-mt-24 py-20 md:py-28 ${muted ? "bg-surface/40" : ""}`}>
-      <div className="max-w-[1400px] mx-auto px-6 md:px-10">{children}</div>
+    <section id={id} className={`scroll-mt-24 py-14 sm:py-20 md:py-28 ${muted ? "bg-surface/40" : ""}`}>
+      <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10">{children}</div>
     </section>
+
   );
 }
 
@@ -853,7 +855,7 @@ function AboutSlideshow() {
   const thumbs = exteriorImages.filter((e) => e !== exterior).slice(0, 3);
 
   return (
-    <div className="relative mx-auto w-[85%]">
+    <div className="relative mx-auto w-full sm:w-[92%] lg:w-[88%]">
       <div className="absolute -inset-6 gradient-brand opacity-10 blur-3xl rounded-[2rem] pointer-events-none" />
 
       {/* Main slideshow — full width */}
