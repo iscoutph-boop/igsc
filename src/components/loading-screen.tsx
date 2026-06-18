@@ -11,9 +11,9 @@ export function LoadingScreen() {
     setMounted(true);
     const prefersReduced =
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-    const total = prefersReduced ? 1200 : 1850;
+    const total = prefersReduced ? 1200 : 2000;
     const fadeT = setTimeout(() => setFadingOut(true), total);
-    const removeT = setTimeout(() => setRemoved(true), total + 500);
+    const removeT = setTimeout(() => setRemoved(true), total + 550);
     return () => {
       clearTimeout(fadeT);
       clearTimeout(removeT);
@@ -35,92 +35,88 @@ export function LoadingScreen() {
         alignItems: "center",
         justifyContent: "center",
         opacity: fadingOut ? 0 : 1,
-        transition: "opacity 500ms ease-out",
+        transform: fadingOut ? "translateY(-12px)" : "translateY(0)",
+        transition: "opacity 550ms ease-out, transform 550ms ease-out",
         pointerEvents: fadingOut ? "none" : "auto",
       }}
     >
       <style>{`
         @keyframes igs-logo-in {
-          0% { opacity: 0; transform: translateY(8px) scale(0.94) rotate(-1.5deg); }
-          60% { opacity: 1; }
-          100% { opacity: 1; transform: translateY(0) scale(1) rotate(0deg); }
-        }
-        @keyframes igs-logo-lift {
-          0%, 100% { transform: translateY(0) rotate(0deg); }
-          50% { transform: translateY(-4px) rotate(0.6deg); }
+          0% { opacity: 0; transform: scale(0.92); }
+          100% { opacity: 1; transform: scale(1); }
         }
         @keyframes igs-glow-pulse {
-          0%, 100% { opacity: 0.5; transform: translate(-50%, -50%) scale(1); }
-          50% { opacity: 0.85; transform: translate(-50%, -50%) scale(1.08); }
+          0%, 100% { opacity: 0.55; transform: translate(-50%, -50%) scale(1); }
+          50% { opacity: 0.9; transform: translate(-50%, -50%) scale(1.1); }
         }
-        @keyframes igs-sweep {
-          0% { transform: translateX(-150%) skewX(-18deg); opacity: 0; }
-          30% { opacity: 0.9; }
-          100% { transform: translateX(150%) skewX(-18deg); opacity: 0; }
+        @keyframes igs-line-draw {
+          0% { transform: scaleX(0); opacity: 0; }
+          100% { transform: scaleX(1); opacity: 1; }
         }
-        .igs-stage {
+        @keyframes igs-text-in {
+          0% { opacity: 0; transform: translateY(6px); letter-spacing: 0.45em; }
+          100% { opacity: 1; transform: translateY(0); letter-spacing: 0.38em; }
+        }
+        .igs-col {
           position: relative;
-          width: min(36vw, 200px);
-          height: min(36vw, 200px);
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 22px;
+        }
+        .igs-logo-wrap {
+          position: relative;
+          width: min(28vw, 160px);
+          height: min(28vw, 160px);
           display: flex;
           align-items: center;
           justify-content: center;
-          animation: igs-logo-in 900ms cubic-bezier(0.22, 1, 0.36, 1) both;
-        }
-        .igs-logo-float {
-          position: relative;
-          width: 100%;
-          height: 100%;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          animation: igs-logo-lift 3.6s ease-in-out 900ms infinite;
+          animation: igs-logo-in 1000ms cubic-bezier(0.22, 1, 0.36, 1) both;
         }
         .igs-glow {
           position: absolute;
           top: 50%; left: 50%;
-          width: 150%; height: 150%;
+          width: 160%; height: 160%;
           border-radius: 50%;
-          background: radial-gradient(circle, rgba(234, 88, 12, 0.45) 0%, rgba(234, 88, 12, 0.18) 40%, rgba(234, 88, 12, 0) 70%);
-          filter: blur(24px);
-          animation: igs-glow-pulse 2.4s ease-in-out infinite;
+          background: radial-gradient(circle, rgba(234, 88, 12, 0.42) 0%, rgba(234, 88, 12, 0.16) 42%, rgba(234, 88, 12, 0) 72%);
+          filter: blur(26px);
+          animation: igs-glow-pulse 2.6s ease-in-out infinite;
           pointer-events: none;
           z-index: 0;
         }
-        .igs-sweep-mask {
-          position: absolute;
-          inset: 0;
-          overflow: hidden;
-          border-radius: 50%;
-          pointer-events: none;
-          z-index: 1;
-        }
-        .igs-sweep {
-          position: absolute;
-          top: 0; left: 0;
-          width: 60%;
-          height: 100%;
-          background: linear-gradient(90deg, transparent 0%, rgba(255, 170, 80, 0.55) 50%, transparent 100%);
-          filter: blur(8px);
-          animation: igs-sweep 1.8s cubic-bezier(0.4, 0, 0.2, 1) 300ms forwards;
-        }
         .igs-logo-img {
           position: relative;
-          width: 82%;
-          height: 82%;
+          width: 100%;
+          height: 100%;
           object-fit: contain;
           z-index: 2;
-          image-rendering: auto;
+        }
+        .igs-line {
+          width: 120px;
+          height: 1.5px;
+          background: linear-gradient(90deg, transparent, #ea580c 20%, #ea580c 80%, transparent);
+          transform-origin: center;
+          animation: igs-line-draw 700ms cubic-bezier(0.22, 1, 0.36, 1) 600ms both;
+        }
+        .igs-brand {
+          font-family: 'Poppins', system-ui, sans-serif;
+          font-size: 11px;
+          font-weight: 600;
+          letter-spacing: 0.38em;
+          color: rgba(60, 40, 20, 0.78);
+          text-transform: uppercase;
+          animation: igs-text-in 700ms ease-out 900ms both;
         }
         @media (prefers-reduced-motion: reduce) {
-          .igs-glow, .igs-sweep, .igs-logo-float { animation: none !important; }
-          .igs-stage { animation: igs-logo-in 600ms ease-out both; }
+          .igs-glow { animation: none !important; }
+          .igs-logo-wrap, .igs-line, .igs-brand {
+            animation: igs-logo-in 600ms ease-out both !important;
+          }
         }
       `}</style>
-      <div className="igs-stage">
-        <div className="igs-glow" />
-        <div className="igs-sweep-mask"><div className="igs-sweep" /></div>
-        <div className="igs-logo-float">
+      <div className="igs-col">
+        <div className="igs-logo-wrap">
+          <div className="igs-glow" />
           <img
             src={logoAsset.url}
             alt="IG Sabroso Construction"
@@ -128,6 +124,8 @@ export function LoadingScreen() {
             draggable={false}
           />
         </div>
+        <div className="igs-line" />
+        <div className="igs-brand">IG Sabroso Construction</div>
       </div>
     </div>
   );
