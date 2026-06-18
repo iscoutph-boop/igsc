@@ -202,47 +202,49 @@ function DetailsPage() {
       <SiteHeader />
       <main className="w-full">
         {/* About */}
-        <Section id="about">
-          <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
-            <Reveal>
-              <Eyebrow>About Us</Eyebrow>
-              <h2 className="mt-3 text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-[1.05]">
-                Built on trust.<br />
-                Driven by <span className="text-gradient-brand">excellence.</span>
-              </h2>
-              <p className="mt-6 text-muted-foreground text-base md:text-lg leading-relaxed max-w-xl">
-                IG Sabroso Construction is a full-service construction company committed to
-                delivering high-quality, dependable, and efficient building solutions. From
-                concept to completion, we bring expertise, transparency, and dedication to every project.
-              </p>
-              <div className="mt-8 grid sm:grid-cols-3 gap-4">
-                {[
-                  { icon: Home, label: "Residential Builds", filter: "Residential" as Filter },
-                  { icon: Wrench, label: "Renovation Works", filter: "Renovation" as Filter },
-                  { icon: Layers, label: "Construction Management", filter: "Commercial" as Filter },
-                ].map((f) => (
-                  <button
-                    key={f.label}
-                    type="button"
-                    onClick={() => handleServiceClick(f.filter)}
-                    aria-label={`View ${f.label} projects`}
-                    className="group text-left glass rounded-2xl p-4 hover:shadow-soft transition-all hover:-translate-y-1 cursor-pointer"
-                  >
-                    <div className="flex items-center justify-between">
-                      <f.icon className="text-primary" size={20} />
-                      <ArrowRight size={14} className="text-primary opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
-                    </div>
-                    <div className="mt-3 text-sm font-semibold">{f.label}</div>
-                    <div className="mt-1 text-[11px] text-muted-foreground">View related projects →</div>
-                  </button>
-                ))}
-              </div>
-            </Reveal>
-            <Reveal delay={0.15}>
-              <AboutSlideshow />
-            </Reveal>
+        <section id="about" className="scroll-mt-24 py-20 md:py-28">
+          <div className="max-w-[1600px] mx-auto px-6 md:px-10 xl:px-16">
+            <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
+              <Reveal className="lg:col-span-5">
+                <Eyebrow>About Us</Eyebrow>
+                <h2 className="mt-3 text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-[1.05]">
+                  Built on trust.<br />
+                  Driven by <span className="text-gradient-brand">excellence.</span>
+                </h2>
+                <p className="mt-6 text-muted-foreground text-base md:text-lg leading-relaxed max-w-xl">
+                  IG Sabroso Construction is a full-service construction company committed to
+                  delivering high-quality, dependable, and efficient building solutions. From
+                  concept to completion, we bring expertise, transparency, and dedication to every project.
+                </p>
+                <div className="mt-8 grid sm:grid-cols-3 gap-4">
+                  {[
+                    { icon: Home, label: "Residential Builds", filter: "Residential" as Filter },
+                    { icon: Wrench, label: "Renovation Works", filter: "Renovation" as Filter },
+                    { icon: Layers, label: "Construction Management", filter: "Commercial" as Filter },
+                  ].map((f) => (
+                    <button
+                      key={f.label}
+                      type="button"
+                      onClick={() => handleServiceClick(f.filter)}
+                      aria-label={`View ${f.label} projects`}
+                      className="group text-left glass rounded-2xl p-4 hover:shadow-soft transition-all hover:-translate-y-1 cursor-pointer"
+                    >
+                      <div className="flex items-center justify-between">
+                        <f.icon className="text-primary" size={20} />
+                        <ArrowRight size={14} className="text-primary opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                      </div>
+                      <div className="mt-3 text-sm font-semibold">{f.label}</div>
+                      <div className="mt-1 text-[11px] text-muted-foreground">View related projects →</div>
+                    </button>
+                  ))}
+                </div>
+              </Reveal>
+              <Reveal delay={0.15} className="lg:col-span-7">
+                <AboutSlideshow />
+              </Reveal>
+            </div>
           </div>
-        </Section>
+        </section>
 
 
         {/* Services */}
