@@ -1,9 +1,12 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { ArrowRight, ShieldCheck, Building2, Hammer } from "lucide-react";
+import { ArrowRight, ShieldCheck, Building2, Hammer, CalendarCheck } from "lucide-react";
 import { SiteHeader } from "@/components/site-header";
 import { PageTransition } from "@/components/page-transition";
+import { CheckBookingModal, ConsultationModal } from "@/components/booking-modals";
 import helmetAsset from "@/assets/helmet-hero.png.asset.json";
+
 
 export const Route = createFileRoute("/")({
   head: () => ({
