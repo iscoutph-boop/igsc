@@ -187,6 +187,15 @@ function DetailsPage() {
 
   useEffect(() => { setVisible(6); }, [filter, query, sort]);
 
+  const handleServiceClick = (f: Filter) => {
+    setFilter(f);
+    requestAnimationFrame(() => {
+      document.getElementById("portfolio")?.scrollIntoView({ behavior: "smooth", block: "start" });
+    });
+  };
+
+
+
 
   return (
     <PageTransition>
