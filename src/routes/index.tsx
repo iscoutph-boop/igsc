@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useState } from "react";
 import { motion } from "framer-motion";
 import { ArrowRight, ShieldCheck, Building2, Hammer, CalendarCheck } from "lucide-react";
