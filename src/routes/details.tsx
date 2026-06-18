@@ -203,9 +203,9 @@ function DetailsPage() {
       <main className="w-full">
         {/* About */}
         <section id="about" className="scroll-mt-24 py-20 md:py-28">
-          <div className="max-w-[1600px] mx-auto px-6 md:px-10 xl:px-16">
-            <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
-              <Reveal className="lg:col-span-5">
+          <div className="max-w-[1760px] mx-auto px-6 md:px-10 xl:px-14 2xl:px-20">
+            <div className="grid lg:grid-cols-12 gap-10 lg:gap-14 items-center">
+              <Reveal className="lg:col-span-4 xl:col-start-2 xl:col-span-4">
                 <Eyebrow>About Us</Eyebrow>
                 <h2 className="mt-3 text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-[1.05]">
                   Built on trust.<br />
@@ -239,7 +239,7 @@ function DetailsPage() {
                   ))}
                 </div>
               </Reveal>
-              <Reveal delay={0.15} className="lg:col-span-7">
+              <Reveal delay={0.15} className="lg:col-span-8 xl:col-span-6">
                 <AboutSlideshow />
               </Reveal>
             </div>
