@@ -228,8 +228,9 @@ function DetailsPage() {
       <SiteHeader />
       <main className="w-full">
         {/* About */}
-        <section id="about" className="scroll-mt-24 py-20 md:py-28">
-          <div className="max-w-[1760px] mx-auto px-6 md:px-10 xl:px-14 2xl:px-20">
+        <section id="about" className="scroll-mt-24 py-14 sm:py-20 md:py-28">
+          <div className="max-w-[1760px] mx-auto px-4 sm:px-6 md:px-10 xl:px-14 2xl:px-20">
+
             <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
               <Reveal className="lg:col-span-4 xl:col-span-3">
                 <Eyebrow>About Us</Eyebrow>
