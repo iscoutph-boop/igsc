@@ -26,12 +26,8 @@ import igs6 from "@/assets/igs-6.jpg.asset.json";
 import igs7 from "@/assets/igs-7.jpg.asset.json";
 import igs8 from "@/assets/igs-8.jpg.asset.json";
 import igs9 from "@/assets/igs-9.jpg.asset.json";
-import up3 from "@/assets/up-3.jpg.asset.json";
-import up4 from "@/assets/up-4.jpg.asset.json";
-import up5 from "@/assets/up-5.jpg.asset.json";
 import up6 from "@/assets/up-6.jpg.asset.json";
 import up7 from "@/assets/up-7.jpg.asset.json";
-import up8 from "@/assets/up-8.jpg.asset.json";
 import up9 from "@/assets/up-9.jpg.asset.json";
 import up10 from "@/assets/up-10.jpg.asset.json";
 import up11 from "@/assets/up-11.jpg.asset.json";
@@ -48,6 +44,10 @@ import carousel2 from "@/assets/carousel-2.jpg.asset.json";
 import carousel3 from "@/assets/carousel-3.jpg.asset.json";
 import carousel4 from "@/assets/carousel-4.jpg.asset.json";
 import carousel5 from "@/assets/carousel-5.jpg.asset.json";
+import miniPreview1 from "@/assets/mini-preview-1.png.asset.json";
+import miniPreview2 from "@/assets/mini-preview-2.png.asset.json";
+import miniPreview3 from "@/assets/mini-preview-3.png.asset.json";
+import miniPreview4 from "@/assets/mini-preview-4.png.asset.json";
 import { ChevronLeft, MessageSquareQuote, Users, Handshake } from "lucide-react";
 
 const aRes = aResAsset.url;
@@ -61,8 +61,8 @@ const fRes = fResAsset.url;
 // Project images for the large slideshow
 const interiorSlides = [carousel1.url, carousel2.url, carousel3.url, carousel4.url, carousel5.url];
 
-// Exterior images for the mini floating preview card
-const exteriorImages = [up3.url, up4.url, up5.url, up8.url];
+// Images for the mini floating preview card
+const exteriorImages = [miniPreview1.url, miniPreview2.url, miniPreview3.url, miniPreview4.url];
 
 
 const galleryPool = [igs1.url, igs2.url, igs3.url, igs4.url, igs6.url, igs7.url, igs8.url, igs9.url];
