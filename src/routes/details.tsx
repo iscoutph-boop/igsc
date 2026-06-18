@@ -933,7 +933,7 @@ function AboutSlideshow() {
                 aria-label="Preview exterior"
                 className="relative aspect-square rounded-md overflow-hidden ring-1 ring-white/30 hover:ring-primary transition"
               >
-                <img src={t} alt="" className="h-full w-full object-cover" />
+                <img src={t} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
               </button>
             ))}
           </div>
