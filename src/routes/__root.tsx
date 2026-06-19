@@ -13,7 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { ThemeProvider } from "../components/theme-provider";
 import { FloatingContact } from "../components/floating-contact";
-import { LoadingScreen } from "../components/loading-screen";
+import { IntroLoader } from "../components/intro-loader";
 
 function NotFoundComponent() {
   return (
@@ -128,7 +128,7 @@ function RootComponent() {
       <ThemeProvider>
         <Outlet />
         <FloatingContact />
-        <LoadingScreen />
+        <IntroLoader />
       </ThemeProvider>
     </QueryClientProvider>
   );
