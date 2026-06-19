@@ -125,6 +125,7 @@ export function IntroLoader() {
           }}
         >
           <img
+            ref={logoRef}
             src={logoAsset.url}
             alt="IG Sabroso Construction"
             onLoad={() => setLogoReady(true)}
