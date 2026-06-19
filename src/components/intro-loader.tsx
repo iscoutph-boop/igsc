@@ -4,7 +4,8 @@ import logoAsset from "@/assets/logo.png.asset.json";
 export function IntroLoader() {
   const [mounted, setMounted] = useState(true);
   const [entered, setEntered] = useState(false);
-  const [exiting, setExiting] = useState(false);
+  const [movingUp, setMovingUp] = useState(false);
+  const [revealing, setRevealing] = useState(false);
 
   useEffect(() => {
     const prefersReduced =
@@ -18,7 +19,10 @@ export function IntroLoader() {
     };
 
     if (prefersReduced) {
-      const rAF = requestAnimationFrame(() => setEntered(true));
+      const rAF = requestAnimationFrame(() => {
+        setEntered(true);
+        setRevealing(true);
+      });
       const t = window.setTimeout(() => {
         setMounted(false);
         restore();
@@ -32,23 +36,33 @@ export function IntroLoader() {
 
     // Stage 1: zoom-in entry on next frame
     const rAF = requestAnimationFrame(() => setEntered(true));
-    // Stage 3: begin upward exit after entry (420ms) + hold (~230ms)
-    const tExit = window.setTimeout(() => setExiting(true), 700);
-    // Unmount after exit completes (~600ms)
-    const tUnmount = window.setTimeout(() => {
+
+    // Stage 2: upward motion of the logo group
+    const tMove = 700;
+    // Stage 3: homepage reveal (overlay fades) — 450ms after movement starts
+    const tReveal = 1150;
+    // Unmount after overlay fade completes
+    const tUnmountMs = 1700;
+    // Hard fallback
+    const tFallbackMs = 2600;
+
+    const moveTimer = window.setTimeout(() => setMovingUp(true), tMove);
+    const revealTimer = window.setTimeout(() => setRevealing(true), tReveal);
+    const unmountTimer = window.setTimeout(() => {
       setMounted(false);
       restore();
-    }, 1400);
-    const tFallback = window.setTimeout(() => {
+    }, tUnmountMs);
+    const fallbackTimer = window.setTimeout(() => {
       setMounted(false);
       restore();
-    }, 2400);
+    }, tFallbackMs);
 
     return () => {
       cancelAnimationFrame(rAF);
-      window.clearTimeout(tExit);
-      window.clearTimeout(tUnmount);
-      window.clearTimeout(tFallback);
+      window.clearTimeout(moveTimer);
+      window.clearTimeout(revealTimer);
+      window.clearTimeout(unmountTimer);
+      window.clearTimeout(fallbackTimer);
       restore();
     };
   }, []);
@@ -56,35 +70,39 @@ export function IntroLoader() {
   if (!mounted) return null;
 
   const easeOut = "cubic-bezier(0.16, 1, 0.3, 1)";
-  const easeInOut = "cubic-bezier(0.76, 0, 0.24, 1)";
+  const easeInOut = "cubic-bezier(0.65, 0, 0.35, 1)";
 
   return (
     <div
+      data-intro-overlay
       aria-hidden="true"
       style={{
         position: "fixed",
         inset: 0,
         zIndex: 2147483647,
-        background: "rgba(248, 245, 239, 0.82)",
+        background: "rgba(248, 245, 239, 0.96)",
         backdropFilter: "blur(2px)",
         WebkitBackdropFilter: "blur(2px)",
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        opacity: exiting ? 0 : 1,
-        transition: `opacity 600ms ${easeInOut}`,
-        pointerEvents: exiting ? "none" : "auto",
+        opacity: revealing ? 0 : 1,
+        transition: "opacity 500ms ease",
+        pointerEvents: revealing ? "none" : "auto",
       }}
     >
-      {/* Outer wrapper: handles upward exit translate */}
+      {/* Moving group: handles upward translate. Opacity is NOT reduced here. */}
       <div
+        data-intro-group
         style={{
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
           gap: "0.9rem",
-          transform: exiting ? "translateY(-120vh)" : "translateY(0)",
-          transition: `transform 600ms ${easeInOut}`,
+          transform: movingUp
+            ? "translate3d(0, -110vh, 0)"
+            : "translate3d(0, 0, 0)",
+          transition: `transform 800ms ${easeInOut}`,
           willChange: "transform",
         }}
       >
