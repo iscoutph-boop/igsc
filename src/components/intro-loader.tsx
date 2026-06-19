@@ -19,12 +19,25 @@ export function IntroLoader() {
     };
   }, [mounted]);
 
-  // Safety fallback: if the logo never loads, force-ready after 3s
+  // Reliable logo readiness — handles cached images that complete before React attaches onLoad
   useEffect(() => {
-    if (logoReady) return;
-    const t = window.setTimeout(() => setLogoReady(true), 3000);
-    return () => window.clearTimeout(t);
-  }, [logoReady]);
+    const img = logoRef.current;
+    const markReady = () => setLogoReady(true);
+
+    if (img && img.complete && img.naturalWidth > 0) {
+      markReady();
+    }
+
+    img?.addEventListener("load", markReady);
+    img?.addEventListener("error", markReady);
+    const t = window.setTimeout(markReady, 600);
+
+    return () => {
+      img?.removeEventListener("load", markReady);
+      img?.removeEventListener("error", markReady);
+      window.clearTimeout(t);
+    };
+  }, []);
 
   // Animation lifecycle — only runs once the logo asset is ready
   useEffect(() => {
