@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import logoAsset from "@/assets/logo.png.asset.json";
 
 export function IntroLoader() {
