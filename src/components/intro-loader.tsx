@@ -43,21 +43,8 @@ export function IntroLoader() {
   useEffect(() => {
     if (!logoReady) return;
 
-    const prefersReduced =
-      typeof window !== "undefined" &&
-      window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-    if (prefersReduced) {
-      const rAF = requestAnimationFrame(() => {
-        setEntered(true);
-        setRevealing(true);
-      });
-      const t = window.setTimeout(() => setMounted(false), 500);
-      return () => {
-        cancelAnimationFrame(rAF);
-        window.clearTimeout(t);
-      };
-    }
+
 
     const rAF = requestAnimationFrame(() => setEntered(true));
     const moveTimer = window.setTimeout(() => setMovingUp(true), 700);
