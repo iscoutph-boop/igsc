@@ -3,59 +3,52 @@ import logoAsset from "@/assets/logo.png.asset.json";
 
 export function IntroLoader() {
   const [mounted, setMounted] = useState(true);
+  const [logoReady, setLogoReady] = useState(false);
   const [entered, setEntered] = useState(false);
   const [movingUp, setMovingUp] = useState(false);
   const [revealing, setRevealing] = useState(false);
 
+  // Scroll-lock lifecycle (independent of animation)
   useEffect(() => {
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = prevOverflow;
+    };
+  }, []);
+
+  // Safety fallback: if the logo never loads, force-ready after 3s
+  useEffect(() => {
+    if (logoReady) return;
+    const t = window.setTimeout(() => setLogoReady(true), 3000);
+    return () => window.clearTimeout(t);
+  }, [logoReady]);
+
+  // Animation lifecycle — only runs once the logo asset is ready
+  useEffect(() => {
+    if (!logoReady) return;
+
     const prefersReduced =
       typeof window !== "undefined" &&
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
-
-    const prevOverflow = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    const restore = () => {
-      document.body.style.overflow = prevOverflow;
-    };
 
     if (prefersReduced) {
       const rAF = requestAnimationFrame(() => {
         setEntered(true);
         setRevealing(true);
       });
-      const t = window.setTimeout(() => {
-        setMounted(false);
-        restore();
-      }, 500);
+      const t = window.setTimeout(() => setMounted(false), 500);
       return () => {
         cancelAnimationFrame(rAF);
         window.clearTimeout(t);
-        restore();
       };
     }
 
-    // Stage 1: zoom-in entry on next frame
     const rAF = requestAnimationFrame(() => setEntered(true));
-
-    // Stage 2: upward motion of the logo group
-    const tMove = 700;
-    // Stage 3: homepage reveal (overlay fades) — 450ms after movement starts
-    const tReveal = 1150;
-    // Unmount after overlay fade completes
-    const tUnmountMs = 1700;
-    // Hard fallback
-    const tFallbackMs = 2600;
-
-    const moveTimer = window.setTimeout(() => setMovingUp(true), tMove);
-    const revealTimer = window.setTimeout(() => setRevealing(true), tReveal);
-    const unmountTimer = window.setTimeout(() => {
-      setMounted(false);
-      restore();
-    }, tUnmountMs);
-    const fallbackTimer = window.setTimeout(() => {
-      setMounted(false);
-      restore();
-    }, tFallbackMs);
+    const moveTimer = window.setTimeout(() => setMovingUp(true), 700);
+    const revealTimer = window.setTimeout(() => setRevealing(true), 1150);
+    const unmountTimer = window.setTimeout(() => setMounted(false), 1700);
+    const fallbackTimer = window.setTimeout(() => setMounted(false), 2600);
 
     return () => {
       cancelAnimationFrame(rAF);
@@ -63,9 +56,8 @@ export function IntroLoader() {
       window.clearTimeout(revealTimer);
       window.clearTimeout(unmountTimer);
       window.clearTimeout(fallbackTimer);
-      restore();
     };
-  }, []);
+  }, [logoReady]);
 
   if (!mounted) return null;
 
@@ -91,7 +83,6 @@ export function IntroLoader() {
         pointerEvents: revealing ? "none" : "auto",
       }}
     >
-      {/* Moving group: handles upward translate. Opacity is NOT reduced here. */}
       <div
         data-intro-group
         style={{
@@ -106,7 +97,6 @@ export function IntroLoader() {
           willChange: "transform",
         }}
       >
-        {/* Inner wrapper: handles zoom-in entry */}
         <div
           style={{
             transform: entered ? "scale(1)" : "scale(0.35)",
@@ -122,6 +112,8 @@ export function IntroLoader() {
           <img
             src={logoAsset.url}
             alt="IG Sabroso Construction"
+            onLoad={() => setLogoReady(true)}
+            onError={() => setLogoReady(true)}
             style={{
               width: "clamp(96px, 14vw, 150px)",
               height: "clamp(96px, 14vw, 150px)",
