@@ -33,12 +33,12 @@ export function IntroLoader() {
     // Stage 1: zoom-in entry on next frame
     const rAF = requestAnimationFrame(() => setEntered(true));
     // Stage 3: begin upward exit after entry (420ms) + hold (~230ms)
-    const tExit = window.setTimeout(() => setExiting(true), 650);
+    const tExit = window.setTimeout(() => setExiting(true), 700);
     // Unmount after exit completes (~600ms)
     const tUnmount = window.setTimeout(() => {
       setMounted(false);
       restore();
-    }, 1300);
+    }, 1400);
     const tFallback = window.setTimeout(() => {
       setMounted(false);
       restore();
