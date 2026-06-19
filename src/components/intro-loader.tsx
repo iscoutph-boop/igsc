@@ -8,14 +8,15 @@ export function IntroLoader() {
   const [movingUp, setMovingUp] = useState(false);
   const [revealing, setRevealing] = useState(false);
 
-  // Scroll-lock lifecycle (independent of animation)
+  // Scroll-lock lifecycle — re-runs when `mounted` flips so cleanup restores overflow
   useEffect(() => {
+    if (!mounted) return;
     const prevOverflow = document.body.style.overflow;
     document.body.style.overflow = "hidden";
     return () => {
       document.body.style.overflow = prevOverflow;
     };
-  }, []);
+  }, [mounted]);
 
   // Safety fallback: if the logo never loads, force-ready after 3s
   useEffect(() => {
