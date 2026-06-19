@@ -1103,6 +1103,27 @@ function EstimatorSection() {
               </div>
               <div className="text-xs text-muted-foreground mt-1">Based on project complexity and finishes</div>
             </div>
+            {selectedAddons.length > 0 && (
+              <div className="mt-5 pb-5 border-b border-border">
+                <div className="font-bold">Selected Add-Ons</div>
+                <ul className="mt-2 space-y-1.5">
+                  {selectedAddons.map((a) => (
+                    <li key={a.id} className="flex items-center justify-between gap-3 text-sm">
+                      <span className="flex items-center gap-2">
+                        <CheckCircle2 size={14} className="text-primary shrink-0" />
+                        {a.label}
+                      </span>
+                      <span className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">
+                        Manual estimate required
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-[11px] text-muted-foreground">
+                  Add-ons receive a custom quote after consultation and are not included in the range above.
+                </p>
+              </div>
+            )}
             <div className="mt-5">
               <div className="flex items-center gap-2">
                 <Star size={16} className="text-primary" />
