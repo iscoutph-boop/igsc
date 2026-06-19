@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import logoAsset from "@/assets/logo.png.asset.json";
 
 export function IntroLoader() {
@@ -7,6 +7,7 @@ export function IntroLoader() {
   const [entered, setEntered] = useState(false);
   const [movingUp, setMovingUp] = useState(false);
   const [revealing, setRevealing] = useState(false);
+  const logoRef = useRef<HTMLImageElement>(null);
 
   // Scroll-lock lifecycle — re-runs when `mounted` flips so cleanup restores overflow
   useEffect(() => {
@@ -18,12 +19,25 @@ export function IntroLoader() {
     };
   }, [mounted]);
 
-  // Safety fallback: if the logo never loads, force-ready after 3s
+  // Reliable logo readiness — handles cached images that complete before React attaches onLoad
   useEffect(() => {
-    if (logoReady) return;
-    const t = window.setTimeout(() => setLogoReady(true), 3000);
-    return () => window.clearTimeout(t);
-  }, [logoReady]);
+    const img = logoRef.current;
+    const markReady = () => setLogoReady(true);
+
+    if (img && img.complete && img.naturalWidth > 0) {
+      markReady();
+    }
+
+    img?.addEventListener("load", markReady);
+    img?.addEventListener("error", markReady);
+    const t = window.setTimeout(markReady, 600);
+
+    return () => {
+      img?.removeEventListener("load", markReady);
+      img?.removeEventListener("error", markReady);
+      window.clearTimeout(t);
+    };
+  }, []);
 
   // Animation lifecycle — only runs once the logo asset is ready
   useEffect(() => {
@@ -111,6 +125,7 @@ export function IntroLoader() {
           }}
         >
           <img
+            ref={logoRef}
             src={logoAsset.url}
             alt="IG Sabroso Construction"
             onLoad={() => setLogoReady(true)}
