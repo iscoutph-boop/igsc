@@ -3,25 +3,34 @@ import logoAsset from "@/assets/logo.png.asset.json";
 
 export function IntroLoader() {
   const [mounted, setMounted] = useState(true);
-  const [fadingOut, setFadingOut] = useState(false);
+  const [phase, setPhase] = useState<"zoom" | "swipe" | "done">("zoom");
 
   useEffect(() => {
     const prefersReduced =
       typeof window !== "undefined" &&
       window.matchMedia?.("(prefers-reduced-motion: reduce)").matches;
 
-    const visibleMs = prefersReduced ? 500 : 1450;
-    const fadeMs = prefersReduced ? 250 : 400;
+    if (prefersReduced) {
+      const t = window.setTimeout(() => setMounted(false), 500);
+      return () => window.clearTimeout(t);
+    }
 
-    const t1 = window.setTimeout(() => setFadingOut(true), visibleMs);
-    const t2 = window.setTimeout(() => setMounted(false), visibleMs + fadeMs);
+    // 0–1100ms: logo zooms out (scale up + fade in then settle)
+    // 1100ms: start swipe up
+    // 1800ms: unmount
+    const t1 = window.setTimeout(() => setPhase("swipe"), 1100);
+    const t2 = window.setTimeout(() => setPhase("done"), 1750);
+    const t3 = window.setTimeout(() => setMounted(false), 1850);
     return () => {
       window.clearTimeout(t1);
       window.clearTimeout(t2);
+      window.clearTimeout(t3);
     };
   }, []);
 
   if (!mounted) return null;
+
+  const swiping = phase !== "zoom";
 
   return (
     <div
@@ -31,90 +40,72 @@ export function IntroLoader() {
         inset: 0,
         zIndex: 99999,
         background: "#F8F5EF",
-        opacity: fadingOut ? 0 : 1,
-        pointerEvents: fadingOut ? "none" : "auto",
-        transition: "opacity 400ms ease-out",
+        transform: swiping ? "translateY(-100%)" : "translateY(0)",
+        transition: "transform 700ms cubic-bezier(0.76, 0, 0.24, 1)",
+        pointerEvents: phase === "done" ? "none" : "auto",
         overflow: "hidden",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
       }}
     >
-      {/* Blueprint grid */}
+      {/* subtle blueprint grid */}
       <div
         style={{
           position: "absolute",
           inset: 0,
           backgroundImage:
-            "linear-gradient(rgba(31,27,22,0.08) 1px, transparent 1px), linear-gradient(90deg, rgba(31,27,22,0.08) 1px, transparent 1px)",
+            "linear-gradient(rgba(31,27,22,0.07) 1px, transparent 1px), linear-gradient(90deg, rgba(31,27,22,0.07) 1px, transparent 1px)",
           backgroundSize: "44px 44px",
-          opacity: 0,
-          animation: "igsGridIn 700ms ease-out 200ms forwards",
           maskImage:
-            "radial-gradient(ellipse at center, black 35%, transparent 75%)",
+            "radial-gradient(ellipse at center, black 30%, transparent 75%)",
           WebkitMaskImage:
-            "radial-gradient(ellipse at center, black 35%, transparent 75%)",
+            "radial-gradient(ellipse at center, black 30%, transparent 75%)",
         }}
       />
 
-      {/* Center stack */}
       <div
         style={{
-          position: "absolute",
-          inset: 0,
+          position: "relative",
           display: "flex",
           flexDirection: "column",
           alignItems: "center",
-          justifyContent: "center",
-          padding: "0 1.5rem",
+          gap: "1.25rem",
         }}
       >
-        {/* Logo frame */}
+        {/* soft glow */}
         <div
           style={{
-            position: "relative",
-            width: "clamp(120px, 22vw, 180px)",
-            height: "clamp(120px, 22vw, 180px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            position: "absolute",
+            top: "-30%",
+            left: "50%",
+            transform: "translateX(-50%)",
+            width: "clamp(180px, 28vw, 260px)",
+            height: "clamp(180px, 28vw, 260px)",
+            background:
+              "radial-gradient(circle, rgba(228,68,22,0.14), transparent 65%)",
+            filter: "blur(10px)",
+            pointerEvents: "none",
           }}
-        >
-          {/* Blueprint corner lines */}
-          <span className="igs-bp" style={{ top: 0, left: 0, borderTop: "1px solid rgba(31,27,22,0.18)", borderLeft: "1px solid rgba(31,27,22,0.18)" }} />
-          <span className="igs-bp" style={{ top: 0, right: 0, borderTop: "1px solid rgba(31,27,22,0.18)", borderRight: "1px solid rgba(31,27,22,0.18)" }} />
-          <span className="igs-bp" style={{ bottom: 0, left: 0, borderBottom: "1px solid rgba(31,27,22,0.18)", borderLeft: "1px solid rgba(31,27,22,0.18)" }} />
-          <span className="igs-bp" style={{ bottom: 0, right: 0, borderBottom: "1px solid rgba(31,27,22,0.18)", borderRight: "1px solid rgba(31,27,22,0.18)" }} />
+        />
 
-          {/* Soft glow */}
-          <div
-            style={{
-              position: "absolute",
-              inset: "-20%",
-              background:
-                "radial-gradient(circle, rgba(228,68,22,0.12), transparent 65%)",
-              filter: "blur(8px)",
-              opacity: 0,
-              animation: "igsFadeIn 600ms ease-out 350ms forwards",
-            }}
-          />
+        <img
+          src={logoAsset.url}
+          alt="IG Sabroso Construction"
+          style={{
+            width: "clamp(110px, 18vw, 170px)",
+            height: "clamp(110px, 18vw, 170px)",
+            objectFit: "contain",
+            opacity: 0,
+            transform: "scale(0.3)",
+            animation:
+              "igsZoomOut 1100ms cubic-bezier(0.22, 1, 0.36, 1) forwards",
+          }}
+        />
 
-          <img
-            src={logoAsset.url}
-            alt="IG Sabroso Construction"
-            style={{
-              width: "78%",
-              height: "78%",
-              objectFit: "contain",
-              opacity: 0,
-              transform: "scale(0.94)",
-              animation: "igsLogoIn 700ms cubic-bezier(0.22,1,0.36,1) 350ms forwards",
-            }}
-          />
-        </div>
-
-        {/* Orange sweep line */}
         <div
           style={{
-            marginTop: "1.25rem",
-            width: "clamp(120px, 22vw, 180px)",
+            width: "clamp(110px, 18vw, 170px)",
             height: 2,
             background: "rgba(31,27,22,0.08)",
             position: "relative",
@@ -125,26 +116,21 @@ export function IntroLoader() {
           <span
             style={{
               position: "absolute",
-              top: 0,
-              left: 0,
-              height: "100%",
-              width: "100%",
-              background: "rgba(228,68,22,0.85)",
+              inset: 0,
+              background: "#E44416",
               transformOrigin: "left center",
               transform: "scaleX(0)",
-              animation: "igsSweep 700ms cubic-bezier(0.7,0,0.3,1) 650ms forwards",
+              animation: "igsLineDraw 650ms cubic-bezier(0.7,0,0.3,1) 600ms forwards",
             }}
           />
         </div>
 
-        {/* Brand text */}
         <div
           style={{
-            marginTop: "1.25rem",
             textAlign: "center",
             opacity: 0,
             transform: "translateY(8px)",
-            animation: "igsTextIn 600ms ease-out 850ms forwards",
+            animation: "igsTextRise 600ms ease-out 750ms forwards",
           }}
         >
           <div
@@ -160,7 +146,7 @@ export function IntroLoader() {
           </div>
           <div
             style={{
-              marginTop: 8,
+              marginTop: 6,
               fontFamily: "'Montserrat', system-ui, sans-serif",
               fontSize: "clamp(10px, 1.1vw, 12px)",
               letterSpacing: "0.18em",
@@ -174,15 +160,13 @@ export function IntroLoader() {
       </div>
 
       <style>{`
-        @keyframes igsFadeIn { to { opacity: 1; } }
-        @keyframes igsGridIn { to { opacity: 1; } }
-        @keyframes igsLogoIn { to { opacity: 1; transform: scale(1); } }
-        @keyframes igsSweep { to { transform: scaleX(1); } }
-        @keyframes igsTextIn { to { opacity: 1; transform: translateY(0); } }
-        .igs-bp { position: absolute; width: 18px; height: 18px; }
-        @media (prefers-reduced-motion: reduce) {
-          .igs-bp { display: none; }
+        @keyframes igsZoomOut {
+          0%   { opacity: 0; transform: scale(0.3); }
+          60%  { opacity: 1; }
+          100% { opacity: 1; transform: scale(1); }
         }
+        @keyframes igsLineDraw { to { transform: scaleX(1); } }
+        @keyframes igsTextRise { to { opacity: 1; transform: translateY(0); } }
       `}</style>
     </div>
   );
