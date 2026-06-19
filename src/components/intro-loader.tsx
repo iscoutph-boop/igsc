@@ -7,6 +7,7 @@ export function IntroLoader() {
   const [entered, setEntered] = useState(false);
   const [movingUp, setMovingUp] = useState(false);
   const [revealing, setRevealing] = useState(false);
+  const logoRef = useRef<HTMLImageElement>(null);
 
   // Scroll-lock lifecycle — re-runs when `mounted` flips so cleanup restores overflow
   useEffect(() => {
