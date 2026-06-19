@@ -1066,11 +1066,13 @@ function EstimatorSection() {
                         className="accent-primary h-4 w-4"
                       />
                       <span className="flex-1 text-sm font-medium">{a.label}</span>
-                      <span className="text-xs text-muted-foreground">+ {fmt(a.price)}</span>
                     </label>
                   );
                 })}
               </div>
+              <p className="mt-2 text-[11px] text-muted-foreground leading-relaxed">
+                Add-ons are manually estimated after project review, site condition checking, and final design scope.
+              </p>
             </Field>
           </div>
         </Reveal>
