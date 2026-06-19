@@ -951,10 +951,10 @@ function AboutSlideshow() {
 type Pkg = "Standard" | "Semi-elegant" | "Elegant" | "Luxury";
 const PKG_RATE: Record<Pkg, number> = { Standard: 32000, "Semi-elegant": 37000, Elegant: 42500, Luxury: 55000 };
 const ADDONS = [
-  { id: "gate", label: "Gate & Fence", price: 180000 },
-  { id: "carport", label: "Carport", price: 250000 },
-  { id: "interior", label: "Interior Fit-Out", price: 350000 },
-  { id: "smart", label: "Smart Home Features", price: 150000 },
+  { id: "gate", label: "Gate & Fence" },
+  { id: "carport", label: "Carport" },
+  { id: "interior", label: "Interior Fit-Out" },
+  { id: "smart", label: "Smart Home Features" },
 ] as const;
 
 function EstimatorSection() {
@@ -967,10 +967,11 @@ function EstimatorSection() {
   const [addons, setAddons] = useState<string[]>(["gate", "carport", "interior"]);
 
   const base = area * PKG_RATE[pkg];
-  const addonTotal = ADDONS.filter((a) => addons.includes(a.id)).reduce((s, a) => s + a.price, 0);
-  const low = Math.round((base + addonTotal) * 1.0);
-  const high = Math.round((base + addonTotal) * 1.18);
+  // Add-ons are excluded from the estimated total — manually quoted after consultation.
+  const low = Math.round(base * 1.0);
+  const high = Math.round(base * 1.18);
   const fmt = (n: number) => "₱" + n.toLocaleString("en-PH");
+  const selectedAddons = ADDONS.filter((a) => addons.includes(a.id));
 
   const inclusions = ["Structural Works", "Doors & Windows", "Electrical & Plumbing", "Paint Works", "Roofing & Ceiling", "Basic Fixtures & Fittings", "Flooring & Wall Finishes"];
 

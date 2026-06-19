@@ -6,11 +6,12 @@ type Ctx = { theme: Theme; toggle: () => void; setTheme: (t: Theme) => void };
 const ThemeContext = createContext<Ctx | null>(null);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("dark");
+  const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
     const stored = (typeof localStorage !== "undefined" && localStorage.getItem("sabroso-theme")) as Theme | null;
     if (stored === "dark" || stored === "light") setTheme(stored);
+    // No saved preference → keep light as default (do not follow system).
   }, []);
 
   useEffect(() => {
