@@ -951,10 +951,10 @@ function AboutSlideshow() {
 type Pkg = "Standard" | "Semi-elegant" | "Elegant" | "Luxury";
 const PKG_RATE: Record<Pkg, number> = { Standard: 32000, "Semi-elegant": 37000, Elegant: 42500, Luxury: 55000 };
 const ADDONS = [
-  { id: "gate", label: "Gate & Fence", price: 180000 },
-  { id: "carport", label: "Carport", price: 250000 },
-  { id: "interior", label: "Interior Fit-Out", price: 350000 },
-  { id: "smart", label: "Smart Home Features", price: 150000 },
+  { id: "gate", label: "Gate & Fence" },
+  { id: "carport", label: "Carport" },
+  { id: "interior", label: "Interior Fit-Out" },
+  { id: "smart", label: "Smart Home Features" },
 ] as const;
 
 function EstimatorSection() {
@@ -967,10 +967,11 @@ function EstimatorSection() {
   const [addons, setAddons] = useState<string[]>(["gate", "carport", "interior"]);
 
   const base = area * PKG_RATE[pkg];
-  const addonTotal = ADDONS.filter((a) => addons.includes(a.id)).reduce((s, a) => s + a.price, 0);
-  const low = Math.round((base + addonTotal) * 1.0);
-  const high = Math.round((base + addonTotal) * 1.18);
+  // Add-ons are excluded from the estimated total — manually quoted after consultation.
+  const low = Math.round(base * 1.0);
+  const high = Math.round(base * 1.18);
   const fmt = (n: number) => "₱" + n.toLocaleString("en-PH");
+  const selectedAddons = ADDONS.filter((a) => addons.includes(a.id));
 
   const inclusions = ["Structural Works", "Doors & Windows", "Electrical & Plumbing", "Paint Works", "Roofing & Ceiling", "Basic Fixtures & Fittings", "Flooring & Wall Finishes"];
 
@@ -1065,11 +1066,13 @@ function EstimatorSection() {
                         className="accent-primary h-4 w-4"
                       />
                       <span className="flex-1 text-sm font-medium">{a.label}</span>
-                      <span className="text-xs text-muted-foreground">+ {fmt(a.price)}</span>
                     </label>
                   );
                 })}
               </div>
+              <p className="mt-2 text-[11px] text-muted-foreground leading-relaxed">
+                Add-ons are manually estimated after project review, site condition checking, and final design scope.
+              </p>
             </Field>
           </div>
         </Reveal>
@@ -1100,6 +1103,27 @@ function EstimatorSection() {
               </div>
               <div className="text-xs text-muted-foreground mt-1">Based on project complexity and finishes</div>
             </div>
+            {selectedAddons.length > 0 && (
+              <div className="mt-5 pb-5 border-b border-border">
+                <div className="font-bold">Selected Add-Ons</div>
+                <ul className="mt-2 space-y-1.5">
+                  {selectedAddons.map((a) => (
+                    <li key={a.id} className="flex items-center justify-between gap-3 text-sm">
+                      <span className="flex items-center gap-2">
+                        <CheckCircle2 size={14} className="text-primary shrink-0" />
+                        {a.label}
+                      </span>
+                      <span className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">
+                        Manual estimate required
+                      </span>
+                    </li>
+                  ))}
+                </ul>
+                <p className="mt-2 text-[11px] text-muted-foreground">
+                  Add-ons receive a custom quote after consultation and are not included in the range above.
+                </p>
+              </div>
+            )}
             <div className="mt-5">
               <div className="flex items-center gap-2">
                 <Star size={16} className="text-primary" />
