@@ -924,14 +924,14 @@ function AboutSlideshow({ onZoom }: { onZoom?: (src: string) => void } = {}) {
         </div>
 
         <button
-          onClick={prev}
+          onClick={(e) => { e.stopPropagation(); prev(); }}
           aria-label="Previous slide"
           className="absolute left-4 top-1/2 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/15 backdrop-blur-xl border border-white/25 text-white shadow-soft hover:bg-white/25 transition opacity-0 group-hover:opacity-100"
         >
           <ChevronLeft size={20} />
         </button>
         <button
-          onClick={next}
+          onClick={(e) => { e.stopPropagation(); next(); }}
           aria-label="Next slide"
           className="absolute right-4 top-1/2 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/15 backdrop-blur-xl border border-white/25 text-white shadow-soft hover:bg-white/25 transition opacity-0 group-hover:opacity-100"
         >
@@ -942,7 +942,7 @@ function AboutSlideshow({ onZoom }: { onZoom?: (src: string) => void } = {}) {
           {interiorSlides.map((_, i) => (
             <button
               key={i}
-              onClick={() => setIdx(i)}
+              onClick={(e) => { e.stopPropagation(); setIdx(i); }}
               aria-label={`Slide ${i + 1}`}
               className={`h-1.5 rounded-full transition-all ${i === idx ? "w-8 bg-primary" : "w-3 bg-white/60 hover:bg-white"}`}
             />
