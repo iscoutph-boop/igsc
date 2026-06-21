@@ -1152,8 +1152,8 @@ function EstimatorSection() {
           </div>
         </Reveal>
 
-        {/* Summary */}
-        <Reveal delay={0.12}>
+        {/* Summary — hidden on mobile */}
+        <Reveal delay={0.12} className="hidden md:block">
           <div className="lg:sticky lg:top-24 glass rounded-3xl p-6 md:p-8 shadow-card">
             <div className="flex items-center gap-2 text-primary">
               <Calculator size={18} />
