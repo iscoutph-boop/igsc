@@ -280,37 +280,74 @@ function getBookingValue(booking: Record<string, unknown> | BookingRecord, ...ke
   return "Not provided";
 }
 
+// Sentinel dates Google Sheets uses when a cell stores a time-only or
+// date-only value. The "Z" suffix is misleading — the wall-clock components
+// are the Philippine values the user entered, NOT UTC. We must extract them
+// verbatim instead of running them through a timezone converter.
+const SHEETS_SENTINEL_DATE_RE = /^(1899-12-30|1900-01-0[01]|1970-01-01)/;
+
+function isSheetsSentinel(raw: string): boolean {
+  return SHEETS_SENTINEL_DATE_RE.test(raw);
+}
+
+function hasTzMarker(raw: string): boolean {
+  return /(Z|[+\-]\d{2}:?\d{2})$/.test(raw);
+}
+
+const PHT_DATE_FMT = new Intl.DateTimeFormat("en-US", {
+  month: "long",
+  day: "numeric",
+  year: "numeric",
+  timeZone: "Asia/Manila",
+});
+
+const PHT_TIME_FMT = new Intl.DateTimeFormat("en-US", {
+  hour: "numeric",
+  minute: "2-digit",
+  hour12: true,
+  timeZone: "Asia/Manila",
+});
+
+function formatPhtTime(date: Date): string {
+  return PHT_TIME_FMT.format(date)
+    .replace(/\s?AM$/i, "am")
+    .replace(/\s?PM$/i, "pm")
+    .replace(/\s+/g, "");
+}
+
 function formatDisplayDate(dateValue: string): string {
   if (!dateValue) return "";
   const raw = String(dateValue).trim();
+
+  // Real ISO datetime with TZ marker → convert to Philippine Time.
+  if (raw.includes("T") && hasTzMarker(raw) && !isSheetsSentinel(raw)) {
+    const d = new Date(raw);
+    if (!Number.isNaN(d.getTime())) return PHT_DATE_FMT.format(d);
+  }
+
+  // Plain YYYY-MM-DD (or sentinel like "1899-12-30T..."): use components verbatim.
   const ymd = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
   if (ymd) {
     const year = Number(ymd[1]);
     const monthIndex = Number(ymd[2]) - 1;
     const day = Number(ymd[3]);
-    const date = new Date(Date.UTC(year, monthIndex, day, 0, 0, 0));
-    return new Intl.DateTimeFormat("en-US", {
-      month: "long",
-      day: "numeric",
-      year: "numeric",
-      timeZone: "Asia/Manila",
-    }).format(date);
+    // If sentinel, the date itself is meaningless — return empty so callers fall back.
+    if (isSheetsSentinel(raw)) return "";
+    // Build at noon UTC so Asia/Manila formatting never rolls back a day.
+    const date = new Date(Date.UTC(year, monthIndex, day, 12, 0, 0));
+    return PHT_DATE_FMT.format(date);
   }
+
   const date = new Date(raw);
   if (Number.isNaN(date.getTime())) return "";
-  return new Intl.DateTimeFormat("en-US", {
-    month: "long",
-    day: "numeric",
-    year: "numeric",
-    timeZone: "Asia/Manila",
-  }).format(date);
+  return PHT_DATE_FMT.format(date);
 }
 
 function formatDisplayTime(timeValue: string): string {
   if (!timeValue) return "";
   const raw = String(timeValue).trim();
 
-  // Plain HH:mm or HH:mm:ss — local clock, no TZ shift.
+  // Plain HH:mm or HH:mm:ss — already Philippine wall-clock, no TZ shift.
   const hm = raw.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
   if (hm) {
     let hour = Number(hm[1]);
@@ -320,7 +357,7 @@ function formatDisplayTime(timeValue: string): string {
     return `${hour}:${minute}${suffix}`;
   }
 
-  // Already human readable "10:30 AM".
+  // Human readable "10:30 AM".
   const ampm = raw.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i);
   if (ampm) {
     let hour = Number(ampm[1]);
@@ -330,9 +367,26 @@ function formatDisplayTime(timeValue: string): string {
     return `${hour}:${minute}${suffix}`;
   }
 
-  // ISO-like value (e.g. "1899-12-30T10:30:00.000Z"). Extract the wall-clock
-  // HH:mm directly — never timezone-convert. Sheets stores time-only cells
-  // with a sentinel date, so historical TZ math would shift the hour wrongly.
+  // Sheets sentinel ISO (e.g. "1899-12-30T13:35:00.000Z"): the wall-clock
+  // value IS the Philippine time the user picked — do NOT convert.
+  if (isSheetsSentinel(raw)) {
+    const isoTime = raw.match(/T(\d{2}):(\d{2})/);
+    if (isoTime) {
+      let hour = Number(isoTime[1]);
+      const minute = isoTime[2];
+      const suffix = hour >= 12 ? "pm" : "am";
+      hour = hour % 12 || 12;
+      return `${hour}:${minute}${suffix}`;
+    }
+  }
+
+  // Real ISO datetime with TZ marker → convert to Philippine Time.
+  if (raw.includes("T") && hasTzMarker(raw)) {
+    const d = new Date(raw);
+    if (!Number.isNaN(d.getTime())) return formatPhtTime(d);
+  }
+
+  // Bare "T HH:mm" without TZ info — treat as Philippine wall-clock.
   const isoTime = raw.match(/T(\d{2}):(\d{2})/);
   if (isoTime) {
     let hour = Number(isoTime[1]);
@@ -344,6 +398,7 @@ function formatDisplayTime(timeValue: string): string {
 
   return raw;
 }
+
 
 
 function formatPreferredSchedule(
