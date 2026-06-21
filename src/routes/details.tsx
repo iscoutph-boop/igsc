@@ -610,7 +610,21 @@ function DetailsPage() {
       {/* Project Detail Modal — styled like the About Page 3 reference */}
       <Dialog open={!!active} onOpenChange={(open) => !open && setActive(null)}>
         <DialogContent className="w-[96vw] sm:w-auto max-w-6xl p-0 overflow-hidden bg-background border-border max-h-[92vh] overflow-y-auto">
-          {active && <ProjectDetail project={active} onClose={() => setActive(null)} />}
+          {active && <ProjectDetail project={active} onClose={() => setActive(null)} onZoom={openZoom} />}
+        </DialogContent>
+      </Dialog>
+
+      {/* Fullscreen image lightbox (double-tap to open) */}
+      <Dialog open={!!zoomImg} onOpenChange={(o) => !o && setZoomImg(null)}>
+        <DialogContent className="w-[98vw] max-w-[1400px] p-0 bg-black/95 border-none shadow-none">
+          {zoomImg && (
+            <img
+              src={zoomImg}
+              alt="Full preview"
+              className="w-full max-h-[92vh] object-contain select-none"
+              onClick={() => setZoomImg(null)}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </PageTransition>
