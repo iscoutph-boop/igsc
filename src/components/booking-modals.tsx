@@ -99,9 +99,9 @@ export function CheckBookingModal({ open, onClose }: { open: boolean; onClose: (
               <div className="inline-flex items-center justify-center h-11 w-11 rounded-2xl gradient-brand text-primary-foreground shadow-soft">
                 <CalendarCheck size={20} />
               </div>
-              <h3 className="mt-4 text-2xl font-display font-bold">Check Booking Status</h3>
+              <h3 className="mt-4 text-2xl font-display font-bold">Manage Your Booking</h3>
               <p className="mt-1 text-sm text-muted-foreground">
-                Track the status of your IG Sabroso booking or site visit.
+                View your appointment details, reschedule your site visit, or cancel your booking.
               </p>
 
               {!result && (
