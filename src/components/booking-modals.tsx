@@ -280,10 +280,9 @@ function getBookingValue(booking: Record<string, unknown> | BookingRecord, ...ke
   return "Not provided";
 }
 
-// Sentinel dates Google Sheets uses when a cell stores a time-only or
-// date-only value. The "Z" suffix is misleading — the wall-clock components
-// are the Philippine values the user entered, NOT UTC. We must extract them
-// verbatim instead of running them through a timezone converter.
+// Sentinel dates Google Sheets uses when a cell stores a time-only value.
+// If Apps Script serializes that value as ISO, the hour is UTC; convert it
+// to Philippine Time before showing it (01:30Z → 9:30am PHT).
 const SHEETS_SENTINEL_DATE_RE = /^(1899-12-30|1900-01-0[01]|1970-01-01)/;
 
 function isSheetsSentinel(raw: string): boolean {
@@ -367,20 +366,8 @@ function formatDisplayTime(timeValue: string): string {
     return `${hour}:${minute}${suffix}`;
   }
 
-  // Sheets sentinel ISO (e.g. "1899-12-30T13:35:00.000Z"): the wall-clock
-  // value IS the Philippine time the user picked — do NOT convert.
-  if (isSheetsSentinel(raw)) {
-    const isoTime = raw.match(/T(\d{2}):(\d{2})/);
-    if (isoTime) {
-      let hour = Number(isoTime[1]);
-      const minute = isoTime[2];
-      const suffix = hour >= 12 ? "pm" : "am";
-      hour = hour % 12 || 12;
-      return `${hour}:${minute}${suffix}`;
-    }
-  }
-
-  // Real ISO datetime with TZ marker → convert to Philippine Time.
+  // Any ISO datetime with a timezone marker — including Google Sheets
+  // sentinel dates like 1899-12-30T01:30:00Z — must display in PHT.
   if (raw.includes("T") && hasTzMarker(raw)) {
     const d = new Date(raw);
     if (!Number.isNaN(d.getTime())) return formatPhtTime(d);
@@ -406,20 +393,26 @@ function formatPreferredSchedule(
   preferredTime: string,
   preferredScheduleFromApi?: string,
 ): string {
-  // Trust the API-formatted schedule when it looks clean.
-  if (
-    preferredScheduleFromApi &&
-    preferredScheduleFromApi !== "Not provided" &&
-    preferredScheduleFromApi !== "Pending schedule confirmation" &&
-    !preferredScheduleFromApi.includes("1899-12-30") &&
-    !/\dT\d/.test(preferredScheduleFromApi)
-  ) {
-    return preferredScheduleFromApi;
-  }
   const date = formatDisplayDate(preferredDate);
   const time = formatDisplayTime(preferredTime);
   if (date && time) return `${date} — ${time}`;
   if (date) return date;
+  if (time) return time;
+
+  if (preferredScheduleFromApi) {
+    const rawSchedule = preferredScheduleFromApi.trim();
+    if (rawSchedule && rawSchedule !== "Not provided" && rawSchedule !== "Pending schedule confirmation") {
+      if (/\dT\d/.test(rawSchedule)) {
+        const parsedDate = formatDisplayDate(rawSchedule);
+        const parsedTime = formatDisplayTime(rawSchedule);
+        if (parsedDate && parsedTime) return `${parsedDate} — ${parsedTime}`;
+        if (parsedTime) return parsedTime;
+        if (parsedDate) return parsedDate;
+      }
+      return rawSchedule;
+    }
+  }
+
   return "Pending schedule confirmation";
 }
 
