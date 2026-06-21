@@ -402,6 +402,12 @@ function repairApiScheduleText(rawSchedule: string): string {
   });
 }
 
+function extractDisplayTimeFromScheduleText(rawSchedule: string): string {
+  const repaired = repairApiScheduleText(rawSchedule);
+  const timeMatch = repaired.match(/\b\d{1,2}(?::\d{2})?\s*(?:am|pm)\b/i);
+  return timeMatch ? formatDisplayTime(timeMatch[0]) : "";
+}
+
 
 
 function formatPreferredSchedule(
@@ -412,8 +418,6 @@ function formatPreferredSchedule(
   const date = formatDisplayDate(preferredDate);
   const time = formatDisplayTime(preferredTime);
   if (date && time) return `${date} — ${time}`;
-  if (date) return date;
-  if (time) return time;
 
   if (preferredScheduleFromApi) {
     const rawSchedule = preferredScheduleFromApi.trim();
@@ -421,13 +425,20 @@ function formatPreferredSchedule(
       if (/\dT\d/.test(rawSchedule)) {
         const parsedDate = formatDisplayDate(rawSchedule);
         const parsedTime = formatDisplayTime(rawSchedule);
+        if (date && parsedTime) return `${date} — ${parsedTime}`;
+        if (parsedDate && time) return `${parsedDate} — ${time}`;
         if (parsedDate && parsedTime) return `${parsedDate} — ${parsedTime}`;
         if (parsedTime) return parsedTime;
         if (parsedDate) return parsedDate;
       }
+      const apiTime = extractDisplayTimeFromScheduleText(rawSchedule);
+      if (date && apiTime) return `${date} — ${apiTime}`;
       return repairApiScheduleText(rawSchedule);
     }
   }
+
+  if (date) return date;
+  if (time) return time;
 
   return "Pending schedule confirmation";
 }
