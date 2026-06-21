@@ -235,21 +235,22 @@ function ConsultationPage() {
                           <CheckCircle2 size={22} />
                         </div>
                         <div className="min-w-0">
-                          <h3 className="font-display font-bold text-xl">Consultation Request Received</h3>
+                          <h3 className="font-display font-bold text-xl">Appointment Request Submitted</h3>
                           <p className="mt-1.5 text-sm text-muted-foreground">
-                            Thank you. Your consultation request has been submitted successfully. Our team will contact you shortly to confirm your schedule.
+                            Your consultation request has been received. Our team will contact you to confirm your appointment schedule.
                           </p>
                         </div>
                       </div>
 
                       <div className="mt-6">
-                        <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground font-bold">Your Booking Reference</div>
+                        <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground font-bold">Booking Reference</div>
                         <div className="mt-2.5">
                           <ReferencePill reference={bookingReference} />
                         </div>
                         <p className="mt-3 text-xs text-muted-foreground">
-                          Please save this reference number. You'll need it to manage, reschedule, or cancel your booking.
+                          Please save this reference. You'll need it to manage, reschedule, or cancel your appointment.
                         </p>
+
                       </div>
 
                       <div className="mt-6 flex flex-wrap items-center gap-3">
