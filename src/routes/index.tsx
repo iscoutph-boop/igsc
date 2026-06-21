@@ -49,10 +49,10 @@ function HomePage() {
           >
             <div className="h-[3px] w-10 gradient-brand rounded-full mb-5" />
             <h1 className="font-display font-black text-[26px] leading-[1.15] tracking-tight text-foreground">
-              Building the future with quality and trust.
+              Already booked an appointment?
             </h1>
             <p className="mt-4 text-[15px] leading-[1.6] text-foreground/75">
-              We deliver lasting construction solutions with confidence, precision, and integrity.
+              Manage your booking here — view details, reschedule, or cancel anytime.
             </p>
 
             {/* Manage Booking supporting CTA */}
@@ -70,7 +70,7 @@ function HomePage() {
                     Manage Booking
                   </span>
                   <span className="block text-[12px] leading-snug text-muted-foreground mt-0.5">
-                    View, reschedule, or cancel anytime.
+                    {"\n"}
                   </span>
                 </span>
                 <ArrowRight size={18} className="text-primary shrink-0" />
