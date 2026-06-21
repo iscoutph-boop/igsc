@@ -631,7 +631,7 @@ function DetailsPage() {
   );
 }
 
-function ProjectDetail({ project, onClose }: { project: Project; onClose: () => void }) {
+function ProjectDetail({ project, onClose, onZoom }: { project: Project; onClose: () => void; onZoom?: (src: string) => void }) {
   // Build a gallery using project hero + 4 rotating gallery images
   const start = (Number(project.number) * 2) % galleryPool.length;
   const gallery = [project.img, ...Array.from({ length: 5 }, (_, i) => galleryPool[(start + i) % galleryPool.length])];
@@ -652,25 +652,33 @@ function ProjectDetail({ project, onClose }: { project: Project; onClose: () => 
         {/* Left — gallery */}
         <div>
           <div className="relative rounded-3xl overflow-hidden shadow-card aspect-[4/3]">
-            <img src={hero} alt={project.title} decoding="async" sizes="(max-width: 1024px) 96vw, 640px" className="h-full w-full object-cover" />
-            <div className="absolute bottom-4 left-4 inline-flex items-center gap-2 bg-background/90 backdrop-blur rounded-full px-4 py-2 text-xs font-semibold">
+            <img
+              src={hero}
+              alt={project.title}
+              decoding="async"
+              sizes="(max-width: 1024px) 96vw, 640px"
+              className="h-full w-full object-cover cursor-zoom-in select-none"
+              onDoubleClick={() => onZoom?.(hero)}
+            />
+            <button
+              type="button"
+              onClick={() => onZoom?.(hero)}
+              className="absolute bottom-4 left-4 inline-flex items-center gap-2 bg-background/90 backdrop-blur rounded-full px-4 py-2 text-xs font-semibold hover:bg-background transition"
+            >
               <ImageIcon size={14} className="text-primary" /> View Full Gallery
-            </div>
+            </button>
           </div>
           <div className="mt-4 grid grid-cols-4 sm:grid-cols-6 gap-2 md:gap-3">
-            {gallery.slice(0, 5).map((g, i) => (
+            {gallery.slice(0, 6).map((g, i) => (
               <button
                 key={i}
                 onClick={() => setHero(g)}
+                onDoubleClick={() => onZoom?.(g)}
                 className={`relative aspect-square rounded-xl overflow-hidden transition ${hero === g ? "ring-2 ring-primary" : "opacity-80 hover:opacity-100"}`}
               >
                 <img src={g} alt={`${project.title} ${i + 1}`} loading="lazy" decoding="async" sizes="(max-width: 640px) 25vw, 120px" className="h-full w-full object-cover" />
               </button>
             ))}
-            <div className="aspect-square rounded-xl border-2 border-dashed border-primary/40 flex flex-col items-center justify-center text-primary">
-              <span className="text-lg font-bold">+</span>
-              <span className="text-[9px] uppercase tracking-wider mt-0.5">View More</span>
-            </div>
           </div>
           <div className="mt-5 glass rounded-2xl p-4 flex items-center gap-4">
             <span className="inline-flex h-10 w-10 items-center justify-center rounded-full gradient-brand text-primary-foreground">
@@ -722,19 +730,62 @@ function ProjectDetail({ project, onClose }: { project: Project; onClose: () => 
               ))}
             </ul>
           </div>
-
-          <Link
-            to="/consultation"
-            onClick={onClose}
-            className="mt-6 group w-full inline-flex items-center justify-center gap-3 gradient-brand text-primary-foreground rounded-full px-7 py-4 font-semibold shadow-glow hover:scale-[1.01] transition"
-          >
-            Inquire Similar Project
-            <span className="bg-background/25 rounded-full p-2 group-hover:translate-x-1 transition-transform">
-              <ArrowRight size={16} />
-            </span>
-          </Link>
         </div>
       </div>
+    </div>
+  );
+}
+
+function PackageCard({ p }: { p: typeof packages[number] }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div
+      className={`relative h-full rounded-3xl p-7 transition-all hover:-translate-y-1 ${
+        p.featured
+          ? "gradient-brand text-primary-foreground shadow-glow"
+          : "glass shadow-card hover:shadow-card"
+      }`}
+    >
+      {p.featured && p.badge && (
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center bg-background text-foreground rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.18em] font-bold shadow-card whitespace-nowrap">
+          {p.badge}
+        </div>
+      )}
+      <div className={`text-[11px] uppercase tracking-[0.22em] font-bold ${p.featured ? "text-primary-foreground/80" : "text-primary"}`}>
+        {p.tier}
+      </div>
+      <div className="mt-4 text-2xl md:text-[1.75rem] font-display font-black leading-none">
+        {p.price}
+      </div>
+      <div className={`mt-2 text-xs ${p.featured ? "text-primary-foreground/85" : "text-muted-foreground"}`}>
+        {p.note}
+      </div>
+      <div className={`mt-6 h-px ${p.featured ? "bg-primary-foreground/25" : "bg-border"}`} />
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className={`mt-5 w-full inline-flex items-center justify-between gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition ${
+          p.featured
+            ? "bg-background text-foreground hover:scale-[1.02]"
+            : "gradient-brand text-primary-foreground hover:scale-[1.02]"
+        }`}
+      >
+        {open ? "Hide Checklist" : "Tap to View Checklist"}
+        <ChevronDown size={16} className={`transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <ul className="mt-5 space-y-3">
+          {p.features.map((f) => (
+            <li key={f} className="flex items-start gap-3 text-sm">
+              <span className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${p.featured ? "bg-primary-foreground/20" : "bg-primary/10 text-primary"}`}>
+                <Check size={12} />
+              </span>
+              <span className={p.featured ? "" : "text-foreground/90"}>{f}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
