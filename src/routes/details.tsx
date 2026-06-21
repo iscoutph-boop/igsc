@@ -212,10 +212,34 @@ function DetailsPage() {
 
   const handleServiceClick = (f: Filter) => {
     setFilter(f);
+    // Push a new history entry so the browser Back button returns the user
+    // to their previous scroll position instead of staying on the portfolio.
+    if (typeof window !== "undefined") {
+      const prevScroll = window.scrollY;
+      window.history.replaceState(
+        { ...(window.history.state ?? {}), __prevScroll: prevScroll },
+        "",
+        window.location.pathname + window.location.search + window.location.hash,
+      );
+      window.history.pushState({ __portfolioJump: true, filter: f }, "", "#portfolio");
+    }
     requestAnimationFrame(() => {
       document.getElementById("portfolio")?.scrollIntoView({ behavior: "smooth", block: "start" });
     });
   };
+
+  useEffect(() => {
+    const onPop = (e: PopStateEvent) => {
+      const prev = (e.state && (e.state.__prevScroll as number | undefined)) ?? undefined;
+      if (typeof prev === "number") {
+        requestAnimationFrame(() => {
+          window.scrollTo({ top: prev, behavior: "smooth" });
+        });
+      }
+    };
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
 
 
