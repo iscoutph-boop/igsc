@@ -384,10 +384,12 @@ function DetailsCard({
   booking,
   onReschedule,
   onCancel,
+  hideActions,
 }: {
   booking: BookingRecord;
   onReschedule: () => void;
   onCancel: () => void;
+  hideActions?: boolean;
 }) {
   const reference = getBookingValue(booking, "bookingReference", "Booking Reference");
   const fullName = getBookingValue(booking, "fullName", "Full Name");
