@@ -14,7 +14,7 @@ export const Route = createFileRoute("/")({
       { title: "IG Sabroso Construction — Your Dependable Building Partner" },
       { name: "description", content: "Premium construction, renovation, and civil works in Dasmariñas, Cavite. Build with confidence — build with Sabroso." },
       { property: "og:title", content: "IG Sabroso Construction" },
-      { property: "og:description", content: "Dependable building solutions for homes, renovations, and civil works." },
+      { property: "og:description", content: "Already booked an appointment? View details, reschedule, or cancel anytime here." },
     ],
   }),
   component: HomePage,
@@ -56,8 +56,8 @@ function HomePage() {
           className="absolute top-28 sm:top-32 md:top-40 left-4 sm:left-5 md:left-12 max-w-[78vw] sm:max-w-[260px] z-10"
         >
           <div className="h-0.5 w-10 gradient-brand rounded-full mb-3" />
-          <p className="text-xs md:text-sm text-foreground/85 font-medium leading-relaxed">
-            Dependable building solutions for homes, renovations, and civil works.
+          <p className="text-xs md:text-sm text-foreground/85 font-medium leading-relaxed whitespace-pre-line">
+            Already booked an appointment?{"\n"}View details, reschedule, or cancel anytime here.
           </p>
           <button
             onClick={() => setBookingOpen(true)}
@@ -65,7 +65,7 @@ function HomePage() {
             className="mt-5 group inline-flex items-center gap-2.5 rounded-full px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold tracking-wide bg-white/85 dark:bg-white/10 backdrop-blur-md text-foreground border border-white/40 shadow-card hover:bg-white hover:scale-[1.02] transition"
           >
             <CalendarCheck size={16} className="text-primary" />
-            Check Booking
+            Manage Booking
           </button>
         </motion.div>
 
