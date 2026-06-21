@@ -558,8 +558,17 @@ function RescheduleForm({
         });
         const rawBooking = (refreshedResult.booking ?? (refreshedResult.data?.booking as BookingRecord | undefined)) as Record<string, unknown> | undefined;
         if (rawBooking) {
+          // Strip any backend-formatted schedule fields so the UI re-renders
+          // from the freshly selected Philippine-time values (no TZ shift).
+          const cleaned = { ...rawBooking };
+          delete cleaned.preferredSchedule;
+          delete cleaned["Preferred Schedule"];
+          delete cleaned.preferredDate;
+          delete cleaned["Preferred Date"];
+          delete cleaned.preferredTime;
+          delete cleaned["Preferred Time"];
           const merged: Record<string, unknown> = {
-            ...rawBooking,
+            ...cleaned,
             bookingReference: String(rawBooking.bookingReference ?? rawBooking["Booking Reference"] ?? booking.bookingReference),
             preferredDate: newPreferredDate,
             preferredTime: newPreferredTime,
