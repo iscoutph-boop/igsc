@@ -16,6 +16,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PageTransition } from "@/components/page-transition";
 import { CheckBookingModal, ReferencePill } from "@/components/booking-modals";
+import { SchedulePicker } from "@/components/schedule-picker";
 import { callCRM } from "@/lib/bookings";
 
 export const Route = createFileRoute("/consultation")({
@@ -35,6 +36,9 @@ function ConsultationPage() {
   const [manageOpen, setManageOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [preferredDate, setPreferredDate] = useState<Date | undefined>(undefined);
+  const [preferredTime, setPreferredTime] = useState<string>("");
+
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -67,6 +71,8 @@ function ConsultationPage() {
       if (!ref) throw new Error("We couldn't generate your booking reference. Please try again.");
       setBookingReference(ref);
       form.reset();
+      setPreferredDate(undefined);
+      setPreferredTime("");
       // Scroll the confirmation card into view
       setTimeout(() => {
         document.getElementById("consultation-confirmation")?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -171,8 +177,16 @@ function ConsultationPage() {
 
                   <Field label="Project Location" name="projectLocation" placeholder="City, Province" />
 
-                  <Field label="Preferred Date" name="preferredDate" type="date" />
-                  <Field label="Preferred Time" name="preferredTime" type="time" />
+                  <div className="sm:col-span-2">
+                    <SchedulePicker
+                      date={preferredDate}
+                      time={preferredTime}
+                      onDateChange={setPreferredDate}
+                      onTimeChange={setPreferredTime}
+                      dateName="preferredDate"
+                      timeName="preferredTime"
+                    />
+                  </div>
 
                   <div className="sm:col-span-2">
                     <Label>Budget Range</Label>
