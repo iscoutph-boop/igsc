@@ -56,8 +56,9 @@ function HomePage() {
           className="absolute top-28 sm:top-32 md:top-40 left-4 sm:left-5 md:left-12 max-w-[78vw] sm:max-w-[260px] z-10"
         >
           <div className="h-0.5 w-10 gradient-brand rounded-full mb-3" />
-          <p className="text-xs md:text-sm text-foreground/85 font-medium leading-relaxed whitespace-pre-line">
-            Already booked an appointment?{"\n"}View details, reschedule, or cancel anytime here.
+          <p className="text-xs md:text-sm text-foreground/85 font-medium leading-relaxed">
+            Already booked an appointment?<br />
+            <span className="text-foreground/75">Manage your booking here — view details, reschedule, or cancel anytime.</span>
           </p>
           <button
             onClick={() => setBookingOpen(true)}

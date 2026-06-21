@@ -209,6 +209,12 @@ function ConsultationPage() {
 
         <SiteFooter />
       </main>
+
+      <CheckBookingModal
+        open={manageOpen}
+        onClose={() => setManageOpen(false)}
+        initialReference={submitted?.reference}
+      />
     </PageTransition>
   );
 }
