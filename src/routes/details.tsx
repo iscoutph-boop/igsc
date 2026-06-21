@@ -576,7 +576,7 @@ function DetailsPage() {
             </h2>
           </Reveal>
 
-          <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="mt-14 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
             {steps.map((s, i) => (
               <Reveal key={s.n} delay={i * 0.08}>
                 <div className="relative glass rounded-3xl p-7 h-full">
