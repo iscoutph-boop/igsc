@@ -62,7 +62,7 @@ function HomePage() {
           </p>
           <button
             onClick={() => setBookingOpen(true)}
-            aria-label="Check Booking Status"
+            aria-label="Manage your booking"
             className="mt-5 group inline-flex items-center gap-2.5 rounded-full px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold tracking-wide bg-white/85 dark:bg-white/10 backdrop-blur-md text-foreground border border-white/40 shadow-card hover:bg-white hover:scale-[1.02] transition"
           >
             <CalendarCheck size={16} className="text-primary" />
