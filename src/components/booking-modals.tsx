@@ -15,8 +15,12 @@ import {
   ArrowLeft,
   Copy,
   Check,
+  Phone,
+  Mail,
+  Wallet,
+  StickyNote,
 } from "lucide-react";
-import { findBooking, updateBooking, type BookingRecord } from "@/lib/bookings";
+import { callCRM, type BookingRecord } from "@/lib/bookings";
 
 function useEscClose(open: boolean, onClose: () => void) {
   useEffect(() => {
@@ -48,11 +52,13 @@ function Backdrop({ children, onClose }: { children: React.ReactNode; onClose: (
   );
 }
 
+type LookupContext = { reference: string; contact: string };
+
 type View =
   | { kind: "lookup" }
-  | { kind: "details"; booking: BookingRecord }
-  | { kind: "reschedule"; booking: BookingRecord }
-  | { kind: "cancel"; booking: BookingRecord }
+  | { kind: "details"; booking: BookingRecord; ctx: LookupContext }
+  | { kind: "reschedule"; booking: BookingRecord; ctx: LookupContext }
+  | { kind: "cancel"; booking: BookingRecord; ctx: LookupContext }
   | { kind: "reschedule-done"; booking: BookingRecord }
   | { kind: "cancel-done"; booking: BookingRecord };
 
@@ -70,36 +76,47 @@ export function CheckBookingModal({
   const [ref, setRef] = useState("");
   const [contact, setContact] = useState("");
   const [err, setErr] = useState<string | null>(null);
-  const [notFound, setNotFound] = useState(false);
+  const [notFoundMsg, setNotFoundMsg] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     if (!open) {
       setView({ kind: "lookup" });
-      setRef(""); setContact(""); setErr(null); setLoading(false); setNotFound(false);
+      setRef(""); setContact(""); setErr(null); setLoading(false); setNotFoundMsg(null);
     } else if (initialReference) {
       setRef(initialReference);
     }
   }, [open, initialReference]);
 
-  const submitLookup = (e: React.FormEvent) => {
+  const submitLookup = async (e: React.FormEvent) => {
     e.preventDefault();
-    setNotFound(false);
+    setNotFoundMsg(null);
     if (!ref.trim() || !contact.trim()) {
       setErr("Please complete both fields to find your booking.");
       return;
     }
     setErr(null);
     setLoading(true);
-    setTimeout(() => {
-      const found = findBooking(ref, contact);
-      setLoading(false);
-      if (found) {
-        setView({ kind: "details", booking: found });
+    try {
+      const data = await callCRM<{ booking?: BookingRecord }>("findBooking", {
+        bookingReference: ref.trim(),
+        contact: contact.trim(),
+      });
+      const booking = data.booking ?? (data.data?.booking as BookingRecord | undefined);
+      if (!booking) {
+        setNotFoundMsg("Booking not found. Please check your booking reference and contact detail.");
       } else {
-        setNotFound(true);
+        setView({ kind: "details", booking, ctx: { reference: ref.trim(), contact: contact.trim() } });
       }
-    }, 500);
+    } catch (e2) {
+      setNotFoundMsg(
+        e2 instanceof Error && e2.message
+          ? e2.message
+          : "Booking not found. Please check your booking reference and contact detail.",
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -163,14 +180,12 @@ export function CheckBookingModal({
                     </div>
                     {err && <p className="text-xs text-destructive">{err}</p>}
 
-                    {notFound && (
+                    {notFoundMsg && (
                       <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 flex items-start gap-3">
                         <AlertCircle size={18} className="text-destructive shrink-0 mt-0.5" />
                         <div>
                           <div className="text-sm font-bold text-destructive">Booking not found</div>
-                          <div className="text-xs text-muted-foreground mt-0.5">
-                            Please check your booking reference and contact detail.
-                          </div>
+                          <div className="text-xs text-muted-foreground mt-0.5">{notFoundMsg}</div>
                         </div>
                       </div>
                     )}
@@ -181,7 +196,7 @@ export function CheckBookingModal({
                       className="w-full inline-flex items-center justify-center gap-2 gradient-brand text-primary-foreground rounded-full px-6 py-3.5 font-semibold shadow-glow hover:scale-[1.01] transition disabled:opacity-70"
                     >
                       {loading ? <Loader2 size={16} className="animate-spin" /> : <CalendarCheck size={16} />}
-                      {loading ? "Searching…" : "Find My Booking"}
+                      {loading ? "Checking..." : "Find My Booking"}
                     </button>
                   </form>
                 </>
@@ -190,14 +205,15 @@ export function CheckBookingModal({
               {view.kind === "details" && (
                 <DetailsCard
                   booking={view.booking}
-                  onReschedule={() => setView({ kind: "reschedule", booking: view.booking })}
-                  onCancel={() => setView({ kind: "cancel", booking: view.booking })}
+                  onReschedule={() => setView({ kind: "reschedule", booking: view.booking, ctx: view.ctx })}
+                  onCancel={() => setView({ kind: "cancel", booking: view.booking, ctx: view.ctx })}
                 />
               )}
 
               {view.kind === "reschedule" && (
                 <RescheduleForm
                   booking={view.booking}
+                  ctx={view.ctx}
                   onDone={(updated) => setView({ kind: "reschedule-done", booking: updated })}
                 />
               )}
@@ -205,7 +221,8 @@ export function CheckBookingModal({
               {view.kind === "cancel" && (
                 <CancelConfirm
                   booking={view.booking}
-                  onBack={() => setView({ kind: "details", booking: view.booking })}
+                  ctx={view.ctx}
+                  onBack={() => setView({ kind: "details", booking: view.booking, ctx: view.ctx })}
                   onDone={(updated) => setView({ kind: "cancel-done", booking: updated })}
                 />
               )}
@@ -213,9 +230,9 @@ export function CheckBookingModal({
               {view.kind === "reschedule-done" && (
                 <ResultCard
                   tone="success"
-                  title="Reschedule request received"
+                  title="Reschedule Request Received"
                   message="Your reschedule request has been received. Our team will contact you to confirm the new schedule."
-                  reference={view.booking.reference}
+                  reference={view.booking.bookingReference}
                   onClose={onClose}
                 />
               )}
@@ -223,9 +240,9 @@ export function CheckBookingModal({
               {view.kind === "cancel-done" && (
                 <ResultCard
                   tone="info"
-                  title="Cancellation request received"
+                  title="Cancellation Request Received"
                   message="Your booking cancellation request has been received."
-                  reference={view.booking.reference}
+                  reference={view.booking.bookingReference}
                   onClose={onClose}
                 />
               )}
@@ -238,9 +255,10 @@ export function CheckBookingModal({
 }
 
 function statusBadgeClasses(status: string) {
-  if (status === "Confirmed" || status === "Site Visit Scheduled") return "bg-emerald-500 text-white";
-  if (status === "Cancelled" || status === "Cancellation Requested") return "bg-destructive text-destructive-foreground";
-  if (status === "Reschedule Requested") return "bg-primary text-primary-foreground";
+  const s = status.toLowerCase();
+  if (s.includes("confirm") || s.includes("scheduled")) return "bg-emerald-500 text-white";
+  if (s.includes("cancel")) return "bg-destructive text-destructive-foreground";
+  if (s.includes("reschedule")) return "bg-primary text-primary-foreground";
   return "bg-amber-500 text-white";
 }
 
@@ -253,15 +271,13 @@ function DetailsCard({
   onReschedule: () => void;
   onCancel: () => void;
 }) {
-  const submitted = new Date(booking.submittedAt).toLocaleDateString(undefined, {
-    year: "numeric", month: "short", day: "numeric",
-  });
-  const cancelled = booking.status === "Cancelled" || booking.status === "Cancellation Requested";
+  const status = booking.bookingStatus || "Pending Confirmation";
+  const cancelled = status.toLowerCase().includes("cancel");
 
   return (
     <>
       <h3 className="mt-4 text-2xl font-display font-bold">Your Booking</h3>
-      <p className="mt-1 text-sm text-muted-foreground">Reference {booking.reference}</p>
+      <p className="mt-1 text-sm text-muted-foreground">Reference {booking.bookingReference}</p>
 
       <motion.div
         initial={{ opacity: 0, y: 12 }}
@@ -270,26 +286,22 @@ function DetailsCard({
       >
         <div className="flex items-center justify-between gap-3">
           <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground font-bold">Booking Found</div>
-          <span className={`text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full ${statusBadgeClasses(booking.status)}`}>
-            {booking.status}
+          <span className={`text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full ${statusBadgeClasses(status)}`}>
+            {status}
           </span>
         </div>
         <div className="mt-3 grid gap-3 text-sm">
-          <Row icon={<User size={14} />} label="Client" value={booking.client} />
+          <Row icon={<FileText size={14} />} label="Booking Reference" value={booking.bookingReference} />
+          <Row icon={<User size={14} />} label="Full Name" value={booking.fullName} />
+          <Row icon={<Phone size={14} />} label="Phone Number" value={booking.phoneNumber} />
+          {booking.emailAddress && <Row icon={<Mail size={14} />} label="Email Address" value={booking.emailAddress} />}
           <Row icon={<FileText size={14} />} label="Project Type" value={booking.projectType} />
-          <Row icon={<Clock size={14} />} label="Submitted" value={submitted} />
-          <Row
-            icon={<CalendarClock size={14} />}
-            label="Appointment Schedule"
-            value={booking.schedule ?? "To be confirmed by our team"}
-          />
-          {booking.reschedule && (
-            <Row
-              icon={<MapPin size={14} />}
-              label="Reschedule Requested"
-              value={`${booking.reschedule.date} · ${booking.reschedule.time}`}
-            />
-          )}
+          {booking.projectLocation && <Row icon={<MapPin size={14} />} label="Project Location" value={booking.projectLocation} />}
+          {booking.preferredDate && <Row icon={<CalendarClock size={14} />} label="Preferred Date" value={booking.preferredDate} />}
+          {booking.preferredTime && <Row icon={<Clock size={14} />} label="Preferred Time" value={booking.preferredTime} />}
+          {booking.budgetRange && <Row icon={<Wallet size={14} />} label="Budget Range" value={booking.budgetRange} />}
+          {booking.projectDetails && <Row icon={<FileText size={14} />} label="Project Details" value={booking.projectDetails} />}
+          {booking.notes && <Row icon={<StickyNote size={14} />} label="Notes" value={booking.notes} />}
         </div>
       </motion.div>
 
@@ -313,14 +325,22 @@ function DetailsCard({
   );
 }
 
-function RescheduleForm({ booking, onDone }: { booking: BookingRecord; onDone: (b: BookingRecord) => void }) {
+function RescheduleForm({
+  booking,
+  ctx,
+  onDone,
+}: {
+  booking: BookingRecord;
+  ctx: LookupContext;
+  onDone: (b: BookingRecord) => void;
+}) {
   const [date, setDate] = useState("");
   const [time, setTime] = useState("");
   const [notes, setNotes] = useState("");
   const [err, setErr] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!date || !time) {
       setErr("Please choose a preferred date and time.");
@@ -328,14 +348,29 @@ function RescheduleForm({ booking, onDone }: { booking: BookingRecord; onDone: (
     }
     setErr(null);
     setLoading(true);
-    setTimeout(() => {
-      const updated = updateBooking(booking.reference, {
-        status: "Reschedule Requested",
-        reschedule: { date, time, notes, requestedAt: new Date().toISOString() },
+    try {
+      await callCRM("rescheduleBooking", {
+        bookingReference: booking.bookingReference,
+        contact: ctx.contact,
+        newPreferredDate: date,
+        newPreferredTime: time,
+        rescheduleNotes: notes,
       });
+      onDone({
+        ...booking,
+        preferredDate: date,
+        preferredTime: time,
+        bookingStatus: "Reschedule Requested",
+      });
+    } catch (e2) {
+      setErr(
+        e2 instanceof Error && e2.message
+          ? e2.message
+          : "We couldn't submit your reschedule request. Please try again.",
+      );
+    } finally {
       setLoading(false);
-      onDone(updated ?? booking);
-    }, 500);
+    }
   };
 
   return (
@@ -348,7 +383,7 @@ function RescheduleForm({ booking, onDone }: { booking: BookingRecord; onDone: (
       <form onSubmit={submit} className="mt-5 space-y-4">
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Preferred Date</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">New Preferred Date</label>
             <input
               type="date"
               value={date}
@@ -357,7 +392,7 @@ function RescheduleForm({ booking, onDone }: { booking: BookingRecord; onDone: (
             />
           </div>
           <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Preferred Time</label>
+            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">New Preferred Time</label>
             <input
               type="time"
               value={time}
@@ -367,7 +402,7 @@ function RescheduleForm({ booking, onDone }: { booking: BookingRecord; onDone: (
           </div>
         </div>
         <div>
-          <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Notes</label>
+          <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Reason / Notes</label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
@@ -376,14 +411,19 @@ function RescheduleForm({ booking, onDone }: { booking: BookingRecord; onDone: (
             className="mt-1.5 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none"
           />
         </div>
-        {err && <p className="text-xs text-destructive">{err}</p>}
+        {err && (
+          <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 flex items-start gap-3">
+            <AlertCircle size={18} className="text-destructive shrink-0 mt-0.5" />
+            <div className="text-xs text-muted-foreground">{err}</div>
+          </div>
+        )}
         <button
           type="submit"
           disabled={loading}
           className="w-full inline-flex items-center justify-center gap-2 gradient-brand text-primary-foreground rounded-full px-6 py-3.5 font-semibold shadow-glow hover:scale-[1.01] transition disabled:opacity-70"
         >
           {loading ? <Loader2 size={16} className="animate-spin" /> : <CalendarClock size={16} />}
-          {loading ? "Submitting…" : "Submit Reschedule Request"}
+          {loading ? "Submitting..." : "Submit Reschedule Request"}
         </button>
       </form>
     </>
@@ -392,31 +432,45 @@ function RescheduleForm({ booking, onDone }: { booking: BookingRecord; onDone: (
 
 function CancelConfirm({
   booking,
+  ctx,
   onBack,
   onDone,
 }: {
   booking: BookingRecord;
+  ctx: LookupContext;
   onBack: () => void;
   onDone: (b: BookingRecord) => void;
 }) {
   const [loading, setLoading] = useState(false);
-  const confirm = () => {
+  const [reason, setReason] = useState("");
+  const [err, setErr] = useState<string | null>(null);
+
+  const confirm = async () => {
+    setErr(null);
     setLoading(true);
-    setTimeout(() => {
-      const updated = updateBooking(booking.reference, {
-        status: "Cancellation Requested",
-        cancelledAt: new Date().toISOString(),
+    try {
+      await callCRM("cancelBooking", {
+        bookingReference: booking.bookingReference,
+        contact: ctx.contact,
+        cancelReason: reason,
       });
+      onDone({ ...booking, bookingStatus: "Cancellation Requested" });
+    } catch (e2) {
+      setErr(
+        e2 instanceof Error && e2.message
+          ? e2.message
+          : "We couldn't submit your cancellation request. Please try again.",
+      );
+    } finally {
       setLoading(false);
-      onDone(updated ?? booking);
-    }, 500);
+    }
   };
 
   return (
     <>
       <h3 className="mt-4 text-2xl font-display font-bold">Cancel Booking?</h3>
       <p className="mt-1 text-sm text-muted-foreground">
-        Are you sure you want to cancel booking <span className="font-semibold text-foreground">{booking.reference}</span>? This cannot be undone.
+        Are you sure you want to request cancellation for booking <span className="font-semibold text-foreground">{booking.bookingReference}</span>?
       </p>
 
       <div className="mt-5 rounded-2xl border border-destructive/30 bg-destructive/10 p-4 flex items-start gap-3">
@@ -426,10 +480,29 @@ function CancelConfirm({
         </div>
       </div>
 
+      <div className="mt-4">
+        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Cancellation Reason (optional)</label>
+        <textarea
+          value={reason}
+          onChange={(e) => setReason(e.target.value)}
+          rows={3}
+          placeholder="Let us know why you're cancelling (optional)."
+          className="mt-1.5 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40 resize-none"
+        />
+      </div>
+
+      {err && (
+        <div className="mt-3 rounded-2xl border border-destructive/30 bg-destructive/10 p-4 flex items-start gap-3">
+          <AlertCircle size={18} className="text-destructive shrink-0 mt-0.5" />
+          <div className="text-xs text-muted-foreground">{err}</div>
+        </div>
+      )}
+
       <div className="mt-5 grid grid-cols-2 gap-3">
         <button
           onClick={onBack}
-          className="inline-flex items-center justify-center gap-2 rounded-full bg-surface border border-border px-5 py-3 text-sm font-semibold hover:bg-muted transition"
+          disabled={loading}
+          className="inline-flex items-center justify-center gap-2 rounded-full bg-surface border border-border px-5 py-3 text-sm font-semibold hover:bg-muted transition disabled:opacity-70"
         >
           Keep Booking
         </button>
@@ -439,7 +512,7 @@ function CancelConfirm({
           className="inline-flex items-center justify-center gap-2 rounded-full bg-destructive text-destructive-foreground px-5 py-3 text-sm font-semibold hover:opacity-90 transition disabled:opacity-70"
         >
           {loading ? <Loader2 size={16} className="animate-spin" /> : <XCircle size={16} />}
-          {loading ? "Submitting…" : "Confirm Cancellation"}
+          {loading ? "Submitting..." : "Confirm Cancellation"}
         </button>
       </div>
     </>
@@ -492,7 +565,7 @@ function Row({ icon, label, value }: { icon: React.ReactNode; label: string; val
       <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">{icon}</span>
       <div className="min-w-0">
         <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">{label}</div>
-        <div className="text-sm font-semibold break-words">{value}</div>
+        <div className="text-sm font-semibold break-words whitespace-pre-wrap">{value}</div>
       </div>
     </div>
   );
@@ -522,41 +595,5 @@ export function ReferencePill({ reference }: { reference: string }) {
         {copied ? <Check size={12} /> : <Copy size={12} />}
       </span>
     </button>
-  );
-}
-
-// ConsultationModal kept for compatibility (not used by any current page).
-const PROJECT_TYPES = ["Residential Build", "Renovation", "Construction Management", "Commercial", "Apartment"];
-export function ConsultationModal({ open, onClose }: { open: boolean; onClose: () => void }) {
-  useEscClose(open, onClose);
-  const [form, setForm] = useState({ name: "", phone: "", email: "", type: PROJECT_TYPES[0], date: "", message: "" });
-  const [done, setDone] = useState(false);
-  useEffect(() => { if (!open) { setDone(false); } }, [open]);
-  return (
-    <AnimatePresence>
-      {open && (
-        <Backdrop onClose={onClose}>
-          <motion.div
-            initial={{ opacity: 0, y: 24, scale: 0.97 }}
-            animate={{ opacity: 1, y: 0, scale: 1 }}
-            exit={{ opacity: 0, y: 16, scale: 0.97 }}
-            className="relative bg-background rounded-3xl shadow-glow border border-border overflow-hidden"
-          >
-            <button onClick={onClose} aria-label="Close" className="absolute right-4 top-4 z-10 inline-flex h-9 w-9 items-center justify-center rounded-full bg-muted hover:bg-muted/70 transition">
-              <X size={16} />
-            </button>
-            <div className="px-7 pt-7 pb-7">
-              <h3 className="text-2xl font-display font-bold">Request a Consultation</h3>
-              <p className="mt-1 text-sm text-muted-foreground">Tell us about your project and our team will contact you to confirm your site visit.</p>
-              {!done ? (
-                <button onClick={() => setDone(true)} className="mt-6 inline-flex items-center justify-center gap-2 gradient-brand text-primary-foreground rounded-full px-6 py-3 text-sm font-semibold">Submit</button>
-              ) : (
-                <p className="mt-6 text-sm">Submitted — {form.name}</p>
-              )}
-            </div>
-          </motion.div>
-        </Backdrop>
-      )}
-    </AnimatePresence>
   );
 }

@@ -1,12 +1,22 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { Phone, Mail, MapPin, Clock, ArrowRight, CheckCircle2, CalendarCheck } from "lucide-react";
+import {
+  Phone,
+  Mail,
+  MapPin,
+  Clock,
+  ArrowRight,
+  CheckCircle2,
+  CalendarCheck,
+  AlertCircle,
+  Loader2,
+} from "lucide-react";
 import { useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PageTransition } from "@/components/page-transition";
 import { CheckBookingModal, ReferencePill } from "@/components/booking-modals";
-import { saveBooking, type BookingRecord } from "@/lib/bookings";
+import { callCRM } from "@/lib/bookings";
 
 export const Route = createFileRoute("/consultation")({
   head: () => ({
@@ -21,24 +31,52 @@ export const Route = createFileRoute("/consultation")({
 });
 
 function ConsultationPage() {
-  const [submitted, setSubmitted] = useState<BookingRecord | null>(null);
+  const [bookingReference, setBookingReference] = useState<string | null>(null);
   const [manageOpen, setManageOpen] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [errorMsg, setErrorMsg] = useState<string | null>(null);
 
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const form = e.target as HTMLFormElement;
+    if (loading) return;
+    const form = e.currentTarget;
     const fd = new FormData(form);
-    const record = saveBooking({
-      client: String(fd.get("name") ?? ""),
-      phone: String(fd.get("phone") ?? ""),
-      email: String(fd.get("email") ?? ""),
-      projectType: String(fd.get("projectType") ?? ""),
-      details: String(fd.get("details") ?? ""),
-    });
-    setSubmitted(record);
-    form.reset();
-  };
 
+    const payload = {
+      fullName: String(fd.get("fullName") ?? "").trim(),
+      phoneNumber: String(fd.get("phoneNumber") ?? "").trim(),
+      emailAddress: String(fd.get("emailAddress") ?? "").trim(),
+      projectType: String(fd.get("projectType") ?? "").trim(),
+      projectLocation: String(fd.get("projectLocation") ?? "").trim(),
+      preferredDate: String(fd.get("preferredDate") ?? "").trim(),
+      preferredTime: String(fd.get("preferredTime") ?? "").trim(),
+      budgetRange: String(fd.get("budgetRange") ?? "").trim(),
+      projectDetails: String(fd.get("projectDetails") ?? "").trim(),
+      leadSource: "Website",
+    };
+
+    setErrorMsg(null);
+    setLoading(true);
+    try {
+      const data = await callCRM("createBooking", payload);
+      const ref = data.bookingReference || data.booking?.bookingReference;
+      if (!ref) throw new Error("We couldn't generate your booking reference. Please try again.");
+      setBookingReference(ref);
+      form.reset();
+      // Scroll the confirmation card into view
+      setTimeout(() => {
+        document.getElementById("consultation-confirmation")?.scrollIntoView({ behavior: "smooth", block: "start" });
+      }, 50);
+    } catch (err) {
+      setErrorMsg(
+        err instanceof Error && err.message
+          ? err.message
+          : "We couldn't submit your request right now. Please try again in a moment.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <PageTransition>
@@ -69,7 +107,6 @@ function ConsultationPage() {
             </motion.div>
 
             <div className="mt-16 grid lg:grid-cols-5 gap-8">
-              {/* Contact info */}
               <motion.aside
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -95,7 +132,6 @@ function ConsultationPage() {
                 </div>
               </motion.aside>
 
-              {/* Form */}
               <motion.div
                 initial={{ opacity: 0, x: 20 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -107,12 +143,12 @@ function ConsultationPage() {
                 <p className="text-sm text-muted-foreground mt-1">Tell us about your project and our team will contact you to confirm your site visit.</p>
 
                 <form onSubmit={onSubmit} className="mt-8 grid sm:grid-cols-2 gap-5">
-                  <Field label="Full Name" name="name" placeholder="Juan Dela Cruz" required />
-                  <Field label="Phone Number" name="phone" placeholder="+63 ..." required />
-                  <Field label="Email Address" name="email" type="email" placeholder="you@example.com" required className="sm:col-span-2" />
+                  <Field label="Full Name" name="fullName" placeholder="Juan Dela Cruz" required />
+                  <Field label="Phone Number" name="phoneNumber" placeholder="+63 ..." required />
+                  <Field label="Email Address" name="emailAddress" type="email" placeholder="you@example.com" className="sm:col-span-2" />
 
-                  <div className="sm:col-span-2">
-                    <Label>Project Type</Label>
+                  <div>
+                    <Label>Project Type <span className="text-destructive">*</span></Label>
                     <select
                       name="projectType"
                       required
@@ -129,10 +165,31 @@ function ConsultationPage() {
                     </select>
                   </div>
 
+                  <Field label="Project Location" name="projectLocation" placeholder="City, Province" />
+
+                  <Field label="Preferred Date" name="preferredDate" type="date" />
+                  <Field label="Preferred Time" name="preferredTime" type="time" />
+
                   <div className="sm:col-span-2">
-                    <Label>Project Details</Label>
+                    <Label>Budget Range</Label>
+                    <select
+                      name="budgetRange"
+                      defaultValue=""
+                      className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
+                    >
+                      <option value="">Prefer not to say</option>
+                      <option>Below ₱500,000</option>
+                      <option>₱500,000 – ₱1,000,000</option>
+                      <option>₱1,000,000 – ₱3,000,000</option>
+                      <option>₱3,000,000 – ₱5,000,000</option>
+                      <option>Above ₱5,000,000</option>
+                    </select>
+                  </div>
+
+                  <div className="sm:col-span-2">
+                    <Label>Project Details <span className="text-destructive">*</span></Label>
                     <textarea
-                      name="details"
+                      name="projectDetails"
                       required
                       rows={5}
                       placeholder="Tell us about your project, location, timeline, and preferred consultation schedule."
@@ -140,22 +197,34 @@ function ConsultationPage() {
                     />
                   </div>
 
+                  {errorMsg && (
+                    <div className="sm:col-span-2 rounded-2xl border border-destructive/30 bg-destructive/10 p-4 flex items-start gap-3">
+                      <AlertCircle size={18} className="text-destructive shrink-0 mt-0.5" />
+                      <div>
+                        <div className="text-sm font-bold text-destructive">We couldn't submit your request</div>
+                        <div className="text-xs text-muted-foreground mt-0.5">{errorMsg}</div>
+                      </div>
+                    </div>
+                  )}
+
                   <div className="sm:col-span-2 flex justify-end">
                     <button
                       type="submit"
-                      className="group inline-flex items-center gap-3 gradient-brand text-primary-foreground rounded-full pl-7 pr-2 py-3 font-semibold shadow-glow hover:scale-[1.02] transition"
+                      disabled={loading}
+                      className="group inline-flex items-center gap-3 gradient-brand text-primary-foreground rounded-full pl-7 pr-2 py-3 font-semibold shadow-glow hover:scale-[1.02] transition disabled:opacity-70 disabled:hover:scale-100"
                     >
-                      Request Consultation
+                      {loading ? "Submitting..." : "Request Consultation"}
                       <span className="bg-background/25 rounded-full p-2 group-hover:translate-x-1 transition-transform">
-                        <ArrowRight size={16} />
+                        {loading ? <Loader2 size={16} className="animate-spin" /> : <ArrowRight size={16} />}
                       </span>
                     </button>
                   </div>
                 </form>
 
                 <AnimatePresence>
-                  {submitted && (
+                  {bookingReference && (
                     <motion.div
+                      id="consultation-confirmation"
                       initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
@@ -176,7 +245,7 @@ function ConsultationPage() {
                       <div className="mt-6">
                         <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground font-bold">Your Booking Reference</div>
                         <div className="mt-2.5">
-                          <ReferencePill reference={submitted.reference} />
+                          <ReferencePill reference={bookingReference} />
                         </div>
                         <p className="mt-3 text-xs text-muted-foreground">
                           Please save this reference number. You'll need it to manage, reschedule, or cancel your booking.
@@ -193,7 +262,7 @@ function ConsultationPage() {
                         </button>
                         <button
                           type="button"
-                          onClick={() => setSubmitted(null)}
+                          onClick={() => setBookingReference(null)}
                           className="inline-flex items-center gap-2 rounded-full bg-surface border border-border px-5 py-3 text-sm font-semibold hover:bg-muted transition"
                         >
                           Submit another request
@@ -213,7 +282,7 @@ function ConsultationPage() {
       <CheckBookingModal
         open={manageOpen}
         onClose={() => setManageOpen(false)}
-        initialReference={submitted?.reference}
+        initialReference={bookingReference ?? undefined}
       />
     </PageTransition>
   );
@@ -244,7 +313,7 @@ function Field({
 }) {
   return (
     <div className={className}>
-      <Label>{label}</Label>
+      <Label>{label}{required && <span className="text-destructive"> *</span>}</Label>
       <input
         name={name}
         type={type}
