@@ -112,9 +112,9 @@ export function SiteHeader({ floating = false }: { floating?: boolean }) {
 
         <div className="ml-auto flex items-center gap-2 md:gap-3">
           <div className="hidden md:flex items-center gap-1.5 text-muted-foreground">
-            <a aria-label="Facebook" href="#" className="p-2 rounded-full hover:text-primary hover:bg-accent transition"><Facebook size={16} /></a>
-            <a aria-label="Instagram" href="#" className="p-2 rounded-full hover:text-primary hover:bg-accent transition"><Instagram size={16} /></a>
-            <a aria-label="LinkedIn" href="#" className="p-2 rounded-full hover:text-primary hover:bg-accent transition"><Linkedin size={16} /></a>
+            <a aria-label="Facebook" href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full hover:text-primary hover:bg-accent transition"><Facebook size={16} /></a>
+            <a aria-label="Instagram" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full hover:text-primary hover:bg-accent transition"><Instagram size={16} /></a>
+            <a aria-label="TikTok" href={TIKTOK_URL} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full hover:text-primary hover:bg-accent transition"><TikTokIcon size={16} /></a>
           </div>
 
           <button
