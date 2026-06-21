@@ -262,6 +262,17 @@ function statusBadgeClasses(status: string) {
   return "bg-amber-500 text-white";
 }
 
+function getBookingValue(booking: Record<string, unknown> | BookingRecord, ...keys: string[]): string {
+  const b = booking as Record<string, unknown>;
+  for (const key of keys) {
+    const v = b?.[key];
+    if (v !== undefined && v !== null && String(v).trim() !== "") {
+      return String(v);
+    }
+  }
+  return "Not provided";
+}
+
 function DetailsCard({
   booking,
   onReschedule,
@@ -271,38 +282,59 @@ function DetailsCard({
   onReschedule: () => void;
   onCancel: () => void;
 }) {
-  const status = booking.bookingStatus || "Pending Confirmation";
+  const reference = getBookingValue(booking, "bookingReference", "Booking Reference");
+  const fullName = getBookingValue(booking, "fullName", "Full Name");
+  const phone = getBookingValue(booking, "phoneNumber", "Phone Number");
+  const email = getBookingValue(booking, "emailAddress", "Email Address");
+  const projectType = getBookingValue(booking, "projectType", "Project Type");
+  const location = getBookingValue(booking, "projectLocation", "Project Location");
+  const preferredDate = getBookingValue(booking, "preferredDate", "Preferred Date");
+  const preferredTime = getBookingValue(booking, "preferredTime", "Preferred Time");
+  const rawStatus = getBookingValue(booking, "bookingStatus", "Booking Status");
+  const status = rawStatus === "Not provided" ? "Pending Confirmation" : rawStatus;
   const cancelled = status.toLowerCase().includes("cancel");
+
+  const hasDate = preferredDate !== "Not provided";
+  const hasTime = preferredTime !== "Not provided";
+  const schedule = hasDate && hasTime
+    ? `${preferredDate} — ${preferredTime}`
+    : hasDate
+      ? preferredDate
+      : "Pending schedule confirmation.";
+
+  const contact = email !== "Not provided" && phone !== "Not provided"
+    ? `${email} · ${phone}`
+    : email !== "Not provided"
+      ? email
+      : phone;
 
   return (
     <>
-      <h3 className="mt-4 text-2xl font-display font-bold">Your Booking</h3>
-      <p className="mt-1 text-sm text-muted-foreground">Reference {booking.bookingReference}</p>
+      <h3 className="mt-4 text-2xl font-display font-bold">Appointment Request Found</h3>
 
       <motion.div
         initial={{ opacity: 0, y: 12 }}
         animate={{ opacity: 1, y: 0 }}
-        className="mt-5 rounded-2xl border border-primary/20 bg-[oklch(0.985_0.012_70)] dark:bg-surface/40 p-5 shadow-soft"
+        className="mt-4 rounded-2xl border border-primary/20 bg-[oklch(0.985_0.012_70)] dark:bg-surface/40 p-5 shadow-soft"
       >
-        <div className="flex items-center justify-between gap-3">
-          <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground font-bold">Booking Found</div>
+        <div className="flex items-center justify-end">
           <span className={`text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full ${statusBadgeClasses(status)}`}>
             {status}
           </span>
         </div>
-        <div className="mt-3 grid gap-3 text-sm">
-          <Row icon={<FileText size={14} />} label="Booking Reference" value={booking.bookingReference} />
-          <Row icon={<User size={14} />} label="Full Name" value={booking.fullName} />
-          <Row icon={<Phone size={14} />} label="Phone Number" value={booking.phoneNumber} />
-          {booking.emailAddress && <Row icon={<Mail size={14} />} label="Email Address" value={booking.emailAddress} />}
-          <Row icon={<FileText size={14} />} label="Project Type" value={booking.projectType} />
-          {booking.projectLocation && <Row icon={<MapPin size={14} />} label="Project Location" value={booking.projectLocation} />}
-          {booking.preferredDate && <Row icon={<CalendarClock size={14} />} label="Preferred Date" value={booking.preferredDate} />}
-          {booking.preferredTime && <Row icon={<Clock size={14} />} label="Preferred Time" value={booking.preferredTime} />}
-          {booking.budgetRange && <Row icon={<Wallet size={14} />} label="Budget Range" value={booking.budgetRange} />}
-          {booking.projectDetails && <Row icon={<FileText size={14} />} label="Project Details" value={booking.projectDetails} />}
-          {booking.notes && <Row icon={<StickyNote size={14} />} label="Notes" value={booking.notes} />}
+
+        <div className="mt-3 divide-y divide-border/60">
+          <SimpleRow label="Reference" value={reference} mono />
+          <SimpleRow label="Client" value={fullName} />
+          {projectType !== "Not provided" && <SimpleRow label="Service" value={projectType} />}
+          <SimpleRow label="Preferred Schedule" value={schedule} />
+          <SimpleRow label="Contact" value={contact} />
+          {location !== "Not provided" && <SimpleRow label="Location" value={location} />}
         </div>
+
+        <p className="mt-4 text-xs text-muted-foreground">
+          Our team will confirm your appointment through email or phone.
+        </p>
       </motion.div>
 
       {!cancelled && (
@@ -311,19 +343,30 @@ function DetailsCard({
             onClick={onReschedule}
             className="inline-flex items-center justify-center gap-2 rounded-full bg-surface border border-border px-5 py-3 text-sm font-semibold hover:bg-muted transition"
           >
-            <CalendarClock size={16} className="text-primary" /> Reschedule Booking
+            <CalendarClock size={16} className="text-primary" /> Reschedule
           </button>
           <button
             onClick={onCancel}
             className="inline-flex items-center justify-center gap-2 rounded-full border border-destructive/40 text-destructive px-5 py-3 text-sm font-semibold hover:bg-destructive/10 transition"
           >
-            <XCircle size={16} /> Cancel Booking
+            <XCircle size={16} /> Cancel Request
           </button>
         </div>
       )}
     </>
   );
 }
+
+function SimpleRow({ label, value, mono }: { label: string; value: string; mono?: boolean }) {
+  if (!value || value.trim() === "") return null;
+  return (
+    <div className="flex items-start justify-between gap-4 py-2.5">
+      <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-bold pt-0.5 shrink-0">{label}</div>
+      <div className={`text-sm font-semibold text-right break-words min-w-0 ${mono ? "font-mono tracking-wider" : ""}`}>{value}</div>
+    </div>
+  );
+}
+
 
 function RescheduleForm({
   booking,
