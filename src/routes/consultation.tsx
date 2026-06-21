@@ -171,8 +171,16 @@ function ConsultationPage() {
 
                   <Field label="Project Location" name="projectLocation" placeholder="City, Province" />
 
-                  <Field label="Preferred Date" name="preferredDate" type="date" />
-                  <Field label="Preferred Time" name="preferredTime" type="time" />
+                  <div className="sm:col-span-2">
+                    <SchedulePicker
+                      date={preferredDate}
+                      time={preferredTime}
+                      onDateChange={setPreferredDate}
+                      onTimeChange={setPreferredTime}
+                      dateName="preferredDate"
+                      timeName="preferredTime"
+                    />
+                  </div>
 
                   <div className="sm:col-span-2">
                     <Label>Budget Range</Label>
