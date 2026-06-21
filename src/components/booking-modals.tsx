@@ -331,19 +331,16 @@ function DetailsCard({
   const email = getBookingValue(booking, "emailAddress", "Email Address");
   const projectType = getBookingValue(booking, "projectType", "Project Type");
   const location = getBookingValue(booking, "projectLocation", "Project Location");
-  const preferredDate = getBookingValue(booking, "preferredDate", "Preferred Date");
-  const preferredTime = getBookingValue(booking, "preferredTime", "Preferred Time");
+  const preferredDateRaw = getBookingValue(booking, "preferredDate", "Preferred Date");
+  const preferredTimeRaw = getBookingValue(booking, "preferredTime", "Preferred Time");
   const rawStatus = getBookingValue(booking, "bookingStatus", "Booking Status");
   const status = rawStatus === "Not provided" ? "Pending Confirmation" : rawStatus;
   const cancelled = status.toLowerCase().includes("cancel");
 
-  const hasDate = preferredDate !== "Not provided";
-  const hasTime = preferredTime !== "Not provided";
-  const schedule = hasDate && hasTime
-    ? `${preferredDate} — ${preferredTime}`
-    : hasDate
-      ? preferredDate
-      : "Pending schedule confirmation.";
+  const schedule = formatPreferredSchedule(
+    preferredDateRaw === "Not provided" ? "" : preferredDateRaw,
+    preferredTimeRaw === "Not provided" ? "" : preferredTimeRaw,
+  );
 
   const contact = email !== "Not provided" && phone !== "Not provided"
     ? `${email} · ${phone}`
