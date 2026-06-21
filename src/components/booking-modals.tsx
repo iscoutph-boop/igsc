@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { callCRM, type BookingRecord } from "@/lib/bookings";
+import { SchedulePicker } from "@/components/schedule-picker";
 
 function useEscClose(open: boolean, onClose: () => void) {
   useEffect(() => {
@@ -280,10 +281,9 @@ function getBookingValue(booking: Record<string, unknown> | BookingRecord, ...ke
   return "Not provided";
 }
 
-// Sentinel dates Google Sheets uses when a cell stores a time-only or
-// date-only value. The "Z" suffix is misleading — the wall-clock components
-// are the Philippine values the user entered, NOT UTC. We must extract them
-// verbatim instead of running them through a timezone converter.
+// Sentinel dates Google Sheets uses when a cell stores a time-only value.
+// If Apps Script serializes that value as ISO, the hour is UTC; convert it
+// to Philippine Time before showing it (01:30Z → 9:30am PHT).
 const SHEETS_SENTINEL_DATE_RE = /^(1899-12-30|1900-01-0[01]|1970-01-01)/;
 
 function isSheetsSentinel(raw: string): boolean {
@@ -291,7 +291,7 @@ function isSheetsSentinel(raw: string): boolean {
 }
 
 function hasTzMarker(raw: string): boolean {
-  return /(Z|[+\-]\d{2}:?\d{2})$/.test(raw);
+  return /(?:Z|[+-]\d{2}:?\d{2})$/.test(raw);
 }
 
 const PHT_DATE_FMT = new Intl.DateTimeFormat("en-US", {
@@ -313,6 +313,23 @@ function formatPhtTime(date: Date): string {
     .replace(/\s?AM$/i, "am")
     .replace(/\s?PM$/i, "pm")
     .replace(/\s+/g, "");
+}
+
+function formatWallClockTime(hour24: number, minute: string): string {
+  const suffix = hour24 >= 12 ? "pm" : "am";
+  const hour12 = hour24 % 12 || 12;
+  return `${hour12}:${minute}${suffix}`;
+}
+
+function formatShiftedPhtTime(hour24: number, minute: string): string {
+  const shiftedHour = (hour24 + 8) % 24;
+  return formatWallClockTime(shiftedHour, minute);
+}
+
+function formatBusinessHourPhtTime(hour24: number, minute: string): string {
+  // Bookings are only offered from 8am–5pm PHT. Values before 8am from the
+  // backend are UTC-shifted Google Sheets times, so repair them to PHT.
+  return hour24 < 8 ? formatShiftedPhtTime(hour24, minute) : formatWallClockTime(hour24, minute);
 }
 
 function formatDisplayDate(dateValue: string): string {
@@ -350,11 +367,7 @@ function formatDisplayTime(timeValue: string): string {
   // Plain HH:mm or HH:mm:ss — already Philippine wall-clock, no TZ shift.
   const hm = raw.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
   if (hm) {
-    let hour = Number(hm[1]);
-    const minute = hm[2];
-    const suffix = hour >= 12 ? "pm" : "am";
-    hour = hour % 12 || 12;
-    return `${hour}:${minute}${suffix}`;
+    return formatBusinessHourPhtTime(Number(hm[1]), hm[2]);
   }
 
   // Human readable "10:30 AM".
@@ -363,24 +376,15 @@ function formatDisplayTime(timeValue: string): string {
     let hour = Number(ampm[1]);
     const minute = ampm[2] || "00";
     const suffix = ampm[3].toLowerCase();
+    if (suffix === "pm" && hour < 12) hour += 12;
+    if (suffix === "am" && hour === 12) hour = 0;
+    if (hour < 8) return formatShiftedPhtTime(hour, minute);
     hour = hour % 12 || 12;
     return `${hour}:${minute}${suffix}`;
   }
 
-  // Sheets sentinel ISO (e.g. "1899-12-30T13:35:00.000Z"): the wall-clock
-  // value IS the Philippine time the user picked — do NOT convert.
-  if (isSheetsSentinel(raw)) {
-    const isoTime = raw.match(/T(\d{2}):(\d{2})/);
-    if (isoTime) {
-      let hour = Number(isoTime[1]);
-      const minute = isoTime[2];
-      const suffix = hour >= 12 ? "pm" : "am";
-      hour = hour % 12 || 12;
-      return `${hour}:${minute}${suffix}`;
-    }
-  }
-
-  // Real ISO datetime with TZ marker → convert to Philippine Time.
+  // Any ISO datetime with a timezone marker — including Google Sheets
+  // sentinel dates like 1899-12-30T01:30:00Z — must display in PHT.
   if (raw.includes("T") && hasTzMarker(raw)) {
     const d = new Date(raw);
     if (!Number.isNaN(d.getTime())) return formatPhtTime(d);
@@ -389,14 +393,29 @@ function formatDisplayTime(timeValue: string): string {
   // Bare "T HH:mm" without TZ info — treat as Philippine wall-clock.
   const isoTime = raw.match(/T(\d{2}):(\d{2})/);
   if (isoTime) {
-    let hour = Number(isoTime[1]);
-    const minute = isoTime[2];
-    const suffix = hour >= 12 ? "pm" : "am";
-    hour = hour % 12 || 12;
-    return `${hour}:${minute}${suffix}`;
+    return formatBusinessHourPhtTime(Number(isoTime[1]), isoTime[2]);
   }
 
   return raw;
+}
+
+function repairApiScheduleText(rawSchedule: string): string {
+  // If the API already sent a human-readable schedule but its time is before
+  // business hours, it is almost certainly UTC text; add 8 hours for PHT.
+  return rawSchedule.replace(/\b(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/i, (match, hourText, minuteText, suffixText) => {
+    let hour = Number(hourText);
+    const minute = String(minuteText || "00").padStart(2, "0");
+    const suffix = String(suffixText).toLowerCase();
+    if (suffix === "pm" && hour < 12) hour += 12;
+    if (suffix === "am" && hour === 12) hour = 0;
+    return hour < 8 ? formatShiftedPhtTime(hour, minute) : match;
+  });
+}
+
+function extractDisplayTimeFromScheduleText(rawSchedule: string): string {
+  const repaired = repairApiScheduleText(rawSchedule);
+  const timeMatch = repaired.match(/\b\d{1,2}(?::\d{2})?\s*(?:am|pm)\b/i);
+  return timeMatch ? formatDisplayTime(timeMatch[0]) : "";
 }
 
 
@@ -406,20 +425,31 @@ function formatPreferredSchedule(
   preferredTime: string,
   preferredScheduleFromApi?: string,
 ): string {
-  // Trust the API-formatted schedule when it looks clean.
-  if (
-    preferredScheduleFromApi &&
-    preferredScheduleFromApi !== "Not provided" &&
-    preferredScheduleFromApi !== "Pending schedule confirmation" &&
-    !preferredScheduleFromApi.includes("1899-12-30") &&
-    !/\dT\d/.test(preferredScheduleFromApi)
-  ) {
-    return preferredScheduleFromApi;
-  }
   const date = formatDisplayDate(preferredDate);
   const time = formatDisplayTime(preferredTime);
   if (date && time) return `${date} — ${time}`;
+
+  if (preferredScheduleFromApi) {
+    const rawSchedule = preferredScheduleFromApi.trim();
+    if (rawSchedule && rawSchedule !== "Not provided" && rawSchedule !== "Pending schedule confirmation") {
+      if (/\dT\d/.test(rawSchedule)) {
+        const parsedDate = formatDisplayDate(rawSchedule);
+        const parsedTime = formatDisplayTime(rawSchedule);
+        if (date && parsedTime) return `${date} — ${parsedTime}`;
+        if (parsedDate && time) return `${parsedDate} — ${time}`;
+        if (parsedDate && parsedTime) return `${parsedDate} — ${parsedTime}`;
+        if (parsedTime) return parsedTime;
+        if (parsedDate) return parsedDate;
+      }
+      const apiTime = extractDisplayTimeFromScheduleText(rawSchedule);
+      if (date && apiTime) return `${date} — ${apiTime}`;
+      return repairApiScheduleText(rawSchedule);
+    }
+  }
+
   if (date) return date;
+  if (time) return time;
+
   return "Pending schedule confirmation";
 }
 
@@ -572,7 +602,7 @@ function RescheduleForm({
   ctx: LookupContext;
   onDone: (b: BookingRecord) => void;
 }) {
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState("");
   const [notes, setNotes] = useState("");
   const [err, setErr] = useState<string | null>(null);
@@ -654,26 +684,14 @@ function RescheduleForm({
       </p>
 
       <form onSubmit={submit} className="mt-5 space-y-4">
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">New Preferred Date</label>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="mt-1.5 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
-            />
-          </div>
-          <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">New Preferred Time</label>
-            <input
-              type="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              className="mt-1.5 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
-            />
-          </div>
-        </div>
+        <SchedulePicker
+          date={date}
+          time={time}
+          onDateChange={setDate}
+          onTimeChange={setTime}
+          layout="stacked"
+          required
+        />
         <div>
           <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Reason / Notes</label>
           <textarea
