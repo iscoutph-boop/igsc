@@ -66,9 +66,9 @@ export function SiteHeader({ floating = false }: { floating?: boolean }) {
       <div className="max-w-[1500px] mx-auto px-5 md:px-10 py-5 flex items-center gap-4">
         <Link to="/" className="flex items-center gap-3 shrink-0 group">
           <img src={logoAsset.url} alt="IG Sabroso Construction" className="h-11 w-11 md:h-12 md:w-12 object-contain transition-transform group-hover:scale-105" />
-          <div className="hidden sm:block leading-tight">
-            <div className="font-display font-bold tracking-tight text-[15px] md:text-base">IG SABROSO CONSTRUCTION</div>
-            <div className="text-[11px] md:text-xs text-muted-foreground">Elevate Your Lifestyle</div>
+          <div className="leading-tight">
+            <div className="font-display font-bold tracking-tight text-[12px] sm:text-[15px] md:text-base">IG SABROSO CONSTRUCTION</div>
+            <div className="hidden sm:block text-[11px] md:text-xs text-muted-foreground">Elevate Your Lifestyle</div>
           </div>
         </Link>
 
