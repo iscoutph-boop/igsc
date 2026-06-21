@@ -1,24 +1,43 @@
 import { Link } from "@tanstack/react-router";
-import { Facebook, Instagram, Linkedin, Phone, Mail, MapPin } from "lucide-react";
+import { Facebook, Instagram, Phone, Mail, MapPin } from "lucide-react";
 import logoAsset from "@/assets/logo.png.asset.json";
+
+function TikTokIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      viewBox="0 0 24 24"
+      width={size}
+      height={size}
+      fill="currentColor"
+      aria-hidden="true"
+    >
+      <path d="M19.6 6.32a5.4 5.4 0 0 1-3.16-1.02 5.4 5.4 0 0 1-2.17-3.55h-3.36v13.13a2.86 2.86 0 1 1-2.86-2.86c.29 0 .57.04.83.13V8.7a6.2 6.2 0 1 0 5.39 6.18V9.4a8.78 8.78 0 0 0 5.33 1.8V7.85a5.4 5.4 0 0 1 0-1.53z" />
+    </svg>
+  );
+}
+
+const FACEBOOK_URL = "https://www.facebook.com/search/top?q=ig%20sabroso%20construction";
+const INSTAGRAM_URL = "https://www.tiktok.com/@igs.construction";
+const TIKTOK_URL = "https://www.tiktok.com/@igs.construction";
 
 export function SiteFooter() {
   return (
     <footer className="border-t border-border bg-surface/60 mt-24">
       <div className="max-w-[1500px] mx-auto px-6 md:px-10 py-16 grid gap-10 md:grid-cols-4">
         <div className="md:col-span-1">
-          <div className="flex items-center gap-3">
-            <img src={logoAsset.url} alt="IG Sabroso" className="h-12 w-12 object-contain" />
+          <Link to="/" className="flex items-center gap-3 group">
+            <img src={logoAsset.url} alt="IG Sabroso" className="h-12 w-12 object-contain transition-transform group-hover:scale-105" />
             <div className="leading-tight">
               <div className="font-display font-bold text-sm">IG SABROSO</div>
               <div className="text-[11px] text-muted-foreground">CONSTRUCTION</div>
             </div>
-          </div>
+          </Link>
           <p className="mt-4 text-sm text-muted-foreground">Elevate Your Lifestyle. Built on trust, driven by excellence.</p>
           <div className="mt-5 flex items-center gap-2 text-muted-foreground">
-            <a href="#" aria-label="Facebook" className="p-2 rounded-full hover:text-primary hover:bg-accent transition"><Facebook size={16} /></a>
-            <a href="#" aria-label="Instagram" className="p-2 rounded-full hover:text-primary hover:bg-accent transition"><Instagram size={16} /></a>
-            <a href="#" aria-label="LinkedIn" className="p-2 rounded-full hover:text-primary hover:bg-accent transition"><Linkedin size={16} /></a>
+            <a href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="p-2 rounded-full hover:text-primary hover:bg-accent transition"><Facebook size={16} /></a>
+            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="p-2 rounded-full hover:text-primary hover:bg-accent transition"><Instagram size={16} /></a>
+            <a href={TIKTOK_URL} target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="p-2 rounded-full hover:text-primary hover:bg-accent transition"><TikTokIcon size={16} /></a>
           </div>
         </div>
 
@@ -27,7 +46,7 @@ export function SiteFooter() {
           <ul className="space-y-2.5 text-sm">
             <li><Link to="/" className="hover:text-primary transition">Home</Link></li>
             <li><Link to="/details" hash="about" className="hover:text-primary transition">About</Link></li>
-            <li><Link to="/details" hash="projects" className="hover:text-primary transition">Projects</Link></li>
+            <li><Link to="/details" hash="portfolio" className="hover:text-primary transition">Projects</Link></li>
             <li><Link to="/details" hash="process" className="hover:text-primary transition">Process</Link></li>
             <li><Link to="/consultation" className="hover:text-primary transition">Consultation</Link></li>
           </ul>
