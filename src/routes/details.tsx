@@ -366,49 +366,7 @@ function DetailsPage() {
           <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {packages.map((p, i) => (
               <Reveal key={p.tier} delay={i * 0.08}>
-                <div
-                  className={`relative h-full rounded-3xl p-7 transition-all hover:-translate-y-1 ${
-                    p.featured
-                      ? "gradient-brand text-primary-foreground shadow-glow"
-                      : "glass shadow-card hover:shadow-card"
-                  }`}
-                >
-                  {p.featured && p.badge && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 bg-background text-foreground rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.18em] font-bold shadow-card whitespace-nowrap">
-                      <Sparkles size={12} className="text-primary" /> {p.badge}
-                    </div>
-                  )}
-                  <div className={`text-[11px] uppercase tracking-[0.22em] font-bold ${p.featured ? "text-primary-foreground/80" : "text-primary"}`}>
-                    {p.tier}
-                  </div>
-                  <div className="mt-4 text-2xl md:text-[1.75rem] font-display font-black leading-none">
-                    {p.price}
-                  </div>
-                  <div className={`mt-2 text-xs ${p.featured ? "text-primary-foreground/85" : "text-muted-foreground"}`}>
-                    {p.note}
-                  </div>
-                  <div className={`mt-6 h-px ${p.featured ? "bg-primary-foreground/25" : "bg-border"}`} />
-                  <ul className="mt-6 space-y-3">
-                    {p.features.map((f) => (
-                      <li key={f} className="flex items-start gap-3 text-sm">
-                        <span className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${p.featured ? "bg-primary-foreground/20" : "bg-primary/10 text-primary"}`}>
-                          <Check size={12} />
-                        </span>
-                        <span className={p.featured ? "" : "text-foreground/90"}>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link
-                    to="/consultation"
-                    className={`mt-8 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition ${
-                      p.featured
-                        ? "bg-background text-foreground hover:scale-[1.02]"
-                        : "gradient-brand text-primary-foreground hover:scale-[1.02]"
-                    }`}
-                  >
-                    Request a Quote <ArrowRight size={14} />
-                  </Link>
-                </div>
+                <PackageCard p={p} />
               </Reveal>
             ))}
           </div>
