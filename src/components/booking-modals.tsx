@@ -226,13 +226,22 @@ export function CheckBookingModal({
               )}
 
               {view.kind === "reschedule-done" && (
-                <ResultCard
-                  tone="success"
-                  title="Reschedule Request Received"
-                  message="Your reschedule request has been received. Our team will contact you to confirm the new schedule."
-                  reference={view.booking.bookingReference}
-                  onClose={onClose}
-                />
+                <>
+                  <h3 className="mt-4 text-2xl font-display font-bold">Reschedule Request Received</h3>
+                  <div className="mt-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 flex items-start gap-3">
+                    <CheckCircle2 size={18} className="text-emerald-600 shrink-0 mt-0.5" />
+                    <p className="text-sm text-foreground/90">
+                      Your reschedule request has been received. Our team will contact you to confirm the new schedule.
+                    </p>
+                  </div>
+                  <DetailsCard booking={view.booking} onReschedule={() => { /* hidden after submit */ }} onCancel={() => { /* hidden after submit */ }} hideActions />
+                  <button
+                    onClick={onClose}
+                    className="mt-5 w-full inline-flex items-center justify-center gap-2 gradient-brand text-primary-foreground rounded-full px-6 py-3 font-semibold shadow-glow hover:scale-[1.01] transition"
+                  >
+                    Done
+                  </button>
+                </>
               )}
 
               {view.kind === "cancel-done" && (
@@ -375,10 +384,12 @@ function DetailsCard({
   booking,
   onReschedule,
   onCancel,
+  hideActions,
 }: {
   booking: BookingRecord;
   onReschedule: () => void;
   onCancel: () => void;
+  hideActions?: boolean;
 }) {
   const reference = getBookingValue(booking, "bookingReference", "Booking Reference");
   const fullName = getBookingValue(booking, "fullName", "Full Name");
@@ -434,7 +445,7 @@ function DetailsCard({
         </p>
       </motion.div>
 
-      {!cancelled && (
+      {!cancelled && !hideActions && (
         <div className="mt-5 grid sm:grid-cols-2 gap-3">
           <button
             onClick={onReschedule}
@@ -465,6 +476,50 @@ function SimpleRow({ label, value, mono }: { label: string; value: string; mono?
 }
 
 
+function toPlainDateValue(value: unknown): string {
+  if (!value) return "";
+  if (typeof value === "string") {
+    const raw = value.trim();
+    const ymd = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (ymd) return `${ymd[1]}-${ymd[2]}-${ymd[3]}`;
+    return raw;
+  }
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    const year = value.getFullYear();
+    const month = String(value.getMonth() + 1).padStart(2, "0");
+    const day = String(value.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  }
+  return String(value).trim();
+}
+
+function toPlainTimeValue(value: unknown): string {
+  if (!value) return "";
+  if (typeof value === "string") {
+    const raw = value.trim();
+    const hm = raw.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+    if (hm) return `${String(Number(hm[1])).padStart(2, "0")}:${hm[2]}`;
+    const ampm = raw.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i);
+    if (ampm) {
+      let hour = Number(ampm[1]);
+      const minute = ampm[2] || "00";
+      const suffix = ampm[3].toUpperCase();
+      if (suffix === "PM" && hour < 12) hour += 12;
+      if (suffix === "AM" && hour === 12) hour = 0;
+      return `${String(hour).padStart(2, "0")}:${minute}`;
+    }
+    const isoTime = raw.match(/T(\d{2}):(\d{2}):/);
+    if (isoTime) return `${isoTime[1]}:${isoTime[2]}`;
+    return raw;
+  }
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    const hour = String(value.getHours()).padStart(2, "0");
+    const minute = String(value.getMinutes()).padStart(2, "0");
+    return `${hour}:${minute}`;
+  }
+  return String(value).trim();
+}
+
 function RescheduleForm({
   booking,
   ctx,
@@ -489,19 +544,45 @@ function RescheduleForm({
     setErr(null);
     setLoading(true);
     try {
-      await callCRM("rescheduleBooking", {
+      const newPreferredDate = toPlainDateValue(date);
+      const newPreferredTime = toPlainTimeValue(time);
+      const reschedulePayload = {
         bookingReference: booking.bookingReference,
         contact: ctx.contact,
-        newPreferredDate: date,
-        newPreferredTime: time,
+        newPreferredDate,
+        newPreferredTime,
         rescheduleNotes: notes,
-      });
-      onDone({
+      };
+      console.log("IGS reschedule payload:", reschedulePayload);
+      await callCRM("rescheduleBooking", reschedulePayload);
+
+      // Re-fetch booking, but always trust the freshly selected raw values for display.
+      let refreshed: BookingRecord = {
         ...booking,
-        preferredDate: date,
-        preferredTime: time,
+        preferredDate: newPreferredDate,
+        preferredTime: newPreferredTime,
         bookingStatus: "Reschedule Requested",
-      });
+      };
+      try {
+        const refreshedResult = await callCRM<{ booking?: BookingRecord }>("findBooking", {
+          bookingReference: booking.bookingReference,
+          contact: ctx.contact,
+        });
+        const rawBooking = (refreshedResult.booking ?? (refreshedResult.data?.booking as BookingRecord | undefined)) as Record<string, unknown> | undefined;
+        if (rawBooking) {
+          const merged: Record<string, unknown> = {
+            ...rawBooking,
+            bookingReference: String(rawBooking.bookingReference ?? rawBooking["Booking Reference"] ?? booking.bookingReference),
+            preferredDate: newPreferredDate,
+            preferredTime: newPreferredTime,
+          };
+          refreshed = merged as unknown as BookingRecord;
+        }
+      } catch (refreshErr) {
+        console.warn("IGS reschedule refresh failed:", refreshErr);
+      }
+
+      onDone(refreshed);
     } catch (e2) {
       setErr(
         e2 instanceof Error && e2.message
