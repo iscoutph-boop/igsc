@@ -301,6 +301,7 @@ function formatDisplayTime(timeValue: string): string {
   if (!timeValue) return "";
   const raw = String(timeValue).trim();
 
+  // Case 1: plain HH:mm or HH:mm:ss — treat as local clock time, no TZ shift
   const hm = raw.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
   if (hm) {
     let hour = Number(hm[1]);
@@ -310,6 +311,24 @@ function formatDisplayTime(timeValue: string): string {
     return `${hour}:${minute}${suffix}`;
   }
 
+  // Case 2: Full ISO UTC timestamp (e.g. "1899-12-30T02:00:00.000Z" representing
+  // 10:00 Manila stored as UTC by Google Sheets). Convert to Asia/Manila clock.
+  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(raw) && /(Z|[+-]\d{2}:?\d{2})$/.test(raw)) {
+    const d = new Date(raw);
+    if (!Number.isNaN(d.getTime())) {
+      return new Intl.DateTimeFormat("en-US", {
+        hour: "numeric",
+        minute: "2-digit",
+        hour12: true,
+        timeZone: "Asia/Manila",
+      })
+        .format(d)
+        .replace(/\s?AM$/i, "am")
+        .replace(/\s?PM$/i, "pm");
+    }
+  }
+
+  // Case 3: ISO-like without timezone — extract local HH:mm after T
   const isoTime = raw.match(/T(\d{2}):(\d{2}):/);
   if (isoTime) {
     let hour = Number(isoTime[1]);
@@ -319,6 +338,7 @@ function formatDisplayTime(timeValue: string): string {
     return `${hour}:${minute}${suffix}`;
   }
 
+  // Case 4: already human readable "2:00 PM"
   const ampm = raw.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i);
   if (ampm) {
     let hour = Number(ampm[1]);
@@ -330,6 +350,7 @@ function formatDisplayTime(timeValue: string): string {
 
   return raw;
 }
+
 
 function formatPreferredSchedule(
   preferredDate: string,
