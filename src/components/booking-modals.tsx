@@ -565,7 +565,7 @@ function RescheduleForm({
             preferredDate: newPreferredDate,
             preferredTime: newPreferredTime,
           };
-          refreshed = merged as BookingRecord;
+          refreshed = merged as unknown as BookingRecord;
         }
       } catch (refreshErr) {
         console.warn("IGS reschedule refresh failed:", refreshErr);
