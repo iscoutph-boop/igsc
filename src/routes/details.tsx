@@ -323,7 +323,19 @@ function DetailsPage() {
             </h2>
           </Reveal>
 
-          <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {/* Mobile: horizontal swipe row. sm+: original grid. */}
+          <div className="mt-14 sm:hidden -mx-4 px-4 overflow-x-auto snap-x snap-mandatory flex gap-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {services.map((s) => (
+              <div key={s.title} className="snap-start shrink-0 w-[78%] glass rounded-3xl p-6">
+                <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl gradient-brand text-primary-foreground shadow-soft">
+                  <s.icon size={20} />
+                </div>
+                <h3 className="mt-5 text-lg font-display font-bold">{s.title}</h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-14 hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {services.map((s, i) => (
               <Reveal key={s.title} delay={i * 0.06}>
                 <div className="group glass rounded-3xl p-7 h-full hover:shadow-card transition-all hover:-translate-y-1">
