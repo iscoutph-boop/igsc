@@ -271,6 +271,51 @@ function getBookingValue(booking: Record<string, unknown> | BookingRecord, ...ke
   return "Not provided";
 }
 
+function formatDateOnly(value: string): string {
+  if (!value) return "";
+  // Google Sheets time-only fallback returns 1899-12-30 — not a real date
+  if (value.includes("1899-12-30")) return "";
+  const date = new Date(value);
+  if (isNaN(date.getTime())) return "";
+  return date.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+    timeZone: "Asia/Manila",
+  });
+}
+
+function formatTimeOnly(value: string): string {
+  if (!value) return "";
+  const date = new Date(value);
+  if (!isNaN(date.getTime())) {
+    return date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+      timeZone: "Asia/Manila",
+    });
+  }
+  // Fallback: HH:MM string like "07:00"
+  const match = String(value).match(/(\d{1,2}):(\d{2})/);
+  if (match) {
+    const h = parseInt(match[1], 10);
+    const m = match[2];
+    const hour12 = ((h + 11) % 12) + 1;
+    const ampm = h < 12 ? "AM" : "PM";
+    return `${hour12}:${m} ${ampm}`;
+  }
+  return "";
+}
+
+function formatPreferredSchedule(preferredDate: string, preferredTime: string): string {
+  const cleanDate = formatDateOnly(preferredDate);
+  const cleanTime = formatTimeOnly(preferredTime);
+  if (cleanDate && cleanTime) return `${cleanDate} — ${cleanTime}`;
+  if (cleanDate) return cleanDate;
+  return "Pending schedule confirmation";
+}
+
 function DetailsCard({
   booking,
   onReschedule,
@@ -286,19 +331,16 @@ function DetailsCard({
   const email = getBookingValue(booking, "emailAddress", "Email Address");
   const projectType = getBookingValue(booking, "projectType", "Project Type");
   const location = getBookingValue(booking, "projectLocation", "Project Location");
-  const preferredDate = getBookingValue(booking, "preferredDate", "Preferred Date");
-  const preferredTime = getBookingValue(booking, "preferredTime", "Preferred Time");
+  const preferredDateRaw = getBookingValue(booking, "preferredDate", "Preferred Date");
+  const preferredTimeRaw = getBookingValue(booking, "preferredTime", "Preferred Time");
   const rawStatus = getBookingValue(booking, "bookingStatus", "Booking Status");
   const status = rawStatus === "Not provided" ? "Pending Confirmation" : rawStatus;
   const cancelled = status.toLowerCase().includes("cancel");
 
-  const hasDate = preferredDate !== "Not provided";
-  const hasTime = preferredTime !== "Not provided";
-  const schedule = hasDate && hasTime
-    ? `${preferredDate} — ${preferredTime}`
-    : hasDate
-      ? preferredDate
-      : "Pending schedule confirmation.";
+  const schedule = formatPreferredSchedule(
+    preferredDateRaw === "Not provided" ? "" : preferredDateRaw,
+    preferredTimeRaw === "Not provided" ? "" : preferredTimeRaw,
+  );
 
   const contact = email !== "Not provided" && phone !== "Not provided"
     ? `${email} · ${phone}`
