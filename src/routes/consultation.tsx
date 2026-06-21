@@ -71,6 +71,8 @@ function ConsultationPage() {
       if (!ref) throw new Error("We couldn't generate your booking reference. Please try again.");
       setBookingReference(ref);
       form.reset();
+      setPreferredDate(undefined);
+      setPreferredTime("");
       // Scroll the confirmation card into view
       setTimeout(() => {
         document.getElementById("consultation-confirmation")?.scrollIntoView({ behavior: "smooth", block: "start" });
