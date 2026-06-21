@@ -306,7 +306,7 @@ function DetailsPage() {
                 </div>
               </Reveal>
               <Reveal delay={0.15} className="lg:col-span-8 xl:col-span-9">
-                <AboutSlideshow />
+                <AboutSlideshow onZoom={openZoom} />
               </Reveal>
             </div>
           </div>
