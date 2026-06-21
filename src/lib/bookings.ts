@@ -50,6 +50,8 @@ export async function callCRM<T = Record<string, unknown>>(
 
   const data = (await response.json()) as CRMResponse<T>;
 
+  console.log("IGS CRM response:", data);
+
   if (!data.success) {
     throw new Error(data.message || "CRM request failed.");
   }
