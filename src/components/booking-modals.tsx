@@ -131,7 +131,7 @@ export function CheckBookingModal({ open, onClose }: { open: boolean; onClose: (
                     className="w-full inline-flex items-center justify-center gap-2 gradient-brand text-primary-foreground rounded-full px-6 py-3.5 font-semibold shadow-glow hover:scale-[1.01] transition disabled:opacity-70"
                   >
                     {loading ? <Loader2 size={16} className="animate-spin" /> : <CalendarCheck size={16} />}
-                    {loading ? "Checking…" : "Check Status"}
+                    {loading ? "Checking…" : "Find My Booking"}
                   </button>
                 </form>
               )}
