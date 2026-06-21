@@ -184,6 +184,8 @@ function DetailsPage() {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("latest");
   const [visible, setVisible] = useState(6);
+  const [zoomImg, setZoomImg] = useState<string | null>(null);
+  const openZoom = (src: string) => setZoomImg(src);
 
   const filtered = useMemo(() => {
     let list = projects;
@@ -304,7 +306,7 @@ function DetailsPage() {
                 </div>
               </Reveal>
               <Reveal delay={0.15} className="lg:col-span-8 xl:col-span-9">
-                <AboutSlideshow />
+                <AboutSlideshow onZoom={openZoom} />
               </Reveal>
             </div>
           </div>
@@ -321,7 +323,19 @@ function DetailsPage() {
             </h2>
           </Reveal>
 
-          <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          {/* Mobile: horizontal swipe row. sm+: original grid. */}
+          <div className="mt-14 sm:hidden -mx-4 px-4 overflow-x-auto snap-x snap-mandatory flex gap-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {services.map((s) => (
+              <div key={s.title} className="snap-start shrink-0 w-[78%] glass rounded-3xl p-6">
+                <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl gradient-brand text-primary-foreground shadow-soft">
+                  <s.icon size={20} />
+                </div>
+                <h3 className="mt-5 text-lg font-display font-bold">{s.title}</h3>
+                <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
+              </div>
+            ))}
+          </div>
+          <div className="mt-14 hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {services.map((s, i) => (
               <Reveal key={s.title} delay={i * 0.06}>
                 <div className="group glass rounded-3xl p-7 h-full hover:shadow-card transition-all hover:-translate-y-1">
@@ -352,49 +366,7 @@ function DetailsPage() {
           <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {packages.map((p, i) => (
               <Reveal key={p.tier} delay={i * 0.08}>
-                <div
-                  className={`relative h-full rounded-3xl p-7 transition-all hover:-translate-y-1 ${
-                    p.featured
-                      ? "gradient-brand text-primary-foreground shadow-glow"
-                      : "glass shadow-card hover:shadow-card"
-                  }`}
-                >
-                  {p.featured && p.badge && (
-                    <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center gap-1.5 bg-background text-foreground rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.18em] font-bold shadow-card whitespace-nowrap">
-                      <Sparkles size={12} className="text-primary" /> {p.badge}
-                    </div>
-                  )}
-                  <div className={`text-[11px] uppercase tracking-[0.22em] font-bold ${p.featured ? "text-primary-foreground/80" : "text-primary"}`}>
-                    {p.tier}
-                  </div>
-                  <div className="mt-4 text-2xl md:text-[1.75rem] font-display font-black leading-none">
-                    {p.price}
-                  </div>
-                  <div className={`mt-2 text-xs ${p.featured ? "text-primary-foreground/85" : "text-muted-foreground"}`}>
-                    {p.note}
-                  </div>
-                  <div className={`mt-6 h-px ${p.featured ? "bg-primary-foreground/25" : "bg-border"}`} />
-                  <ul className="mt-6 space-y-3">
-                    {p.features.map((f) => (
-                      <li key={f} className="flex items-start gap-3 text-sm">
-                        <span className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${p.featured ? "bg-primary-foreground/20" : "bg-primary/10 text-primary"}`}>
-                          <Check size={12} />
-                        </span>
-                        <span className={p.featured ? "" : "text-foreground/90"}>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                  <Link
-                    to="/consultation"
-                    className={`mt-8 inline-flex items-center gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition ${
-                      p.featured
-                        ? "bg-background text-foreground hover:scale-[1.02]"
-                        : "gradient-brand text-primary-foreground hover:scale-[1.02]"
-                    }`}
-                  >
-                    Request a Quote <ArrowRight size={14} />
-                  </Link>
-                </div>
+                <PackageCard p={p} />
               </Reveal>
             ))}
           </div>
@@ -565,7 +537,7 @@ function DetailsPage() {
             {meetingImages.map((src, i) => (
               <Reveal key={src} delay={Math.min(i * 0.05, 0.3)}>
                 <div className={`relative rounded-2xl overflow-hidden shadow-card group ${i === 0 ? "col-span-2 row-span-2 aspect-[4/3] md:aspect-[4/5]" : "aspect-square"}`}>
-                  <img src={src} alt={`IG Sabroso client meeting ${i + 1}`} loading="lazy" decoding="async" sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 720px" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                  <img src={src} alt={`IG Sabroso client meeting ${i + 1}`} onDoubleClick={() => openZoom(src)} loading="lazy" decoding="async" sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 720px" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 cursor-zoom-in select-none" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition" />
                 </div>
               </Reveal>
@@ -604,7 +576,7 @@ function DetailsPage() {
             </h2>
           </Reveal>
 
-          <div className="mt-14 grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div className="mt-14 grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
             {steps.map((s, i) => (
               <Reveal key={s.n} delay={i * 0.08}>
                 <div className="relative glass rounded-3xl p-7 h-full">
@@ -638,14 +610,28 @@ function DetailsPage() {
       {/* Project Detail Modal — styled like the About Page 3 reference */}
       <Dialog open={!!active} onOpenChange={(open) => !open && setActive(null)}>
         <DialogContent className="w-[96vw] sm:w-auto max-w-6xl p-0 overflow-hidden bg-background border-border max-h-[92vh] overflow-y-auto">
-          {active && <ProjectDetail project={active} onClose={() => setActive(null)} />}
+          {active && <ProjectDetail project={active} onClose={() => setActive(null)} onZoom={openZoom} />}
+        </DialogContent>
+      </Dialog>
+
+      {/* Fullscreen image lightbox (double-tap to open) */}
+      <Dialog open={!!zoomImg} onOpenChange={(o) => !o && setZoomImg(null)}>
+        <DialogContent className="w-[98vw] max-w-[1400px] p-0 bg-black/95 border-none shadow-none">
+          {zoomImg && (
+            <img
+              src={zoomImg}
+              alt="Full preview"
+              className="w-full max-h-[92vh] object-contain select-none"
+              onClick={() => setZoomImg(null)}
+            />
+          )}
         </DialogContent>
       </Dialog>
     </PageTransition>
   );
 }
 
-function ProjectDetail({ project, onClose }: { project: Project; onClose: () => void }) {
+function ProjectDetail({ project, onClose, onZoom }: { project: Project; onClose: () => void; onZoom?: (src: string) => void }) {
   // Build a gallery using project hero + 4 rotating gallery images
   const start = (Number(project.number) * 2) % galleryPool.length;
   const gallery = [project.img, ...Array.from({ length: 5 }, (_, i) => galleryPool[(start + i) % galleryPool.length])];
@@ -666,25 +652,33 @@ function ProjectDetail({ project, onClose }: { project: Project; onClose: () => 
         {/* Left — gallery */}
         <div>
           <div className="relative rounded-3xl overflow-hidden shadow-card aspect-[4/3]">
-            <img src={hero} alt={project.title} decoding="async" sizes="(max-width: 1024px) 96vw, 640px" className="h-full w-full object-cover" />
-            <div className="absolute bottom-4 left-4 inline-flex items-center gap-2 bg-background/90 backdrop-blur rounded-full px-4 py-2 text-xs font-semibold">
+            <img
+              src={hero}
+              alt={project.title}
+              decoding="async"
+              sizes="(max-width: 1024px) 96vw, 640px"
+              className="h-full w-full object-cover cursor-zoom-in select-none"
+              onDoubleClick={() => onZoom?.(hero)}
+            />
+            <button
+              type="button"
+              onClick={() => onZoom?.(hero)}
+              className="absolute bottom-4 left-4 inline-flex items-center gap-2 bg-background/90 backdrop-blur rounded-full px-4 py-2 text-xs font-semibold hover:bg-background transition"
+            >
               <ImageIcon size={14} className="text-primary" /> View Full Gallery
-            </div>
+            </button>
           </div>
           <div className="mt-4 grid grid-cols-4 sm:grid-cols-6 gap-2 md:gap-3">
-            {gallery.slice(0, 5).map((g, i) => (
+            {gallery.slice(0, 6).map((g, i) => (
               <button
                 key={i}
                 onClick={() => setHero(g)}
+                onDoubleClick={() => onZoom?.(g)}
                 className={`relative aspect-square rounded-xl overflow-hidden transition ${hero === g ? "ring-2 ring-primary" : "opacity-80 hover:opacity-100"}`}
               >
                 <img src={g} alt={`${project.title} ${i + 1}`} loading="lazy" decoding="async" sizes="(max-width: 640px) 25vw, 120px" className="h-full w-full object-cover" />
               </button>
             ))}
-            <div className="aspect-square rounded-xl border-2 border-dashed border-primary/40 flex flex-col items-center justify-center text-primary">
-              <span className="text-lg font-bold">+</span>
-              <span className="text-[9px] uppercase tracking-wider mt-0.5">View More</span>
-            </div>
           </div>
           <div className="mt-5 glass rounded-2xl p-4 flex items-center gap-4">
             <span className="inline-flex h-10 w-10 items-center justify-center rounded-full gradient-brand text-primary-foreground">
@@ -736,19 +730,62 @@ function ProjectDetail({ project, onClose }: { project: Project; onClose: () => 
               ))}
             </ul>
           </div>
-
-          <Link
-            to="/consultation"
-            onClick={onClose}
-            className="mt-6 group w-full inline-flex items-center justify-center gap-3 gradient-brand text-primary-foreground rounded-full px-7 py-4 font-semibold shadow-glow hover:scale-[1.01] transition"
-          >
-            Inquire Similar Project
-            <span className="bg-background/25 rounded-full p-2 group-hover:translate-x-1 transition-transform">
-              <ArrowRight size={16} />
-            </span>
-          </Link>
         </div>
       </div>
+    </div>
+  );
+}
+
+function PackageCard({ p }: { p: typeof packages[number] }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <div
+      className={`relative h-full rounded-3xl p-7 transition-all hover:-translate-y-1 ${
+        p.featured
+          ? "gradient-brand text-primary-foreground shadow-glow"
+          : "glass shadow-card hover:shadow-card"
+      }`}
+    >
+      {p.featured && p.badge && (
+        <div className="absolute -top-3 left-1/2 -translate-x-1/2 inline-flex items-center bg-background text-foreground rounded-full px-3 py-1 text-[10px] uppercase tracking-[0.18em] font-bold shadow-card whitespace-nowrap">
+          {p.badge}
+        </div>
+      )}
+      <div className={`text-[11px] uppercase tracking-[0.22em] font-bold ${p.featured ? "text-primary-foreground/80" : "text-primary"}`}>
+        {p.tier}
+      </div>
+      <div className="mt-4 text-2xl md:text-[1.75rem] font-display font-black leading-none">
+        {p.price}
+      </div>
+      <div className={`mt-2 text-xs ${p.featured ? "text-primary-foreground/85" : "text-muted-foreground"}`}>
+        {p.note}
+      </div>
+      <div className={`mt-6 h-px ${p.featured ? "bg-primary-foreground/25" : "bg-border"}`} />
+      <button
+        type="button"
+        onClick={() => setOpen((o) => !o)}
+        aria-expanded={open}
+        className={`mt-5 w-full inline-flex items-center justify-between gap-2 rounded-full px-5 py-2.5 text-sm font-semibold transition ${
+          p.featured
+            ? "bg-background text-foreground hover:scale-[1.02]"
+            : "gradient-brand text-primary-foreground hover:scale-[1.02]"
+        }`}
+      >
+        {open ? "Hide Checklist" : "Tap to View Checklist"}
+        <ChevronDown size={16} className={`transition-transform ${open ? "rotate-180" : ""}`} />
+      </button>
+      {open && (
+        <ul className="mt-5 space-y-3">
+          {p.features.map((f) => (
+            <li key={f} className="flex items-start gap-3 text-sm">
+              <span className={`mt-0.5 inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full ${p.featured ? "bg-primary-foreground/20" : "bg-primary/10 text-primary"}`}>
+                <Check size={12} />
+              </span>
+              <span className={p.featured ? "" : "text-foreground/90"}>{f}</span>
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
@@ -874,7 +911,7 @@ function Reveal({ children, delay = 0, className = "" }: { children: React.React
   );
 }
 
-function AboutSlideshow() {
+function AboutSlideshow({ onZoom }: { onZoom?: (src: string) => void } = {}) {
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
   const [exterior, setExterior] = useState(exteriorImages[0]);
@@ -896,9 +933,11 @@ function AboutSlideshow() {
 
       {/* Main slideshow — full width */}
       <div
-        className="relative rounded-3xl shadow-card overflow-hidden aspect-[4/3] md:aspect-[16/10] lg:aspect-[16/9] group"
+        className="relative rounded-3xl shadow-card overflow-hidden aspect-[4/3] md:aspect-[16/10] lg:aspect-[16/9] group select-none"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
+        onClick={() => setPaused((p) => !p)}
+        onDoubleClick={(e) => { e.stopPropagation(); onZoom?.(interiorSlides[idx]); }}
       >
         <AnimatePresence mode="wait">
           <motion.img
@@ -916,18 +955,18 @@ function AboutSlideshow() {
 
         <div className="absolute top-4 right-4 inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-xl border border-white/25 text-white rounded-full px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] font-bold shadow-soft">
           <span className={`h-1.5 w-1.5 rounded-full ${paused ? "bg-white/70" : "bg-emerald-400 animate-pulse"}`} />
-          {paused ? "Paused" : "Autoplay"}
+          {paused ? "Paused — tap to resume" : "Autoplay"}
         </div>
 
         <button
-          onClick={prev}
+          onClick={(e) => { e.stopPropagation(); prev(); }}
           aria-label="Previous slide"
           className="absolute left-4 top-1/2 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/15 backdrop-blur-xl border border-white/25 text-white shadow-soft hover:bg-white/25 transition opacity-0 group-hover:opacity-100"
         >
           <ChevronLeft size={20} />
         </button>
         <button
-          onClick={next}
+          onClick={(e) => { e.stopPropagation(); next(); }}
           aria-label="Next slide"
           className="absolute right-4 top-1/2 -translate-y-1/2 inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/15 backdrop-blur-xl border border-white/25 text-white shadow-soft hover:bg-white/25 transition opacity-0 group-hover:opacity-100"
         >
@@ -938,7 +977,7 @@ function AboutSlideshow() {
           {interiorSlides.map((_, i) => (
             <button
               key={i}
-              onClick={() => setIdx(i)}
+              onClick={(e) => { e.stopPropagation(); setIdx(i); }}
               aria-label={`Slide ${i + 1}`}
               className={`h-1.5 rounded-full transition-all ${i === idx ? "w-8 bg-primary" : "w-3 bg-white/60 hover:bg-white"}`}
             />
@@ -1113,8 +1152,8 @@ function EstimatorSection() {
           </div>
         </Reveal>
 
-        {/* Summary */}
-        <Reveal delay={0.12}>
+        {/* Summary — hidden on mobile */}
+        <Reveal delay={0.12} className="hidden md:block">
           <div className="lg:sticky lg:top-24 glass rounded-3xl p-6 md:p-8 shadow-card">
             <div className="flex items-center gap-2 text-primary">
               <Calculator size={18} />

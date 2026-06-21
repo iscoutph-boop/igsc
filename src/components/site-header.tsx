@@ -1,9 +1,21 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Facebook, Instagram, Linkedin, Moon, Sun, ArrowRight, Menu, X } from "lucide-react";
+import { Facebook, Instagram, Moon, Sun, ArrowRight, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import logoAsset from "@/assets/logo.png.asset.json";
 import { useTheme } from "./theme-provider";
+
+const FACEBOOK_URL = "https://www.facebook.com/search/top?q=ig%20sabroso%20construction";
+const INSTAGRAM_URL = "https://www.tiktok.com/@igs.construction";
+const TIKTOK_URL = "https://www.tiktok.com/@igs.construction";
+
+function TikTokIcon({ size = 16 }: { size?: number }) {
+  return (
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width={size} height={size} fill="currentColor" aria-hidden="true">
+      <path d="M19.6 6.32a5.4 5.4 0 0 1-3.16-1.02 5.4 5.4 0 0 1-2.17-3.55h-3.36v13.13a2.86 2.86 0 1 1-2.86-2.86c.29 0 .57.04.83.13V8.7a6.2 6.2 0 1 0 5.39 6.18V9.4a8.78 8.78 0 0 0 5.33 1.8V7.85a5.4 5.4 0 0 1 0-1.53z" />
+    </svg>
+  );
+}
 
 const navItems: { to: "/" | "/details" | "/consultation"; label: string; hash?: string }[] = [
   { to: "/", label: "Home" },
@@ -100,9 +112,9 @@ export function SiteHeader({ floating = false }: { floating?: boolean }) {
 
         <div className="ml-auto flex items-center gap-2 md:gap-3">
           <div className="hidden md:flex items-center gap-1.5 text-muted-foreground">
-            <a aria-label="Facebook" href="#" className="p-2 rounded-full hover:text-primary hover:bg-accent transition"><Facebook size={16} /></a>
-            <a aria-label="Instagram" href="#" className="p-2 rounded-full hover:text-primary hover:bg-accent transition"><Instagram size={16} /></a>
-            <a aria-label="LinkedIn" href="#" className="p-2 rounded-full hover:text-primary hover:bg-accent transition"><Linkedin size={16} /></a>
+            <a aria-label="Facebook" href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full hover:text-primary hover:bg-accent transition"><Facebook size={16} /></a>
+            <a aria-label="Instagram" href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full hover:text-primary hover:bg-accent transition"><Instagram size={16} /></a>
+            <a aria-label="TikTok" href={TIKTOK_URL} target="_blank" rel="noopener noreferrer" className="p-2 rounded-full hover:text-primary hover:bg-accent transition"><TikTokIcon size={16} /></a>
           </div>
 
           <button
