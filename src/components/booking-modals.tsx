@@ -593,12 +593,6 @@ function toPlainTimeValue(value: unknown): string {
   return String(value).trim();
 }
 
-function parsePlainDateInput(value: string): Date | undefined {
-  const ymd = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
-  if (!ymd) return undefined;
-  return new Date(Number(ymd[1]), Number(ymd[2]) - 1, Number(ymd[3]));
-}
-
 function RescheduleForm({
   booking,
   ctx,
