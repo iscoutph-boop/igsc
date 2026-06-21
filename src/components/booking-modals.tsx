@@ -371,9 +371,11 @@ function DetailsCard({
   const status = rawStatus === "Not provided" ? "Pending Confirmation" : rawStatus;
   const cancelled = status.toLowerCase().includes("cancel");
 
+  const preferredScheduleFromApi = getBookingValue(booking, "preferredSchedule", "Preferred Schedule");
   const schedule = formatPreferredSchedule(
     preferredDateRaw === "Not provided" ? "" : preferredDateRaw,
     preferredTimeRaw === "Not provided" ? "" : preferredTimeRaw,
+    preferredScheduleFromApi === "Not provided" ? "" : preferredScheduleFromApi,
   );
 
   const contact = email !== "Not provided" && phone !== "Not provided"
