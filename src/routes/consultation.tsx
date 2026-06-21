@@ -58,7 +58,11 @@ function ConsultationPage() {
     setErrorMsg(null);
     setLoading(true);
     try {
+      console.log("IGS booking payload:", payload);
       const data = await callCRM("createBooking", payload);
+      if ((data as { warnings?: unknown }).warnings) {
+        console.warn("CRM warnings:", (data as { warnings?: unknown }).warnings);
+      }
       const ref = data.bookingReference || data.booking?.bookingReference;
       if (!ref) throw new Error("We couldn't generate your booking reference. Please try again.");
       setBookingReference(ref);
