@@ -2,7 +2,7 @@
 // Uses text/plain to avoid CORS preflight.
 
 const GOOGLE_APPS_SCRIPT_WEB_APP_URL =
-  "https://script.google.com/macros/s/AKfycbxafSYtJshUT2NeuwKlNy2qJM_1N46t0ffJr83zoHFTh7_zEvvfhMQHYTd-EXzcoFJwfQ/exec";
+  "https://script.google.com/macros/s/AKfycbym6yZbnhNFA6xVAYRQhW1hB7lXGFVFXTKdgj3lUMZscjN2HZq6K547FZgFDiQkypTd9g/exec";
 
 export type CRMAction =
   | "createBooking"
