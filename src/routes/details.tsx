@@ -244,7 +244,7 @@ function DetailsPage() {
                   {[
                     { icon: Home, label: "Residential Builds", filter: "Residential" as Filter },
                     { icon: Wrench, label: "Renovation Works", filter: "Renovation" as Filter },
-                    { icon: Layers, label: "Construction Management", filter: "Commercial" as Filter },
+                    { icon: Layers, label: "Project Portfolio", filter: "All" as Filter },
                   ].map((f) => (
                     <button
                       key={f.label}
@@ -258,7 +258,8 @@ function DetailsPage() {
                           <f.icon className="text-primary" size={20} />
                           <div className="text-sm font-semibold">{f.label}</div>
                         </div>
-                        <ArrowRight size={14} className="text-primary opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all" />
+                        <ArrowRight size={14} className="text-primary transition-transform group-hover:translate-x-1" />
+
                       </div>
                     </button>
                   ))}
