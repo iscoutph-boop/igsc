@@ -5,21 +5,14 @@ import {
   CalendarCheck,
   Loader2,
   CheckCircle2,
-  MapPin,
-  Clock,
-  User,
-  FileText,
   AlertCircle,
   CalendarClock,
   XCircle,
   ArrowLeft,
   Copy,
   Check,
-  Phone,
-  Mail,
-  Wallet,
-  StickyNote,
 } from "lucide-react";
+
 import { callCRM, type BookingRecord } from "@/lib/bookings";
 
 function useEscClose(open: boolean, onClose: () => void) {
