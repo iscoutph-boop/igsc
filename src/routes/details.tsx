@@ -999,7 +999,7 @@ function EstimatorSection() {
               <Field label="Floor Area (sqm)">
                 <div className="flex items-center gap-2 bg-background rounded-xl border border-border px-4 py-3">
                   <Square size={16} className="text-primary" />
-                  <input type="number" min={40} value={area} onChange={(e) => setArea(Math.max(40, Number(e.target.value) || 0))} className="bg-transparent w-full focus:outline-none" />
+                  <input type="number" min={0} value={area} onChange={(e) => setArea(Math.max(0, Number(e.target.value) || 0))} className="bg-transparent w-full focus:outline-none" />
                   <span className="text-xs text-muted-foreground px-2 py-0.5 rounded bg-muted">sqm</span>
                 </div>
               </Field>
