@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 
 import { callCRM, type BookingRecord } from "@/lib/bookings";
+import { SchedulePicker } from "@/components/schedule-picker";
 
 function useEscClose(open: boolean, onClose: () => void) {
   useEffect(() => {
@@ -325,6 +326,12 @@ function formatShiftedPhtTime(hour24: number, minute: string): string {
   return formatWallClockTime(shiftedHour, minute);
 }
 
+function formatBusinessHourPhtTime(hour24: number, minute: string): string {
+  // Bookings are only offered from 8am–5pm PHT. Values before 8am from the
+  // backend are UTC-shifted Google Sheets times, so repair them to PHT.
+  return hour24 < 8 ? formatShiftedPhtTime(hour24, minute) : formatWallClockTime(hour24, minute);
+}
+
 function formatDisplayDate(dateValue: string): string {
   if (!dateValue) return "";
   const raw = String(dateValue).trim();
@@ -360,7 +367,7 @@ function formatDisplayTime(timeValue: string): string {
   // Plain HH:mm or HH:mm:ss — already Philippine wall-clock, no TZ shift.
   const hm = raw.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
   if (hm) {
-    return formatWallClockTime(Number(hm[1]), hm[2]);
+    return formatBusinessHourPhtTime(Number(hm[1]), hm[2]);
   }
 
   // Human readable "10:30 AM".
@@ -369,6 +376,9 @@ function formatDisplayTime(timeValue: string): string {
     let hour = Number(ampm[1]);
     const minute = ampm[2] || "00";
     const suffix = ampm[3].toLowerCase();
+    if (suffix === "pm" && hour < 12) hour += 12;
+    if (suffix === "am" && hour === 12) hour = 0;
+    if (hour < 8) return formatShiftedPhtTime(hour, minute);
     hour = hour % 12 || 12;
     return `${hour}:${minute}${suffix}`;
   }
@@ -383,7 +393,7 @@ function formatDisplayTime(timeValue: string): string {
   // Bare "T HH:mm" without TZ info — treat as Philippine wall-clock.
   const isoTime = raw.match(/T(\d{2}):(\d{2})/);
   if (isoTime) {
-    return formatWallClockTime(Number(isoTime[1]), isoTime[2]);
+    return formatBusinessHourPhtTime(Number(isoTime[1]), isoTime[2]);
   }
 
   return raw;
