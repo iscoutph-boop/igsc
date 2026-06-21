@@ -600,17 +600,6 @@ function ResultCard({
   );
 }
 
-function Row({ icon, label, value }: { icon: React.ReactNode; label: string; value: string }) {
-  return (
-    <div className="flex items-start gap-3">
-      <span className="mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary">{icon}</span>
-      <div className="min-w-0">
-        <div className="text-[10px] uppercase tracking-wider text-muted-foreground font-bold">{label}</div>
-        <div className="text-sm font-semibold break-words whitespace-pre-wrap">{value}</div>
-      </div>
-    </div>
-  );
-}
 
 // Small reusable copy-to-clipboard reference pill used in the consultation success card.
 export function ReferencePill({ reference }: { reference: string }) {
