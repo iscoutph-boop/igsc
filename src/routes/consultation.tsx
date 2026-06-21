@@ -36,6 +36,9 @@ function ConsultationPage() {
   const [manageOpen, setManageOpen] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState<string | null>(null);
+  const [preferredDate, setPreferredDate] = useState<Date | undefined>(undefined);
+  const [preferredTime, setPreferredTime] = useState<string>("");
+
 
   const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
