@@ -593,6 +593,12 @@ function toPlainTimeValue(value: unknown): string {
   return String(value).trim();
 }
 
+function parsePlainDateInput(value: string): Date | undefined {
+  const ymd = value.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+  if (!ymd) return undefined;
+  return new Date(Number(ymd[1]), Number(ymd[2]) - 1, Number(ymd[3]));
+}
+
 function RescheduleForm({
   booking,
   ctx,
@@ -602,7 +608,7 @@ function RescheduleForm({
   ctx: LookupContext;
   onDone: (b: BookingRecord) => void;
 }) {
-  const [date, setDate] = useState("");
+  const [date, setDate] = useState<Date | undefined>(undefined);
   const [time, setTime] = useState("");
   const [notes, setNotes] = useState("");
   const [err, setErr] = useState<string | null>(null);
@@ -684,26 +690,14 @@ function RescheduleForm({
       </p>
 
       <form onSubmit={submit} className="mt-5 space-y-4">
-        <div className="grid grid-cols-2 gap-3">
-          <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">New Preferred Date</label>
-            <input
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-              className="mt-1.5 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
-            />
-          </div>
-          <div>
-            <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">New Preferred Time</label>
-            <input
-              type="time"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              className="mt-1.5 w-full rounded-xl border border-border bg-background px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-primary/40"
-            />
-          </div>
-        </div>
+        <SchedulePicker
+          date={date}
+          time={time}
+          onDateChange={setDate}
+          onTimeChange={setTime}
+          layout="stacked"
+          required
+        />
         <div>
           <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Reason / Notes</label>
           <textarea
