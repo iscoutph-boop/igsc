@@ -1,10 +1,12 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
-import { Phone, Mail, MapPin, Clock, ArrowRight, CheckCircle2 } from "lucide-react";
+import { Phone, Mail, MapPin, Clock, ArrowRight, CheckCircle2, CalendarCheck } from "lucide-react";
 import { useState } from "react";
 import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PageTransition } from "@/components/page-transition";
+import { CheckBookingModal, ReferencePill } from "@/components/booking-modals";
+import { saveBooking, type BookingRecord } from "@/lib/bookings";
 
 export const Route = createFileRoute("/consultation")({
   head: () => ({
@@ -19,14 +21,24 @@ export const Route = createFileRoute("/consultation")({
 });
 
 function ConsultationPage() {
-  const [submitted, setSubmitted] = useState(false);
+  const [submitted, setSubmitted] = useState<BookingRecord | null>(null);
+  const [manageOpen, setManageOpen] = useState(false);
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setSubmitted(true);
-    (e.target as HTMLFormElement).reset();
-    setTimeout(() => setSubmitted(false), 6000);
+    const form = e.target as HTMLFormElement;
+    const fd = new FormData(form);
+    const record = saveBooking({
+      client: String(fd.get("name") ?? ""),
+      phone: String(fd.get("phone") ?? ""),
+      email: String(fd.get("email") ?? ""),
+      projectType: String(fd.get("projectType") ?? ""),
+      details: String(fd.get("details") ?? ""),
+    });
+    setSubmitted(record);
+    form.reset();
   };
+
 
   return (
     <PageTransition>
@@ -92,7 +104,7 @@ function ConsultationPage() {
                 className="lg:col-span-3 glass rounded-3xl p-8 md:p-10 shadow-card relative overflow-hidden"
               >
                 <h2 className="font-display font-bold text-2xl">Request a Consultation</h2>
-                <p className="text-sm text-muted-foreground mt-1">Fill out the form and we'll respond within one business day.</p>
+                <p className="text-sm text-muted-foreground mt-1">Tell us about your project and our team will contact you to confirm your site visit.</p>
 
                 <form onSubmit={onSubmit} className="mt-8 grid sm:grid-cols-2 gap-5">
                   <Field label="Full Name" name="name" placeholder="Juan Dela Cruz" required />
@@ -123,7 +135,7 @@ function ConsultationPage() {
                       name="details"
                       required
                       rows={5}
-                      placeholder="Tell us about your project..."
+                      placeholder="Tell us about your project, location, timeline, and preferred consultation schedule."
                       className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition resize-none"
                     />
                   </div>
@@ -133,7 +145,7 @@ function ConsultationPage() {
                       type="submit"
                       className="group inline-flex items-center gap-3 gradient-brand text-primary-foreground rounded-full pl-7 pr-2 py-3 font-semibold shadow-glow hover:scale-[1.02] transition"
                     >
-                      Request a Consultation
+                      Request Consultation
                       <span className="bg-background/25 rounded-full p-2 group-hover:translate-x-1 transition-transform">
                         <ArrowRight size={16} />
                       </span>
@@ -144,17 +156,48 @@ function ConsultationPage() {
                 <AnimatePresence>
                   {submitted && (
                     <motion.div
-                      initial={{ opacity: 0, y: 10 }}
+                      initial={{ opacity: 0, y: 12 }}
                       animate={{ opacity: 1, y: 0 }}
                       exit={{ opacity: 0 }}
-                      className="mt-6 flex items-start gap-3 rounded-2xl border border-primary/30 bg-primary/10 p-5"
+                      className="mt-8 rounded-3xl border border-primary/30 bg-[oklch(0.985_0.012_70)] dark:bg-surface/40 p-6 md:p-8 shadow-card"
                     >
-                      <CheckCircle2 className="text-primary shrink-0 mt-0.5" size={20} />
-                      <div className="text-sm">
-                        <div className="font-semibold">Thank you!</div>
-                        <div className="text-muted-foreground mt-1">
-                          Your consultation request has been received. Our team will contact you shortly.
+                      <div className="flex items-start gap-4">
+                        <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-600">
+                          <CheckCircle2 size={22} />
                         </div>
+                        <div className="min-w-0">
+                          <h3 className="font-display font-bold text-xl">Consultation Request Received</h3>
+                          <p className="mt-1.5 text-sm text-muted-foreground">
+                            Thank you. Your consultation request has been submitted successfully. Our team will contact you shortly to confirm your schedule.
+                          </p>
+                        </div>
+                      </div>
+
+                      <div className="mt-6">
+                        <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground font-bold">Your Booking Reference</div>
+                        <div className="mt-2.5">
+                          <ReferencePill reference={submitted.reference} />
+                        </div>
+                        <p className="mt-3 text-xs text-muted-foreground">
+                          Please save this reference number. You'll need it to manage, reschedule, or cancel your booking.
+                        </p>
+                      </div>
+
+                      <div className="mt-6 flex flex-wrap items-center gap-3">
+                        <button
+                          type="button"
+                          onClick={() => setManageOpen(true)}
+                          className="inline-flex items-center gap-2 gradient-brand text-primary-foreground rounded-full px-5 py-3 text-sm font-semibold shadow-glow hover:scale-[1.02] transition"
+                        >
+                          <CalendarCheck size={16} /> Manage My Booking
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => setSubmitted(null)}
+                          className="inline-flex items-center gap-2 rounded-full bg-surface border border-border px-5 py-3 text-sm font-semibold hover:bg-muted transition"
+                        >
+                          Submit another request
+                        </button>
                       </div>
                     </motion.div>
                   )}
