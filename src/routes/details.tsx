@@ -876,7 +876,7 @@ function Reveal({ children, delay = 0, className = "" }: { children: React.React
   );
 }
 
-function AboutSlideshow() {
+function AboutSlideshow({ onZoom }: { onZoom?: (src: string) => void } = {}) {
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
   const [exterior, setExterior] = useState(exteriorImages[0]);
@@ -898,9 +898,11 @@ function AboutSlideshow() {
 
       {/* Main slideshow — full width */}
       <div
-        className="relative rounded-3xl shadow-card overflow-hidden aspect-[4/3] md:aspect-[16/10] lg:aspect-[16/9] group"
+        className="relative rounded-3xl shadow-card overflow-hidden aspect-[4/3] md:aspect-[16/10] lg:aspect-[16/9] group select-none"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
+        onClick={() => setPaused((p) => !p)}
+        onDoubleClick={(e) => { e.stopPropagation(); onZoom?.(interiorSlides[idx]); }}
       >
         <AnimatePresence mode="wait">
           <motion.img
@@ -918,7 +920,7 @@ function AboutSlideshow() {
 
         <div className="absolute top-4 right-4 inline-flex items-center gap-1.5 bg-white/15 backdrop-blur-xl border border-white/25 text-white rounded-full px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] font-bold shadow-soft">
           <span className={`h-1.5 w-1.5 rounded-full ${paused ? "bg-white/70" : "bg-emerald-400 animate-pulse"}`} />
-          {paused ? "Paused" : "Autoplay"}
+          {paused ? "Paused — tap to resume" : "Autoplay"}
         </div>
 
         <button
