@@ -310,7 +310,7 @@ function formatDisplayTime(timeValue: string): string {
   if (!timeValue) return "";
   const raw = String(timeValue).trim();
 
-  // Case 1: plain HH:mm or HH:mm:ss — treat as local clock time, no TZ shift
+  // Plain HH:mm or HH:mm:ss — local clock, no TZ shift.
   const hm = raw.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
   if (hm) {
     let hour = Number(hm[1]);
@@ -320,39 +320,24 @@ function formatDisplayTime(timeValue: string): string {
     return `${hour}:${minute}${suffix}`;
   }
 
-  // Case 2: Full ISO UTC timestamp (e.g. "1899-12-30T02:00:00.000Z" representing
-  // 10:00 Manila stored as UTC by Google Sheets). Convert to Asia/Manila clock.
-  if (/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(raw) && /(Z|[+-]\d{2}:?\d{2})$/.test(raw)) {
-    const d = new Date(raw);
-    if (!Number.isNaN(d.getTime())) {
-      return new Intl.DateTimeFormat("en-US", {
-        hour: "numeric",
-        minute: "2-digit",
-        hour12: true,
-        timeZone: "Asia/Manila",
-      })
-        .format(d)
-        .replace(/\s?AM$/i, "am")
-        .replace(/\s?PM$/i, "pm");
-    }
-  }
-
-  // Case 3: ISO-like without timezone — extract local HH:mm after T
-  const isoTime = raw.match(/T(\d{2}):(\d{2}):/);
-  if (isoTime) {
-    let hour = Number(isoTime[1]);
-    const minute = isoTime[2];
-    const suffix = hour >= 12 ? "pm" : "am";
-    hour = hour % 12 || 12;
-    return `${hour}:${minute}${suffix}`;
-  }
-
-  // Case 4: already human readable "2:00 PM"
+  // Already human readable "10:30 AM".
   const ampm = raw.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i);
   if (ampm) {
     let hour = Number(ampm[1]);
     const minute = ampm[2] || "00";
     const suffix = ampm[3].toLowerCase();
+    hour = hour % 12 || 12;
+    return `${hour}:${minute}${suffix}`;
+  }
+
+  // ISO-like value (e.g. "1899-12-30T10:30:00.000Z"). Extract the wall-clock
+  // HH:mm directly — never timezone-convert. Sheets stores time-only cells
+  // with a sentinel date, so historical TZ math would shift the hour wrongly.
+  const isoTime = raw.match(/T(\d{2}):(\d{2})/);
+  if (isoTime) {
+    let hour = Number(isoTime[1]);
+    const minute = isoTime[2];
+    const suffix = hour >= 12 ? "pm" : "am";
     hour = hour % 12 || 12;
     return `${hour}:${minute}${suffix}`;
   }
@@ -366,17 +351,20 @@ function formatPreferredSchedule(
   preferredTime: string,
   preferredScheduleFromApi?: string,
 ): string {
+  // Trust the API-formatted schedule when it looks clean.
+  if (
+    preferredScheduleFromApi &&
+    preferredScheduleFromApi !== "Not provided" &&
+    preferredScheduleFromApi !== "Pending schedule confirmation" &&
+    !preferredScheduleFromApi.includes("1899-12-30") &&
+    !/\dT\d/.test(preferredScheduleFromApi)
+  ) {
+    return preferredScheduleFromApi;
+  }
   const date = formatDisplayDate(preferredDate);
   const time = formatDisplayTime(preferredTime);
   if (date && time) return `${date} — ${time}`;
   if (date) return date;
-  if (
-    preferredScheduleFromApi &&
-    !String(preferredScheduleFromApi).includes("1899-12-30") &&
-    !String(preferredScheduleFromApi).includes("T")
-  ) {
-    return preferredScheduleFromApi;
-  }
   return "Pending schedule confirmation";
 }
 
