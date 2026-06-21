@@ -56,12 +56,13 @@ function HomePage() {
           className="absolute top-28 sm:top-32 md:top-40 left-4 sm:left-5 md:left-12 max-w-[78vw] sm:max-w-[260px] z-10"
         >
           <div className="h-0.5 w-10 gradient-brand rounded-full mb-3" />
-          <p className="text-xs md:text-sm text-foreground/85 font-medium leading-relaxed whitespace-pre-line">
-            Already booked an appointment?{"\n"}View details, reschedule, or cancel anytime here.
+          <p className="text-xs md:text-sm text-foreground/85 font-medium leading-relaxed">
+            Already booked an appointment?<br />
+            <span className="text-foreground/75">Manage your booking here — view details, reschedule, or cancel anytime.</span>
           </p>
           <button
             onClick={() => setBookingOpen(true)}
-            aria-label="Check Booking Status"
+            aria-label="Manage your booking"
             className="mt-5 group inline-flex items-center gap-2.5 rounded-full px-4 sm:px-5 py-2.5 sm:py-3 text-xs sm:text-sm font-semibold tracking-wide bg-white/85 dark:bg-white/10 backdrop-blur-md text-foreground border border-white/40 shadow-card hover:bg-white hover:scale-[1.02] transition"
           >
             <CalendarCheck size={16} className="text-primary" />
