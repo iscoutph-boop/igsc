@@ -226,13 +226,22 @@ export function CheckBookingModal({
               )}
 
               {view.kind === "reschedule-done" && (
-                <ResultCard
-                  tone="success"
-                  title="Reschedule Request Received"
-                  message="Your reschedule request has been received. Our team will contact you to confirm the new schedule."
-                  reference={view.booking.bookingReference}
-                  onClose={onClose}
-                />
+                <>
+                  <h3 className="mt-4 text-2xl font-display font-bold">Reschedule Request Received</h3>
+                  <div className="mt-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 flex items-start gap-3">
+                    <CheckCircle2 size={18} className="text-emerald-600 shrink-0 mt-0.5" />
+                    <p className="text-sm text-foreground/90">
+                      Your reschedule request has been received. Our team will contact you to confirm the new schedule.
+                    </p>
+                  </div>
+                  <DetailsCard booking={view.booking} onReschedule={() => { /* hidden after submit */ }} onCancel={() => { /* hidden after submit */ }} hideActions />
+                  <button
+                    onClick={onClose}
+                    className="mt-5 w-full inline-flex items-center justify-center gap-2 gradient-brand text-primary-foreground rounded-full px-6 py-3 font-semibold shadow-glow hover:scale-[1.01] transition"
+                  >
+                    Done
+                  </button>
+                </>
               )}
 
               {view.kind === "cancel-done" && (
