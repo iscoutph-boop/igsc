@@ -314,6 +314,17 @@ function formatPhtTime(date: Date): string {
     .replace(/\s+/g, "");
 }
 
+function formatWallClockTime(hour24: number, minute: string): string {
+  const suffix = hour24 >= 12 ? "pm" : "am";
+  const hour12 = hour24 % 12 || 12;
+  return `${hour12}:${minute}${suffix}`;
+}
+
+function formatShiftedPhtTime(hour24: number, minute: string): string {
+  const shiftedHour = (hour24 + 8) % 24;
+  return formatWallClockTime(shiftedHour, minute);
+}
+
 function formatDisplayDate(dateValue: string): string {
   if (!dateValue) return "";
   const raw = String(dateValue).trim();
@@ -349,11 +360,7 @@ function formatDisplayTime(timeValue: string): string {
   // Plain HH:mm or HH:mm:ss — already Philippine wall-clock, no TZ shift.
   const hm = raw.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
   if (hm) {
-    let hour = Number(hm[1]);
-    const minute = hm[2];
-    const suffix = hour >= 12 ? "pm" : "am";
-    hour = hour % 12 || 12;
-    return `${hour}:${minute}${suffix}`;
+    return formatWallClockTime(Number(hm[1]), hm[2]);
   }
 
   // Human readable "10:30 AM".
@@ -376,14 +383,23 @@ function formatDisplayTime(timeValue: string): string {
   // Bare "T HH:mm" without TZ info — treat as Philippine wall-clock.
   const isoTime = raw.match(/T(\d{2}):(\d{2})/);
   if (isoTime) {
-    let hour = Number(isoTime[1]);
-    const minute = isoTime[2];
-    const suffix = hour >= 12 ? "pm" : "am";
-    hour = hour % 12 || 12;
-    return `${hour}:${minute}${suffix}`;
+    return formatWallClockTime(Number(isoTime[1]), isoTime[2]);
   }
 
   return raw;
+}
+
+function repairApiScheduleText(rawSchedule: string): string {
+  // If the API already sent a human-readable schedule but its time is before
+  // business hours, it is almost certainly UTC text; add 8 hours for PHT.
+  return rawSchedule.replace(/\b(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/i, (match, hourText, minuteText, suffixText) => {
+    let hour = Number(hourText);
+    const minute = String(minuteText || "00").padStart(2, "0");
+    const suffix = String(suffixText).toLowerCase();
+    if (suffix === "pm" && hour < 12) hour += 12;
+    if (suffix === "am" && hour === 12) hour = 0;
+    return hour < 8 ? formatShiftedPhtTime(hour, minute) : match;
+  });
 }
 
 
@@ -409,7 +425,7 @@ function formatPreferredSchedule(
         if (parsedTime) return parsedTime;
         if (parsedDate) return parsedDate;
       }
-      return rawSchedule;
+      return repairApiScheduleText(rawSchedule);
     }
   }
 
