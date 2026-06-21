@@ -271,48 +271,82 @@ function getBookingValue(booking: Record<string, unknown> | BookingRecord, ...ke
   return "Not provided";
 }
 
-function formatDateOnly(value: string): string {
-  if (!value) return "";
-  // Google Sheets time-only fallback returns 1899-12-30 — not a real date
-  if (value.includes("1899-12-30")) return "";
-  const date = new Date(value);
-  if (isNaN(date.getTime())) return "";
-  return date.toLocaleDateString("en-US", {
+function formatDisplayDate(dateValue: string): string {
+  if (!dateValue) return "";
+  const raw = String(dateValue).trim();
+  const ymd = raw.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  if (ymd) {
+    const year = Number(ymd[1]);
+    const monthIndex = Number(ymd[2]) - 1;
+    const day = Number(ymd[3]);
+    const date = new Date(Date.UTC(year, monthIndex, day, 0, 0, 0));
+    return new Intl.DateTimeFormat("en-US", {
+      month: "long",
+      day: "numeric",
+      year: "numeric",
+      timeZone: "Asia/Manila",
+    }).format(date);
+  }
+  const date = new Date(raw);
+  if (Number.isNaN(date.getTime())) return "";
+  return new Intl.DateTimeFormat("en-US", {
     month: "long",
     day: "numeric",
     year: "numeric",
     timeZone: "Asia/Manila",
-  });
+  }).format(date);
 }
 
-function formatTimeOnly(value: string): string {
-  if (!value) return "";
-  const date = new Date(value);
-  if (!isNaN(date.getTime())) {
-    return date.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-      timeZone: "Asia/Manila",
-    });
+function formatDisplayTime(timeValue: string): string {
+  if (!timeValue) return "";
+  const raw = String(timeValue).trim();
+
+  const hm = raw.match(/^(\d{1,2}):(\d{2})(?::\d{2})?$/);
+  if (hm) {
+    let hour = Number(hm[1]);
+    const minute = hm[2];
+    const suffix = hour >= 12 ? "pm" : "am";
+    hour = hour % 12 || 12;
+    return `${hour}:${minute}${suffix}`;
   }
-  // Fallback: HH:MM string like "07:00"
-  const match = String(value).match(/(\d{1,2}):(\d{2})/);
-  if (match) {
-    const h = parseInt(match[1], 10);
-    const m = match[2];
-    const hour12 = ((h + 11) % 12) + 1;
-    const ampm = h < 12 ? "AM" : "PM";
-    return `${hour12}:${m} ${ampm}`;
+
+  const isoTime = raw.match(/T(\d{2}):(\d{2}):/);
+  if (isoTime) {
+    let hour = Number(isoTime[1]);
+    const minute = isoTime[2];
+    const suffix = hour >= 12 ? "pm" : "am";
+    hour = hour % 12 || 12;
+    return `${hour}:${minute}${suffix}`;
   }
-  return "";
+
+  const ampm = raw.match(/^(\d{1,2})(?::(\d{2}))?\s*(AM|PM)$/i);
+  if (ampm) {
+    let hour = Number(ampm[1]);
+    const minute = ampm[2] || "00";
+    const suffix = ampm[3].toLowerCase();
+    hour = hour % 12 || 12;
+    return `${hour}:${minute}${suffix}`;
+  }
+
+  return raw;
 }
 
-function formatPreferredSchedule(preferredDate: string, preferredTime: string): string {
-  const cleanDate = formatDateOnly(preferredDate);
-  const cleanTime = formatTimeOnly(preferredTime);
-  if (cleanDate && cleanTime) return `${cleanDate} — ${cleanTime}`;
-  if (cleanDate) return cleanDate;
+function formatPreferredSchedule(
+  preferredDate: string,
+  preferredTime: string,
+  preferredScheduleFromApi?: string,
+): string {
+  const date = formatDisplayDate(preferredDate);
+  const time = formatDisplayTime(preferredTime);
+  if (date && time) return `${date} — ${time}`;
+  if (date) return date;
+  if (
+    preferredScheduleFromApi &&
+    !String(preferredScheduleFromApi).includes("1899-12-30") &&
+    !String(preferredScheduleFromApi).includes("T")
+  ) {
+    return preferredScheduleFromApi;
+  }
   return "Pending schedule confirmation";
 }
 
@@ -337,9 +371,11 @@ function DetailsCard({
   const status = rawStatus === "Not provided" ? "Pending Confirmation" : rawStatus;
   const cancelled = status.toLowerCase().includes("cancel");
 
+  const preferredScheduleFromApi = getBookingValue(booking, "preferredSchedule", "Preferred Schedule");
   const schedule = formatPreferredSchedule(
     preferredDateRaw === "Not provided" ? "" : preferredDateRaw,
     preferredTimeRaw === "Not provided" ? "" : preferredTimeRaw,
+    preferredScheduleFromApi === "Not provided" ? "" : preferredScheduleFromApi,
   );
 
   const contact = email !== "Not provided" && phone !== "Not provided"
