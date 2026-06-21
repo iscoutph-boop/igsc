@@ -291,7 +291,7 @@ function isSheetsSentinel(raw: string): boolean {
 }
 
 function hasTzMarker(raw: string): boolean {
-  return /(Z|[+\-]\d{2}:?\d{2})$/.test(raw);
+  return /(?:Z|[+-]\d{2}:?\d{2})$/.test(raw);
 }
 
 const PHT_DATE_FMT = new Intl.DateTimeFormat("en-US", {
