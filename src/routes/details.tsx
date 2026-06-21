@@ -210,35 +210,49 @@ function DetailsPage() {
 
   useEffect(() => { setVisible(6); }, [filter, query, sort]);
 
-  const handleServiceClick = (f: Filter) => {
-    setFilter(f);
-    // Push a new history entry so the browser Back button returns the user
-    // to their previous scroll position instead of staying on the portfolio.
-    if (typeof window !== "undefined") {
-      const prevScroll = window.scrollY;
-      window.history.replaceState(
-        { ...(window.history.state ?? {}), __prevScroll: prevScroll },
-        "",
-        window.location.pathname + window.location.search + window.location.hash,
-      );
-      window.history.pushState({ __portfolioJump: true, filter: f }, "", "#portfolio");
-    }
-    requestAnimationFrame(() => {
-      document.getElementById("portfolio")?.scrollIntoView({ behavior: "smooth", block: "start" });
-    });
+  const sectionIds = ["about", "services", "portfolio", "process"] as const;
+
+  const scrollToHash = (hash: string, smooth = true) => {
+    const id = hash.replace(/^#/, "");
+    if (!id) return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: smooth ? "smooth" : "auto", block: "start" });
   };
 
+  const handleServiceClick = (f: Filter) => {
+    setFilter(f);
+    if (typeof window !== "undefined" && window.location.hash !== "#portfolio") {
+      // Push a real hash entry so Back/forward and refresh work naturally.
+      window.history.pushState(null, "", "#portfolio");
+    }
+    requestAnimationFrame(() => scrollToHash("portfolio"));
+  };
+
+  // Handle initial hash on mount (refresh / direct link) and hashchange / back-forward.
   useEffect(() => {
-    const onPop = (e: PopStateEvent) => {
-      const prev = (e.state && (e.state.__prevScroll as number | undefined)) ?? undefined;
-      if (typeof prev === "number") {
-        requestAnimationFrame(() => {
-          window.scrollTo({ top: prev, behavior: "smooth" });
-        });
-      }
-    };
+    if (typeof window === "undefined") return;
+    if (window.location.hash) {
+      // Defer to allow layout to settle before scrolling.
+      const id = window.requestAnimationFrame(() => scrollToHash(window.location.hash, false));
+      // Second pass after images/fonts settle for accurate position.
+      const t = window.setTimeout(() => scrollToHash(window.location.hash, false), 250);
+      return () => {
+        window.cancelAnimationFrame(id);
+        window.clearTimeout(t);
+      };
+    }
+  }, []);
+
+  useEffect(() => {
+    const onHashChange = () => scrollToHash(window.location.hash);
+    const onPop = () => scrollToHash(window.location.hash);
+    window.addEventListener("hashchange", onHashChange);
     window.addEventListener("popstate", onPop);
-    return () => window.removeEventListener("popstate", onPop);
+    return () => {
+      window.removeEventListener("hashchange", onHashChange);
+      window.removeEventListener("popstate", onPop);
+    };
   }, []);
 
 
