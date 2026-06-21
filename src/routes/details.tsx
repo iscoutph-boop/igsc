@@ -184,6 +184,8 @@ function DetailsPage() {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("latest");
   const [visible, setVisible] = useState(6);
+  const [zoomImg, setZoomImg] = useState<string | null>(null);
+  const openZoom = (src: string) => setZoomImg(src);
 
   const filtered = useMemo(() => {
     let list = projects;
