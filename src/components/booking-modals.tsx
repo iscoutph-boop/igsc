@@ -445,7 +445,7 @@ function DetailsCard({
         </p>
       </motion.div>
 
-      {!cancelled && (
+      {!cancelled && !hideActions && (
         <div className="mt-5 grid sm:grid-cols-2 gap-3">
           <button
             onClick={onReschedule}
