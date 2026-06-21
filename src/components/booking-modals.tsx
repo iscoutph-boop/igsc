@@ -102,12 +102,17 @@ export function CheckBookingModal({
         bookingReference: ref.trim(),
         contact: contact.trim(),
       });
-      const booking = data.booking ?? (data.data?.booking as BookingRecord | undefined);
-      if (!booking) {
+      const rawBooking = (data.booking ?? (data.data?.booking as BookingRecord | undefined)) as Record<string, unknown> | undefined;
+      if (!rawBooking) {
         setNotFoundMsg("Booking not found. Please check your booking reference and contact detail.");
       } else {
+        const normalizedRef = String(
+          rawBooking.bookingReference ?? rawBooking["Booking Reference"] ?? ref.trim(),
+        );
+        const booking = { ...rawBooking, bookingReference: normalizedRef } as BookingRecord;
         setView({ kind: "details", booking, ctx: { reference: ref.trim(), contact: contact.trim() } });
       }
+
     } catch (e2) {
       setNotFoundMsg(
         e2 instanceof Error && e2.message
