@@ -465,10 +465,7 @@ function DetailsPage() {
                         </div>
                       </div>
                     </div>
-                    <div className="p-5 flex items-center justify-between bg-card">
-                      <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-foreground/80">
-                        View Details <ChevronRight size={14} />
-                      </span>
+                    <div className="p-5 flex items-center justify-center bg-card">
                       <span className="inline-flex items-center gap-2 text-primary text-sm font-semibold group-hover:brightness-110">
                         Open Project <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
                       </span>
