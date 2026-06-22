@@ -122,7 +122,7 @@ function ConsultationPage() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
-                className="lg:col-span-2 glass rounded-3xl p-8 shadow-card h-fit"
+                className="order-2 lg:order-1 lg:col-span-2 glass rounded-3xl p-8 shadow-card h-fit"
               >
                 <h2 className="font-display font-bold text-2xl">Contact Details</h2>
                 <p className="text-sm text-muted-foreground mt-2">We're here Monday — Saturday.</p>
@@ -147,7 +147,7 @@ function ConsultationPage() {
                 whileInView={{ opacity: 1, x: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6, delay: 0.1 }}
-                className="lg:col-span-3 glass rounded-3xl p-8 md:p-10 shadow-card relative overflow-hidden"
+                className="order-1 lg:order-2 lg:col-span-3 glass rounded-3xl p-8 md:p-10 shadow-card relative overflow-hidden"
               >
                 <h2 className="font-display font-bold text-2xl">Request a Consultation</h2>
                 <p className="text-sm text-muted-foreground mt-1">Tell us about your project and our team will contact you to confirm your site visit.</p>
