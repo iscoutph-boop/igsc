@@ -523,6 +523,50 @@ function DetailsPage() {
           </Reveal>
         </Section>
 
+        {/* Client Reviews — under Client & Team Meetings */}
+        <Section id="reviews">
+          <Reveal className="text-center max-w-2xl mx-auto">
+            <Eyebrow center>Client Reviews</Eyebrow>
+            <h2 className="mt-3 text-4xl md:text-5xl font-display font-bold leading-tight">
+              Trusted by families.<br />
+              <span className="text-gradient-brand">Proven by results.</span>
+            </h2>
+            <p className="mt-5 text-muted-foreground">
+              Real feedback from clients we have built with — from the first consultation to turnover day.
+            </p>
+          </Reveal>
+
+          <div className="mt-14 grid md:grid-cols-3 gap-6">
+            {testimonials.map((t, i) => (
+              <Reveal key={t.name} delay={i * 0.08}>
+                <div className="relative h-full glass rounded-3xl p-7 shadow-card hover:shadow-glow transition-all hover:-translate-y-1">
+                  <MessageSquareQuote className="text-primary/30 absolute top-5 right-5" size={36} />
+                  <div className="flex items-center gap-1 text-primary">
+                    {Array.from({ length: t.rating }).map((_, k) => (
+                      <Star key={k} size={14} className="fill-primary" />
+                    ))}
+                  </div>
+                  <p className="mt-5 text-sm md:text-base text-foreground/90 leading-relaxed italic">
+                    “{t.quote}”
+                  </p>
+                  <div className="mt-6 pt-5 border-t border-border flex items-center gap-3">
+                    <span className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full gradient-brand text-primary-foreground font-display font-black">
+                      {t.name.split(" ").slice(-1)[0]?.[0] ?? "C"}
+                    </span>
+                    <div className="min-w-0">
+                      <div className="font-display font-bold text-sm truncate">{t.name}</div>
+                      <div className="text-[11px] text-muted-foreground truncate">{t.project}</div>
+                      <div className="text-[11px] text-primary mt-0.5 flex items-center gap-1"><MapPin size={10} /> {t.location}</div>
+                    </div>
+                  </div>
+                </div>
+              </Reveal>
+            ))}
+          </div>
+        </Section>
+
+
+
 
 
 
