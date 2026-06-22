@@ -180,6 +180,7 @@ type SortKey = "latest" | "completed" | "ongoing" | "name";
 
 function DetailsPage() {
   const [filter, setFilter] = useState<Filter>("All");
+  const [folder, setFolder] = useState<Filter | null>(null);
   const [active, setActive] = useState<Project | null>(null);
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("latest");
@@ -212,6 +213,40 @@ function DetailsPage() {
 
   useEffect(() => { setVisible(6); }, [filter, query, sort]);
 
+  const folderDefs: { key: Filter; label: string; icon: typeof Home; desc: string }[] = [
+    { key: "Completed", label: "Completed", icon: CheckCircle2, desc: "Delivered & turned over" },
+    { key: "Ongoing", label: "Ongoing", icon: HardHat, desc: "Currently under construction" },
+    { key: "Residential", label: "Residential", icon: Home, desc: "Custom family homes" },
+    { key: "Apartment", label: "Apartment", icon: Building, desc: "Multi-unit dwellings" },
+    { key: "Commercial", label: "Commercial", icon: Layers, desc: "Commercial buildings" },
+    { key: "Renovation", label: "Renovation", icon: Wrench, desc: "Remodels & transformations" },
+  ];
+
+  const folderCount = (k: Filter) =>
+    k === "Completed" || k === "Ongoing"
+      ? projects.filter((p) => p.status === k).length
+      : projects.filter((p) => p.type === k).length;
+
+  const folderCover = (k: Filter) => {
+    const list = k === "Completed" || k === "Ongoing"
+      ? projects.filter((p) => p.status === k)
+      : projects.filter((p) => p.type === k);
+    return list[0]?.img ?? projects[0].img;
+  };
+
+  const openFolder = (k: Filter) => {
+    setFolder(k);
+    setFilter(k);
+    setQuery("");
+    setVisible(6);
+  };
+
+  const closeFolder = () => {
+    setFolder(null);
+    setFilter("All");
+    setQuery("");
+  };
+
   const sectionIds = ["about", "services", "portfolio", "process"] as const;
 
   const scrollToHash = (hash: string, smooth = true) => {
@@ -223,13 +258,19 @@ function DetailsPage() {
   };
 
   const handleServiceClick = (f: Filter) => {
-    setFilter(f);
+    if (f === "All") {
+      setFolder(null);
+      setFilter("All");
+    } else {
+      openFolder(f);
+    }
     if (typeof window !== "undefined" && window.location.hash !== "#portfolio") {
       // Push a real hash entry so Back/forward and refresh work naturally.
       window.history.pushState(null, "", "#portfolio");
     }
     requestAnimationFrame(() => scrollToHash("portfolio"));
   };
+
 
   // Handle initial hash on mount (refresh / direct link) and hashchange / back-forward.
   useEffect(() => {
