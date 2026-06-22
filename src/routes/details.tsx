@@ -1098,10 +1098,7 @@ function EstimatorSection() {
                     >
                       <div className="flex items-center gap-2">
                         <span className={`h-4 w-4 rounded-full border-2 ${active ? "border-primary bg-primary" : "border-muted-foreground/40"}`} />
-                        {p === "Standard" && <Home size={16} className="text-primary" />}
-                        {p === "Semi-elegant" && <Layers size={16} className="text-primary" />}
-                        {p === "Elegant" && <Star size={16} className="text-primary" />}
-                        {p === "Luxury" && <Sparkles size={16} className="text-primary" />}
+                        <Home size={16} className="text-primary" />
                         <span className="font-bold text-sm">{p}</span>
                       </div>
                       <div className="mt-1.5 text-[11px] text-muted-foreground">
