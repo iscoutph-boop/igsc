@@ -434,84 +434,128 @@ function DetailsPage() {
             </p>
           </Reveal>
 
-          {/* Filters + Sort + Search */}
-          <Reveal delay={0.1}>
-            <div className="mt-10 grid gap-4 lg:grid-cols-[1fr_auto_auto] lg:items-center">
-              <div className="flex flex-wrap gap-2 min-w-0">
-                {filters.map((f) => {
-                  const isActive = filter === f;
-                  return (
-                    <button
-                      key={f}
-                      onClick={() => setFilter(f)}
-                      className={`px-4 py-2 rounded-full text-xs md:text-sm font-semibold transition-all ${
-                        isActive
-                          ? "gradient-brand text-primary-foreground shadow-soft"
-                          : "glass hover:shadow-soft text-foreground/80"
-                      }`}
-                    >
-                      {f}
-                    </button>
-                  );
-                })}
+          {folder === null ? (
+            // Folder grid view
+            <Reveal delay={0.1}>
+              <div className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                {folderDefs.map((f, i) => (
+                  <motion.button
+                    key={f.key}
+                    type="button"
+                    onClick={() => openFolder(f.key)}
+                    initial={{ opacity: 0, y: 16 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ duration: 0.45, delay: Math.min(i * 0.05, 0.25) }}
+                    className="group relative text-left glass rounded-3xl overflow-hidden shadow-card hover:shadow-glow hover:-translate-y-1 transition-all"
+                  >
+                    <div className="relative aspect-[4/3] overflow-hidden">
+                      <img src={folderCover(f.key)} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
+                      <div className="absolute top-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-xl border border-white/25 text-white px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] font-bold">
+                        <f.icon size={12} /> Folder
+                      </div>
+                      <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-3">
+                        <div className="min-w-0 text-white">
+                          <div className="font-display font-black text-2xl truncate">{f.label}</div>
+                          <div className="text-xs opacity-90">{f.desc}</div>
+                        </div>
+                        <div className="shrink-0 rounded-full bg-white/15 backdrop-blur-xl border border-white/25 text-white px-3 py-1.5 text-xs font-bold">
+                          {folderCount(f.key)} {folderCount(f.key) === 1 ? "project" : "projects"}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-5 flex items-center justify-between">
+                      <span className="text-sm font-semibold">View Details</span>
+                      <span className="inline-flex items-center gap-2 text-primary text-sm font-semibold">
+                        Open Folder <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+                      </span>
+                    </div>
+                  </motion.button>
+                ))}
               </div>
-              <div className="relative">
-                <select
-                  value={sort}
-                  onChange={(e) => setSort(e.target.value as SortKey)}
-                  className="appearance-none glass rounded-full pl-5 pr-10 py-2.5 text-sm font-medium cursor-pointer hover:shadow-soft transition w-full lg:w-auto"
-                >
-                  <option value="latest">Latest Projects</option>
-                  <option value="name">Project Name</option>
-                  <option value="completed">Completed First</option>
-                  <option value="ongoing">Ongoing First</option>
-                </select>
-                <ChevronDown size={16} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              </div>
-              <div className="relative">
-                <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
-                <input
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search projects..."
-                  className="glass rounded-full pl-11 pr-5 py-2.5 text-sm w-full lg:w-72 focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
-                />
-              </div>
-            </div>
-          </Reveal>
-
-          {/* Grid */}
-          <motion.div layout className="mt-10 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            <AnimatePresence mode="popLayout">
-              {filtered.slice(0, visible).map((p, i) => (
-                <motion.div
-                  key={p.id}
-                  layout
-                  initial={{ opacity: 0, y: 24 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.45, delay: Math.min(i * 0.04, 0.3), ease: [0.22, 1, 0.36, 1] }}
-                >
-                  <ProjectCard project={p} onOpen={() => setActive(p)} />
-                </motion.div>
-              ))}
-            </AnimatePresence>
-          </motion.div>
-
-          {filtered.length === 0 && (
-            <p className="mt-10 text-center text-muted-foreground">No projects match your search.</p>
-          )}
-
-          {visible < filtered.length && (
-            <Reveal className="mt-12 flex justify-center">
-              <button
-                onClick={() => setVisible((v) => v + 6)}
-                className="inline-flex items-center gap-3 rounded-full px-7 py-3 text-sm font-semibold border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition"
-              >
-                Load More Projects
-                <ArrowRight size={16} />
-              </button>
             </Reveal>
+          ) : (
+            <>
+              {/* Folder header + back */}
+              <Reveal delay={0.1}>
+                <div className="mt-10 flex flex-wrap items-center justify-between gap-4">
+                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
+                    <button onClick={closeFolder} className="hover:text-foreground transition inline-flex items-center gap-1.5">
+                      <ChevronLeft size={16} /> All Folders
+                    </button>
+                    <span>›</span>
+                    <span className="text-primary font-semibold">{folder}</span>
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    <div className="relative">
+                      <select
+                        value={sort}
+                        onChange={(e) => setSort(e.target.value as SortKey)}
+                        className="appearance-none glass rounded-full pl-5 pr-10 py-2.5 text-sm font-medium cursor-pointer hover:shadow-soft transition"
+                      >
+                        <option value="latest">Latest Projects</option>
+                        <option value="name">Project Name</option>
+                        <option value="completed">Completed First</option>
+                        <option value="ongoing">Ongoing First</option>
+                      </select>
+                      <ChevronDown size={16} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                    </div>
+                    <div className="relative">
+                      <Search size={16} className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+                      <input
+                        value={query}
+                        onChange={(e) => setQuery(e.target.value)}
+                        placeholder="Search projects..."
+                        className="glass rounded-full pl-11 pr-5 py-2.5 text-sm w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </Reveal>
+
+              <motion.div layout className="mt-8 grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <AnimatePresence mode="popLayout">
+                  {filtered.slice(0, visible).map((p, i) => (
+                    <motion.div
+                      key={p.id}
+                      layout
+                      initial={{ opacity: 0, y: 24 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      exit={{ opacity: 0, y: -10 }}
+                      transition={{ duration: 0.45, delay: Math.min(i * 0.04, 0.3), ease: [0.22, 1, 0.36, 1] }}
+                    >
+                      <ProjectCard project={p} onOpen={() => setActive(p)} />
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </motion.div>
+
+              {filtered.length === 0 && (
+                <p className="mt-10 text-center text-muted-foreground">No projects match your search.</p>
+              )}
+
+              {visible < filtered.length && (
+                <Reveal className="mt-12 flex justify-center">
+                  <button
+                    onClick={() => setVisible((v) => v + 6)}
+                    className="inline-flex items-center gap-3 rounded-full px-7 py-3 text-sm font-semibold border-2 border-primary text-primary hover:bg-primary hover:text-primary-foreground transition"
+                  >
+                    Load More Projects
+                    <ArrowRight size={16} />
+                  </button>
+                </Reveal>
+              )}
+
+              <Reveal className="mt-10 flex justify-center">
+                <button
+                  onClick={closeFolder}
+                  className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold glass hover:shadow-soft transition"
+                >
+                  <ChevronLeft size={14} /> Back to Folders
+                </button>
+              </Reveal>
+            </>
           )}
         </Section>
 
