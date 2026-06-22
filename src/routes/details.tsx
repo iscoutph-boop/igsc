@@ -426,7 +426,7 @@ function DetailsPage() {
           <Reveal>
             <Eyebrow>Project Portfolio</Eyebrow>
             <h2 className="mt-3 text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-[1.05]">
-              Explore all our <span className="text-gradient-brand">builds.</span>
+              Explore all our <span className="text-primary">builds.</span>
             </h2>
             <p className="mt-5 text-muted-foreground max-w-2xl">
               From modern homes to multi-unit developments and commercial spaces, explore our portfolio
@@ -453,11 +453,11 @@ function DetailsPage() {
                       <img src={folderCover(f.key)} alt={f.label} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.08]" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
                       <div className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/95 backdrop-blur text-foreground px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] font-bold shadow-sm">
-                        <Building2 size={12} className="text-primary group-hover:scale-110 transition-transform" /> Project Category
+                        <Building2 size={12} className="text-primary group-hover:scale-110 transition-transform" /> {f.key === "Ongoing" ? "ON-GOING" : f.key.toUpperCase()}
                       </div>
                       <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-3">
                         <div className="min-w-0 text-white">
-                          <div className="font-display font-black text-2xl truncate drop-shadow">{f.label}</div>
+                          <div className="font-display font-black text-2xl truncate drop-shadow">{"\n"}</div>
                           <div className="text-xs opacity-95">{f.desc}</div>
                         </div>
                         <div className="shrink-0 rounded-full bg-white/15 backdrop-blur-xl border border-primary/40 text-white px-3 py-1.5 text-xs font-bold group-hover:bg-primary/90 group-hover:border-primary transition">
