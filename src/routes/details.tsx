@@ -48,7 +48,7 @@ import miniPreview1 from "@/assets/mini-preview-1.png.asset.json";
 import miniPreview2 from "@/assets/mini-preview-2.png.asset.json";
 import miniPreview3 from "@/assets/mini-preview-3.png.asset.json";
 import miniPreview4 from "@/assets/mini-preview-4.png.asset.json";
-import { ChevronLeft, MessageSquareQuote, Users, Handshake } from "lucide-react";
+import { ChevronLeft, ChevronRight, MessageSquareQuote, Users, Handshake, Building2 } from "lucide-react";
 
 const aRes = aResAsset.url;
 const oRes = oResAsset.url;
@@ -447,28 +447,30 @@ function DetailsPage() {
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.45, delay: Math.min(i * 0.05, 0.25) }}
-                    className="group relative text-left glass rounded-3xl overflow-hidden shadow-card hover:shadow-glow hover:-translate-y-1 transition-all"
+                    className="group relative text-left bg-card rounded-3xl overflow-hidden shadow-card hover:shadow-glow hover:-translate-y-1 transition-all border border-border/50"
                   >
                     <div className="relative aspect-[4/3] overflow-hidden">
-                      <img src={folderCover(f.key)} alt="" loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                      <div className="absolute top-4 left-4 inline-flex items-center gap-2 rounded-full bg-white/15 backdrop-blur-xl border border-white/25 text-white px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] font-bold">
-                        <f.icon size={12} /> Folder
+                      <img src={folderCover(f.key)} alt={f.label} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.08]" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
+                      <div className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/95 backdrop-blur text-foreground px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] font-bold shadow-sm">
+                        <Building2 size={12} className="text-primary group-hover:scale-110 transition-transform" /> Project Category
                       </div>
                       <div className="absolute bottom-4 left-4 right-4 flex items-end justify-between gap-3">
                         <div className="min-w-0 text-white">
-                          <div className="font-display font-black text-2xl truncate">{f.label}</div>
-                          <div className="text-xs opacity-90">{f.desc}</div>
+                          <div className="font-display font-black text-2xl truncate drop-shadow">{f.label}</div>
+                          <div className="text-xs opacity-95">{f.desc}</div>
                         </div>
-                        <div className="shrink-0 rounded-full bg-white/15 backdrop-blur-xl border border-white/25 text-white px-3 py-1.5 text-xs font-bold">
+                        <div className="shrink-0 rounded-full bg-white/15 backdrop-blur-xl border border-primary/40 text-white px-3 py-1.5 text-xs font-bold group-hover:bg-primary/90 group-hover:border-primary transition">
                           {folderCount(f.key)} {folderCount(f.key) === 1 ? "project" : "projects"}
                         </div>
                       </div>
                     </div>
-                    <div className="p-5 flex items-center justify-between">
-                      <span className="text-sm font-semibold">View Details</span>
-                      <span className="inline-flex items-center gap-2 text-primary text-sm font-semibold">
-                        Open Folder <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
+                    <div className="p-5 flex items-center justify-between bg-card">
+                      <span className="inline-flex items-center gap-1.5 text-sm font-semibold text-foreground/80">
+                        View Details <ChevronRight size={14} />
+                      </span>
+                      <span className="inline-flex items-center gap-2 text-primary text-sm font-semibold group-hover:brightness-110">
+                        Open Project <ArrowRight size={14} className="transition-transform group-hover:translate-x-1" />
                       </span>
                     </div>
                   </motion.button>
