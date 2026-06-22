@@ -48,6 +48,11 @@ import miniPreview1 from "@/assets/mini-preview-1.png.asset.json";
 import miniPreview2 from "@/assets/mini-preview-2.png.asset.json";
 import miniPreview3 from "@/assets/mini-preview-3.png.asset.json";
 import miniPreview4 from "@/assets/mini-preview-4.png.asset.json";
+import ongoingThumbAsset from "@/assets/portfolio-ongoing-thumb.png.asset.json";
+import apartmentThumbAsset from "@/assets/portfolio-apartment-thumb.png.asset.json";
+import renovationThumbAsset from "@/assets/portfolio-renovation-thumb.png.asset.json";
+import residentialThumbAsset from "@/assets/portfolio-residential-thumb.png.asset.json";
+import commercialThumbAsset from "@/assets/portfolio-commercial-thumb.png.asset.json";
 import { ChevronLeft, ChevronRight, MessageSquareQuote, Users, Handshake, Building2 } from "lucide-react";
 
 const aRes = aResAsset.url;
@@ -228,6 +233,16 @@ function DetailsPage() {
       : projects.filter((p) => p.type === k).length;
 
   const folderCover = (k: Filter) => {
+    const customThumbs: Partial<Record<Filter, string>> = {
+      Ongoing: ongoingThumbAsset.url,
+      Residential: residentialThumbAsset.url,
+      Apartment: apartmentThumbAsset.url,
+      Commercial: commercialThumbAsset.url,
+      Renovation: renovationThumbAsset.url,
+    };
+
+    if (customThumbs[k]) return customThumbs[k];
+
     const list = k === "Completed" || k === "Ongoing"
       ? projects.filter((p) => p.status === k)
       : projects.filter((p) => p.type === k);
