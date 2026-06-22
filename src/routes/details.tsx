@@ -426,7 +426,7 @@ function DetailsPage() {
           <Reveal>
             <Eyebrow>Project Portfolio</Eyebrow>
             <h2 className="mt-3 text-4xl md:text-5xl lg:text-6xl font-display font-bold leading-[1.05]">
-              Explore all our <span className="text-gradient-brand">builds.</span>
+              Explore all our <span className="text-primary">builds.</span>
             </h2>
             <p className="mt-5 text-muted-foreground max-w-2xl">
               From modern homes to multi-unit developments and commercial spaces, explore our portfolio
