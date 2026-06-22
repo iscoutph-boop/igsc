@@ -48,7 +48,7 @@ import miniPreview1 from "@/assets/mini-preview-1.png.asset.json";
 import miniPreview2 from "@/assets/mini-preview-2.png.asset.json";
 import miniPreview3 from "@/assets/mini-preview-3.png.asset.json";
 import miniPreview4 from "@/assets/mini-preview-4.png.asset.json";
-import { ChevronLeft, MessageSquareQuote, Users, Handshake } from "lucide-react";
+import { ChevronLeft, ChevronRight, MessageSquareQuote, Users, Handshake, Building2 } from "lucide-react";
 
 const aRes = aResAsset.url;
 const oRes = oResAsset.url;
