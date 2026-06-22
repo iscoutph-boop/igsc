@@ -247,7 +247,7 @@ function DetailsPage() {
     setQuery("");
   };
 
-  const sectionIds = ["about", "services", "portfolio", "process"] as const;
+  const sectionIds = ["about", "services", "packages", "portfolio", "meetings", "reviews", "process", "estimator"] as const;
 
   const scrollToHash = (hash: string, smooth = true) => {
     const id = hash.replace(/^#/, "");
@@ -265,20 +265,17 @@ function DetailsPage() {
       openFolder(f);
     }
     if (typeof window !== "undefined" && window.location.hash !== "#portfolio") {
-      // Push a real hash entry so Back/forward and refresh work naturally.
       window.history.pushState(null, "", "#portfolio");
     }
     requestAnimationFrame(() => scrollToHash("portfolio"));
   };
 
 
-  // Handle initial hash on mount (refresh / direct link) and hashchange / back-forward.
+  // Handle initial hash on mount (refresh / direct link).
   useEffect(() => {
     if (typeof window === "undefined") return;
     if (window.location.hash) {
-      // Defer to allow layout to settle before scrolling.
       const id = window.requestAnimationFrame(() => scrollToHash(window.location.hash, false));
-      // Second pass after images/fonts settle for accurate position.
       const t = window.setTimeout(() => scrollToHash(window.location.hash, false), 250);
       return () => {
         window.cancelAnimationFrame(id);
@@ -287,6 +284,7 @@ function DetailsPage() {
     }
   }, []);
 
+  // Listen for hashchange / back-forward to scroll to the appropriate section.
   useEffect(() => {
     const onHashChange = () => scrollToHash(window.location.hash);
     const onPop = () => scrollToHash(window.location.hash);
@@ -297,6 +295,54 @@ function DetailsPage() {
       window.removeEventListener("popstate", onPop);
     };
   }, []);
+
+  // Scroll-spy: as the user scrolls between sections, push a new history entry
+  // so the browser Back button returns to the previously-viewed section.
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    let current = window.location.hash.replace(/^#/, "") || "";
+    let isProgrammatic = false;
+    let popTimer: number | null = null;
+
+    const markProgrammatic = () => {
+      isProgrammatic = true;
+      if (popTimer) window.clearTimeout(popTimer);
+      popTimer = window.setTimeout(() => { isProgrammatic = false; }, 800);
+    };
+    window.addEventListener("hashchange", markProgrammatic);
+    window.addEventListener("popstate", markProgrammatic);
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (isProgrammatic) return;
+        // Pick the entry closest to the top of the viewport that is intersecting.
+        const visible = entries
+          .filter((e) => e.isIntersecting)
+          .sort((a, b) => a.boundingClientRect.top - b.boundingClientRect.top)[0];
+        if (!visible) return;
+        const id = visible.target.id;
+        if (!id || id === current) return;
+        current = id;
+        // Push a real history entry so Back returns to the previous section.
+        window.history.pushState(null, "", `#${id}`);
+      },
+      { rootMargin: "-30% 0px -60% 0px", threshold: 0 }
+    );
+
+    sectionIds.forEach((id) => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("hashchange", markProgrammatic);
+      window.removeEventListener("popstate", markProgrammatic);
+      if (popTimer) window.clearTimeout(popTimer);
+    };
+  }, []);
+
+
 
 
 
