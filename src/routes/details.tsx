@@ -782,19 +782,13 @@ function DetailsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Fullscreen image lightbox (double-tap to open) */}
-      <Dialog open={!!zoomImg} onOpenChange={(o) => !o && setZoomImg(null)}>
-        <DialogContent className="w-[98vw] max-w-[1400px] p-0 bg-black/95 border-none shadow-none">
-          {zoomImg && (
-            <img
-              src={zoomImg}
-              alt="Full preview"
-              className="w-full max-h-[92vh] object-contain select-none"
-              onClick={() => setZoomImg(null)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Shared lightbox — used by About, Collaboration, Meetings, Portfolio, Project gallery */}
+      <Lightbox
+        images={zoomGroup}
+        index={zoomIndex}
+        onIndexChange={setZoomIndex}
+        onClose={closeZoom}
+      />
     </PageTransition>
   );
 }
