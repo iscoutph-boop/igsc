@@ -978,16 +978,21 @@ function extractMeta(highlights: string[]) {
   return { beds, baths, cars };
 }
 
-function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void }) {
+function ProjectCard({ project, onOpen, onZoom }: { project: Project; onOpen: () => void; onZoom?: (src: string) => void }) {
   const meta = extractMeta(project.highlights);
   return (
-    <div className="group relative h-full rounded-3xl overflow-hidden glass shadow-card hover:shadow-glow transition-all hover:-translate-y-1">
-      <div className="relative aspect-[4/3] overflow-hidden">
+    <div className="group relative h-full rounded-3xl overflow-hidden glass shadow-card hover:shadow-glow transition-all hover:-translate-y-1 flex flex-col">
+      <button
+        type="button"
+        onClick={() => onZoom?.(project.img)}
+        aria-label={`Preview ${project.title}`}
+        className="relative aspect-[4/3] overflow-hidden block w-full cursor-zoom-in"
+      >
         <img
           src={project.img}
           alt={project.title}
           loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+          className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-110"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
         <div className="absolute top-3 left-3 flex flex-wrap gap-2">
@@ -1001,8 +1006,8 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void
         <div className="pointer-events-none absolute -right-2 -bottom-6 text-[7rem] leading-none font-display font-black text-white/20 select-none">
           {project.number}
         </div>
-      </div>
-      <div className="p-5">
+      </button>
+      <div className="p-5 flex flex-col flex-1">
         <h3 className="font-display font-bold text-lg md:text-xl">{project.title}</h3>
         <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
           <MapPin size={12} className="text-primary" /> {project.location}
@@ -1031,14 +1036,15 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void
         </p>
         <button
           onClick={onOpen}
-          className="mt-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary hover:gap-3 transition-all"
+          className="mt-auto pt-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary hover:gap-3 transition-all self-start"
         >
-          View Details <ArrowRight size={14} />
+          Open Project <ArrowRight size={14} />
         </button>
       </div>
     </div>
   );
 }
+
 
 function Section({ id, children, muted = false }: { id?: string; children: React.ReactNode; muted?: boolean }) {
   return (
