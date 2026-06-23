@@ -799,7 +799,7 @@ function DetailsPage() {
   );
 }
 
-function ProjectDetail({ project, onClose, onZoom }: { project: Project; onClose: () => void; onZoom?: (src: string) => void }) {
+function ProjectDetail({ project, onClose, onZoom }: { project: Project; onClose: () => void; onZoom?: (src: string, group?: string[]) => void }) {
   // Build a gallery using project hero + 4 rotating gallery images
   const start = (Number(project.number) * 2) % galleryPool.length;
   const gallery = [project.img, ...Array.from({ length: 5 }, (_, i) => galleryPool[(start + i) % galleryPool.length])];
@@ -982,7 +982,7 @@ function extractMeta(highlights: string[]) {
   return { beds, baths, cars };
 }
 
-function ProjectCard({ project, onOpen, onZoom }: { project: Project; onOpen: () => void; onZoom?: (src: string) => void }) {
+function ProjectCard({ project, onOpen, onZoom }: { project: Project; onOpen: () => void; onZoom?: (src: string, group?: string[]) => void }) {
   const meta = extractMeta(project.highlights);
   return (
     <div className="group relative h-full rounded-3xl overflow-hidden glass shadow-card hover:shadow-glow transition-all hover:-translate-y-1 flex flex-col">
