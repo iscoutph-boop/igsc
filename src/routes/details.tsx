@@ -191,8 +191,15 @@ function DetailsPage() {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("latest");
   const [visible, setVisible] = useState(6);
-  const [zoomImg, setZoomImg] = useState<string | null>(null);
-  const openZoom = (src: string) => setZoomImg(src);
+  const [zoomGroup, setZoomGroup] = useState<string[]>([]);
+  const [zoomIndex, setZoomIndex] = useState<number>(-1);
+  const openZoom = (src: string, group?: string[]) => {
+    const g = group && group.length ? group : [src];
+    setZoomGroup(g);
+    const idx = g.indexOf(src);
+    setZoomIndex(idx >= 0 ? idx : 0);
+  };
+  const closeZoom = () => { setZoomIndex(-1); setZoomGroup([]); };
 
   const filtered = useMemo(() => {
     let list = projects;
