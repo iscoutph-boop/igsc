@@ -301,16 +301,6 @@ function DetailsPage() {
     if (typeof window !== "undefined" && window.location.hash !== "#portfolio") {
       window.history.pushState(null, "", "#portfolio");
     }
-  const handleServiceClick = (f: Filter) => {
-    if (f === "All") {
-      setFolder(null);
-      setFilter("All");
-    } else {
-      openFolder(f);
-    }
-    if (typeof window !== "undefined" && window.location.hash !== "#portfolio") {
-      window.history.pushState(null, "", "#portfolio");
-    }
     requestAnimationFrame(() => scrollToHash("portfolio"));
   };
 
