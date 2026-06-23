@@ -99,15 +99,24 @@ export const Route = createFileRoute("/details")({
   component: DetailsPage,
 });
 
+const slugify = (s: string) => "service-" + s.toLowerCase().replace(/&/g, "").replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-");
+
 const services = [
-  { icon: Home, title: "Residential Construction", desc: "Custom homes built to last with craftsmanship and care." },
-  { icon: Wrench, title: "Renovation & Remodeling", desc: "Reimagine your space with modern, functional upgrades." },
-  { icon: HardHat, title: "Civil Works", desc: "Reliable infrastructure for roads, drainage, and foundations." },
-  { icon: Ruler, title: "Design-Build Services", desc: "One team from concept to handover — seamless delivery." },
-  { icon: Compass, title: "Construction Management", desc: "Timelines, budgets, and quality kept on track end to end." },
-  { icon: PencilRuler, title: "Architectural Drawings", desc: "Precise, code-ready plans tailored to your vision." },
-  { icon: Box, title: "3D Rendering & Visualization", desc: "See your project in lifelike detail before we break ground." },
-];
+  { icon: Home, title: "Residential Construction", desc: "Custom homes built to last with craftsmanship and care.",
+    long: "From new builds to expansions, we deliver residential projects that combine craftsmanship, durable materials, and thoughtful space planning — designed around how your family actually lives." },
+  { icon: Wrench, title: "Renovation & Remodeling", desc: "Reimagine your space with modern, functional upgrades.",
+    long: "Full or partial remodels, kitchen and bath updates, room conversions, and modernization works — executed cleanly, on schedule, with minimal disruption to your routine." },
+  { icon: HardHat, title: "Civil Works", desc: "Reliable infrastructure for roads, drainage, and foundations.",
+    long: "Site development, foundations, drainage, retaining walls, and roadworks built to engineering specs. Reliable groundwork for residential, commercial, and institutional projects." },
+  { icon: Ruler, title: "Design-Build Services", desc: "One team from concept to handover — seamless delivery.",
+    long: "Architecture, engineering, and construction under one accountable team. One contract, one timeline, fewer surprises — from first sketches all the way to turnover." },
+  { icon: Compass, title: "Construction Management", desc: "Timelines, budgets, and quality kept on track end to end.",
+    long: "Project oversight, scheduling, cost control, subcontractor coordination, QA/QC, and clear weekly reporting — so you always know where the build stands." },
+  { icon: PencilRuler, title: "Architectural Drawings", desc: "Precise, code-ready plans tailored to your vision.",
+    long: "Concept design, floor plans, elevations, working drawings, and permit-ready documentation prepared by licensed professionals to local codes." },
+  { icon: Box, title: "3D Rendering & Visualization", desc: "See your project in lifelike detail before we break ground.",
+    long: "Photorealistic interior and exterior renders, walkthrough animations, and material studies that let you experience the design before construction starts." },
+].map((s) => ({ ...s, id: slugify(s.title) }));
 
 type ProjectType = "Residential" | "Apartment" | "Commercial" | "Renovation";
 type ProjectStatus = "Completed" | "Ongoing";
