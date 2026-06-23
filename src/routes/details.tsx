@@ -447,29 +447,63 @@ function DetailsPage() {
           {/* Mobile: horizontal swipe row. sm+: original grid. */}
           <div className="mt-14 sm:hidden -mx-4 px-4 overflow-x-auto snap-x snap-mandatory flex gap-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {services.map((s) => (
-              <div key={s.title} className="snap-start shrink-0 w-[78%] glass rounded-3xl p-6">
+              <button
+                key={s.title}
+                type="button"
+                onClick={() => scrollToService(s.id)}
+                className="snap-start shrink-0 w-[78%] text-left glass rounded-3xl p-6 hover:shadow-card transition active:scale-[0.99]"
+              >
                 <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl gradient-brand text-primary-foreground shadow-soft">
                   <s.icon size={20} />
                 </div>
                 <h3 className="mt-5 text-lg font-display font-bold">{s.title}</h3>
                 <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
-              </div>
+              </button>
             ))}
           </div>
           <div className="mt-14 hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {services.map((s, i) => (
               <Reveal key={s.title} delay={i * 0.06}>
-                <div className="group glass rounded-3xl p-7 h-full hover:shadow-card transition-all hover:-translate-y-1">
+                <button
+                  type="button"
+                  onClick={() => scrollToService(s.id)}
+                  className="group text-left w-full glass rounded-3xl p-7 h-full hover:shadow-card transition-all hover:-translate-y-1"
+                >
                   <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl gradient-brand text-primary-foreground shadow-soft">
                     <s.icon size={20} />
                   </div>
                   <h3 className="mt-5 text-lg font-display font-bold">{s.title}</h3>
                   <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
-                </div>
+                  <span className="mt-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary group-hover:gap-3 transition-all">
+                    Learn more <ArrowRight size={14} />
+                  </span>
+                </button>
               </Reveal>
             ))}
           </div>
+
+          {/* Service details — anchor targets with brief highlight on scroll-in */}
+          <div className="mt-16 grid gap-4">
+            {services.map((s) => (
+              <div
+                key={s.id}
+                id={s.id}
+                className="scroll-mt-28 glass rounded-2xl p-6 md:p-7 border border-transparent transition-colors duration-500"
+              >
+                <div className="flex items-start gap-4">
+                  <span className="inline-flex items-center justify-center h-11 w-11 shrink-0 rounded-xl gradient-brand text-primary-foreground">
+                    <s.icon size={18} />
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="font-display font-bold text-lg md:text-xl">{s.title}</h3>
+                    <p className="mt-1.5 text-sm md:text-base text-muted-foreground leading-relaxed">{s.long}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </Section>
+
 
         {/* Finish Packages */}
         <Section id="packages">
