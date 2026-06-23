@@ -1375,95 +1375,158 @@ function EstimatorSection() {
           </div>
         </Reveal>
 
-        {/* Summary — hidden on mobile */}
+        {/* Summary — desktop */}
         <Reveal delay={0.12} className="hidden md:block">
-          <div className="lg:sticky lg:top-24 glass rounded-3xl p-6 md:p-8 shadow-card">
-            <div className="flex items-center gap-2 text-primary">
-              <Calculator size={18} />
-              <span className="text-[11px] uppercase tracking-[0.22em] font-bold">Estimate Summary</span>
-            </div>
-            <div className="mt-5 pb-5 border-b border-border">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="font-bold">Base Rate ({pkg} Package)</div>
-                  <div className="text-xs text-muted-foreground">Based on selected floor area</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-primary font-bold">{fmt(PKG_RATE[pkg])} / sqm</div>
-                  <div className="text-xs text-muted-foreground">{area} sqm</div>
-                </div>
-              </div>
-            </div>
-            <div className="mt-5 pb-5 border-b border-border">
-              <div className="font-bold">Estimated Construction Range</div>
-              <div className="mt-1 text-2xl md:text-3xl font-display font-black text-primary">
-                {fmt(low)} – {fmt(high)}
-              </div>
-              <div className="text-xs text-muted-foreground mt-1">Based on project complexity and finishes</div>
-            </div>
-            {selectedAddons.length > 0 && (
-              <div className="mt-5 pb-5 border-b border-border">
-                <div className="font-bold">Selected Add-Ons</div>
-                <ul className="mt-2 space-y-1.5">
-                  {selectedAddons.map((a) => (
-                    <li key={a.id} className="flex items-center justify-between gap-3 text-sm">
-                      <span className="flex items-center gap-2">
-                        <CheckCircle2 size={14} className="text-primary shrink-0" />
-                        {a.label}
-                      </span>
-                      <span className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">
-                        Manual estimate required
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                <p className="mt-2 text-[11px] text-muted-foreground">
-                  Add-ons receive a custom quote after consultation and are not included in the range above.
-                </p>
-              </div>
-            )}
-            <div className="mt-5">
-              <div className="flex items-center gap-2">
-                <Star size={16} className="text-primary" />
-                <span className="text-xs uppercase tracking-wider font-bold text-muted-foreground">Selected Package</span>
-              </div>
-              <div className="mt-1 font-display font-black text-xl">{pkg}</div>
-              <div className="text-xs text-muted-foreground">Quality materials, modern design</div>
-            </div>
-            <div className="mt-5">
-              <div className="font-bold mb-3">Inclusions Summary</div>
-              <ul className="grid sm:grid-cols-2 gap-2 text-sm">
-                {inclusions.map((i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <CheckCircle2 size={14} className="text-primary mt-0.5 shrink-0" />
-                    <span>{i}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="mt-6 rounded-2xl bg-primary/5 border border-primary/20 p-5 text-center">
-              <div className="text-[11px] uppercase tracking-[0.22em] font-bold text-muted-foreground">Estimated Total Budget</div>
-              <div className="mt-2 text-2xl md:text-3xl font-display font-black text-primary">
-                {fmt(low)} – {fmt(high)}
-              </div>
-              <div className="text-[11px] text-muted-foreground mt-1">This is an estimated budget only.</div>
-            </div>
-            <Link
-              to="/consultation"
-              className="mt-5 group w-full inline-flex items-center justify-center gap-3 gradient-brand text-primary-foreground rounded-full px-7 py-4 font-semibold shadow-glow hover:scale-[1.01] transition"
-            >
-              Get Detailed Estimate
-              <span className="bg-background/25 rounded-full p-2 group-hover:translate-x-1 transition-transform">
-                <ArrowRight size={16} />
-              </span>
-            </Link>
-            <p className="mt-3 text-[11px] text-muted-foreground text-center leading-relaxed">
-              Final cost may vary based on design, site condition, finishes, and scope of work.
-            </p>
-          </div>
+          <EstimateSummary
+            pkg={pkg}
+            area={typeof area === "number" ? area : 0}
+            rate={rate}
+            low={low}
+            high={high}
+            canEstimate={canEstimate}
+            selectedAddons={selectedAddons}
+            inclusions={inclusions}
+            fmt={fmt}
+          />
         </Reveal>
       </div>
+
+      {/* Summary — mobile (revealed by button) */}
+      {showSummary && (
+        <div id="estimator-mobile-summary" className="md:hidden mt-8">
+          <EstimateSummary
+            pkg={pkg}
+            area={typeof area === "number" ? area : 0}
+            rate={rate}
+            low={low}
+            high={high}
+            canEstimate={canEstimate}
+            selectedAddons={selectedAddons}
+            inclusions={inclusions}
+            fmt={fmt}
+          />
+        </div>
+      )}
     </Section>
+  );
+}
+
+function EstimateSummary({
+  pkg, area, rate, low, high, canEstimate, selectedAddons, inclusions, fmt,
+}: {
+  pkg: Pkg | "";
+  area: number;
+  rate: number;
+  low: number;
+  high: number;
+  canEstimate: boolean;
+  selectedAddons: { id: string; label: string }[];
+  inclusions: string[];
+  fmt: (n: number) => string;
+}) {
+  return (
+    <div className="lg:sticky lg:top-24 glass rounded-3xl p-6 md:p-8 shadow-card">
+      <div className="flex items-center gap-2 text-primary">
+        <Calculator size={18} />
+        <span className="text-[11px] uppercase tracking-[0.22em] font-bold">Estimate Summary</span>
+      </div>
+
+      {!canEstimate ? (
+        <div className="mt-5 text-sm text-muted-foreground">
+          Choose a <span className="font-semibold text-foreground">package</span> and enter a <span className="font-semibold text-foreground">floor area (min 10 sqm)</span> to see your estimated range.
+        </div>
+      ) : (
+        <>
+          <div className="mt-5 pb-5 border-b border-border">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="font-bold">Base Rate ({pkg} Package)</div>
+                <div className="text-xs text-muted-foreground">Based on selected floor area</div>
+              </div>
+              <div className="text-right">
+                <div className="text-primary font-bold">{fmt(rate)} / sqm</div>
+                <div className="text-xs text-muted-foreground">{area} sqm</div>
+              </div>
+            </div>
+          </div>
+          <div className="mt-5 pb-5 border-b border-border">
+            <div className="font-bold">Estimated Construction Range</div>
+            <div className="mt-1 text-2xl md:text-3xl font-display font-black text-primary">
+              {fmt(low)} – {fmt(high)}
+            </div>
+            <div className="text-xs text-muted-foreground mt-1">Based on project complexity and finishes</div>
+          </div>
+        </>
+      )}
+
+      {selectedAddons.length > 0 && (
+        <div className="mt-5 pb-5 border-b border-border">
+          <div className="font-bold">Selected Add-Ons</div>
+          <ul className="mt-2 space-y-1.5">
+            {selectedAddons.map((a) => (
+              <li key={a.id} className="flex items-center justify-between gap-3 text-sm">
+                <span className="flex items-center gap-2">
+                  <CheckCircle2 size={14} className="text-primary shrink-0" />
+                  {a.label}
+                </span>
+                <span className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">
+                  Manual estimate required
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            Add-ons receive a custom quote after consultation and are not included in the range above.
+          </p>
+        </div>
+      )}
+
+      {pkg && (
+        <div className="mt-5">
+          <div className="flex items-center gap-2">
+            <Star size={16} className="text-primary" />
+            <span className="text-xs uppercase tracking-wider font-bold text-muted-foreground">Selected Package</span>
+          </div>
+          <div className="mt-1 font-display font-black text-xl">{pkg}</div>
+          <div className="text-xs text-muted-foreground">Quality materials, modern design</div>
+        </div>
+      )}
+
+      <div className="mt-5">
+        <div className="font-bold mb-3">Inclusions Summary</div>
+        <ul className="grid sm:grid-cols-2 gap-2 text-sm">
+          {inclusions.map((i) => (
+            <li key={i} className="flex items-start gap-2">
+              <CheckCircle2 size={14} className="text-primary mt-0.5 shrink-0" />
+              <span>{i}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {canEstimate && (
+        <div className="mt-6 rounded-2xl bg-primary/5 border border-primary/20 p-5 text-center">
+          <div className="text-[11px] uppercase tracking-[0.22em] font-bold text-muted-foreground">Estimated Total Budget</div>
+          <div className="mt-2 text-2xl md:text-3xl font-display font-black text-primary">
+            {fmt(low)} – {fmt(high)}
+          </div>
+          <div className="text-[11px] text-muted-foreground mt-1">This is an estimated budget only.</div>
+        </div>
+      )}
+
+      <Link
+        to="/consultation"
+        className="mt-5 group w-full inline-flex items-center justify-center gap-3 gradient-brand text-primary-foreground rounded-full px-7 py-4 font-semibold shadow-glow hover:scale-[1.01] transition"
+      >
+        Get Detailed Estimate
+        <span className="bg-background/25 rounded-full p-2 group-hover:translate-x-1 transition-transform">
+          <ArrowRight size={16} />
+        </span>
+      </Link>
+      <p className="mt-3 text-[11px] text-muted-foreground text-center leading-relaxed">
+        Final cost may vary based on design, site condition, finishes, and scope of work.
+      </p>
+    </div>
   );
 }
 
@@ -1488,6 +1551,26 @@ function SelectInput({ value, onChange, options, icon }: { value: string; onChan
         {options.map((o) => <option key={o} value={o}>{o}</option>)}
       </select>
       <ChevronDown size={16} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+    </div>
+  );
+}
+
+function TextInputWithIcon({
+  value, onChange, placeholder, icon, list,
+}: {
+  value: string; onChange: (v: string) => void; placeholder?: string; icon?: React.ReactNode; list?: string;
+}) {
+  return (
+    <div className="relative">
+      {icon && <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary">{icon}</span>}
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        list={list}
+        className={`w-full bg-background rounded-xl border border-border ${icon ? "pl-11" : "pl-4"} pr-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/40`}
+      />
     </div>
   );
 }
