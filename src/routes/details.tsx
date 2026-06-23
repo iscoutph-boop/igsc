@@ -1082,7 +1082,7 @@ function Reveal({ children, delay = 0, className = "" }: { children: React.React
   );
 }
 
-function AboutSlideshow({ onZoom }: { onZoom?: (src: string) => void } = {}) {
+function AboutSlideshow({ onZoom }: { onZoom?: (src: string, group?: string[]) => void } = {}) {
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
   const [exterior, setExterior] = useState(exteriorImages[0]);
@@ -1104,11 +1104,10 @@ function AboutSlideshow({ onZoom }: { onZoom?: (src: string) => void } = {}) {
 
       {/* Main slideshow — full width */}
       <div
-        className="relative rounded-3xl shadow-card overflow-hidden aspect-[4/3] md:aspect-[16/10] lg:aspect-[16/9] group select-none"
+        className="relative rounded-3xl shadow-card overflow-hidden aspect-[4/3] md:aspect-[16/10] lg:aspect-[16/9] group select-none cursor-zoom-in"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
-        onClick={() => setPaused((p) => !p)}
-        onDoubleClick={(e) => { e.stopPropagation(); onZoom?.(interiorSlides[idx]); }}
+        onClick={() => onZoom?.(interiorSlides[idx], interiorSlides)}
       >
         <AnimatePresence mode="wait">
           <motion.img
