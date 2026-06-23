@@ -316,14 +316,42 @@ function Info({ icon: Icon, label, value }: { icon: React.ComponentType<{ size?:
   );
 }
 
+function InfoButton({ icon: Icon, label, value, onClick }: { icon: React.ComponentType<{ size?: number; className?: string }>; label: string; value: string; onClick: () => void }) {
+  return (
+    <button type="button" onClick={onClick} className="w-full text-left flex items-start gap-4 group">
+      <div className="h-11 w-11 shrink-0 rounded-2xl gradient-brand text-primary-foreground flex items-center justify-center shadow-soft group-hover:scale-105 transition">
+        <Icon size={18} />
+      </div>
+      <div className="min-w-0">
+        <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>
+        <div className="text-sm font-semibold mt-0.5 group-hover:text-primary transition">{value}</div>
+      </div>
+    </button>
+  );
+}
+
+function InfoLink({ icon: Icon, label, value, href, external }: { icon: React.ComponentType<{ size?: number; className?: string }>; label: string; value: string; href: string; external?: boolean }) {
+  return (
+    <a href={href} target={external ? "_blank" : undefined} rel={external ? "noopener noreferrer" : undefined} className="flex items-start gap-4 group">
+      <div className="h-11 w-11 shrink-0 rounded-2xl gradient-brand text-primary-foreground flex items-center justify-center shadow-soft group-hover:scale-105 transition">
+        <Icon size={18} />
+      </div>
+      <div className="min-w-0">
+        <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>
+        <div className="text-sm font-semibold mt-0.5 break-words group-hover:text-primary transition">{value}</div>
+      </div>
+    </a>
+  );
+}
+
 function Label({ children }: { children: React.ReactNode }) {
   return <label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">{children}</label>;
 }
 
 function Field({
-  label, name, type = "text", placeholder, required, className = "",
+  label, name, type = "text", placeholder, required, className = "", list,
 }: {
-  label: string; name: string; type?: string; placeholder?: string; required?: boolean; className?: string;
+  label: string; name: string; type?: string; placeholder?: string; required?: boolean; className?: string; list?: string;
 }) {
   return (
     <div className={className}>
@@ -333,6 +361,7 @@ function Field({
         type={type}
         required={required}
         placeholder={placeholder}
+        list={list}
         className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
       />
     </div>
