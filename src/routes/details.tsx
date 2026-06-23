@@ -568,9 +568,18 @@ function DetailsPage() {
                       <input
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
-                        placeholder="Search projects..."
+                        placeholder="Search project"
+                        list="portfolioSearchList"
                         className="glass rounded-full pl-11 pr-5 py-2.5 text-sm w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
                       />
+                      <datalist id="portfolioSearchList">
+                        {projects.map((p) => (
+                          <option key={p.id} value={p.title} />
+                        ))}
+                        {Array.from(new Set(projects.map((p) => p.location))).map((loc) => (
+                          <option key={loc} value={loc} />
+                        ))}
+                      </datalist>
                     </div>
                   </div>
                 </div>
@@ -587,7 +596,7 @@ function DetailsPage() {
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.45, delay: Math.min(i * 0.04, 0.3), ease: [0.22, 1, 0.36, 1] }}
                     >
-                      <ProjectCard project={p} onOpen={() => setActive(p)} />
+                      <ProjectCard project={p} onOpen={() => setActive(p)} onZoom={openZoom} />
                     </motion.div>
                   ))}
                 </AnimatePresence>
@@ -614,12 +623,13 @@ function DetailsPage() {
                   onClick={closeFolder}
                   className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold glass hover:shadow-soft transition"
                 >
-                  <ChevronLeft size={14} /> Back to Folders
+                  <ChevronLeft size={14} /> Back to Project Portfolio
                 </button>
               </Reveal>
             </>
           )}
         </Section>
+
 
         {/* Client Reviews moved below Client & Team Meetings */}
 
