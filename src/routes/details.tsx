@@ -1108,12 +1108,15 @@ function ProjectCard({ project, onOpen, onZoom }: { project: Project; onOpen: ()
 
 function Section({ id, children, muted = false }: { id?: string; children: React.ReactNode; muted?: boolean }) {
   return (
-    <section id={id} className={`scroll-mt-24 py-10 sm:py-14 md:py-20 ${muted ? "bg-surface/40" : ""}`}>
+    <section
+      id={id}
+      className={`scroll-mt-24 py-10 sm:py-14 md:py-20 ${muted ? "bg-gradient-to-b from-transparent via-surface/40 to-transparent" : ""}`}
+    >
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10">{children}</div>
     </section>
-
   );
 }
+
 
 function Eyebrow({ children, center }: { children: React.ReactNode; center?: boolean }) {
   return (
