@@ -1224,22 +1224,59 @@ function EstimatorSection() {
           <div className="mt-8 glass rounded-3xl p-6 md:p-7 shadow-card space-y-5">
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Project Type">
-                <SelectInput value="Residential House" onChange={() => {}} options={["Residential House", "Apartment", "Commercial"]} icon={<Home size={16} />} />
+                <TextInputWithIcon
+                  value={projectType}
+                  onChange={setProjectType}
+                  placeholder="e.g. Residential, Commercial, Renovation..."
+                  icon={<Home size={16} />}
+                  list="estProjectTypes"
+                />
+                <datalist id="estProjectTypes">
+                  <option value="Residential House" />
+                  <option value="Apartment" />
+                  <option value="Commercial" />
+                  <option value="Renovation" />
+                  <option value="Civil Works" />
+                </datalist>
               </Field>
               <Field label="Project Location">
-                <SelectInput value="Cavite, Philippines" onChange={() => {}} options={["Cavite, Philippines", "Laguna, Philippines", "Metro Manila"]} icon={<MapPin size={16} />} />
+                <TextInputWithIcon
+                  value={location}
+                  onChange={setLocation}
+                  placeholder="Barangay, City, Province / Country"
+                  icon={<MapPin size={16} />}
+                />
               </Field>
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Floor Area (sqm)">
                 <div className="flex items-center gap-2 bg-background rounded-xl border border-border px-4 py-3">
                   <Square size={16} className="text-primary" />
-                  <input type="number" min={0} value={area} onChange={(e) => setArea(Math.max(0, Number(e.target.value) || 0))} className="bg-transparent w-full focus:outline-none" />
+                  <input
+                    type="number"
+                    min={10}
+                    placeholder="Min. 10 sqm"
+                    value={area === "" ? "" : area}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === "") setArea("");
+                      else setArea(Math.max(0, Number(v) || 0));
+                    }}
+                    className="bg-transparent w-full focus:outline-none"
+                  />
                   <span className="text-xs text-muted-foreground px-2 py-0.5 rounded bg-muted">sqm</span>
                 </div>
+                {area !== "" && area < 10 && (
+                  <p className="mt-1.5 text-[11px] text-destructive">Floor area must be at least 10 sqm.</p>
+                )}
               </Field>
               <Field label="Number of Floors">
-                <SelectInput value={`${floors} Floor${floors > 1 ? "s" : ""}`} onChange={(v) => setFloors(Number(v.split(" ")[0]))} options={["1 Floor", "2 Floors", "3 Floors"]} icon={<Layers size={16} />} />
+                <SelectInput
+                  value={`${floors} Floor${floors > 1 ? "s" : ""}`}
+                  onChange={(v) => setFloors(Number(v.split(" ")[0]))}
+                  options={["1 Floor", "2 Floors", "3 Floors", "4 Floors", "5 Floors"]}
+                  icon={<Layers size={16} />}
+                />
               </Field>
             </div>
 
@@ -1250,6 +1287,7 @@ function EstimatorSection() {
                   return (
                     <button
                       key={p}
+                      type="button"
                       onClick={() => setPkg(p)}
                       className={`text-left rounded-2xl border-2 p-4 transition ${active ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"}`}
                     >
@@ -1268,6 +1306,9 @@ function EstimatorSection() {
                   );
                 })}
               </div>
+              {!pkg && (
+                <p className="mt-2 text-[11px] text-muted-foreground">Please select a package to see your estimate.</p>
+              )}
             </Field>
 
             <div className="grid sm:grid-cols-3 gap-4">
@@ -1278,7 +1319,19 @@ function EstimatorSection() {
                 <SelectInput value={String(bathrooms)} onChange={(v) => setBathrooms(Number(v))} options={["1", "2", "3", "4", "5"]} icon={<Bath size={16} />} />
               </Field>
               <Field label="Site Condition">
-                <SelectInput value={site} onChange={setSite} options={["Flat & Accessible", "Sloped Site", "Tight Access"]} icon={<HardHat size={16} />} />
+                <TextInputWithIcon
+                  value={site}
+                  onChange={setSite}
+                  placeholder="Describe the site (e.g. flat, sloped, tight access)"
+                  icon={<HardHat size={16} />}
+                  list="estSiteList"
+                />
+                <datalist id="estSiteList">
+                  <option value="Flat & Accessible" />
+                  <option value="Sloped Site" />
+                  <option value="Tight Access" />
+                  <option value="Coastal / Soft Soil" />
+                </datalist>
               </Field>
             </div>
 
@@ -1303,6 +1356,22 @@ function EstimatorSection() {
                 Add-ons are manually estimated after project review, site condition checking, and final design scope.
               </p>
             </Field>
+
+            {/* Mobile: Estimate Summary button */}
+            <div className="md:hidden pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowSummary(true);
+                  requestAnimationFrame(() => {
+                    document.getElementById("estimator-mobile-summary")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  });
+                }}
+                className="w-full inline-flex items-center justify-center gap-2 gradient-brand text-primary-foreground rounded-full px-6 py-3 font-semibold shadow-glow"
+              >
+                <Calculator size={16} /> View Estimate Summary
+              </button>
+            </div>
           </div>
         </Reveal>
 
