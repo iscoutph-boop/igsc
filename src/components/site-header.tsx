@@ -146,6 +146,15 @@ export function SiteHeader({ floating = false }: { floating?: boolean }) {
             </span>
           </Link>
 
+          {/* Mobile booking icon — visible on small screens only */}
+          <Link
+            to="/consultation"
+            aria-label="Book a consultation"
+            className="sm:hidden inline-flex items-center justify-center h-9 w-9 rounded-full gradient-brand text-primary-foreground shadow-soft"
+          >
+            <CalendarCheck size={16} />
+          </Link>
+
           <button
             className="xl:hidden p-2 rounded-full glass"
             aria-label="Menu"
