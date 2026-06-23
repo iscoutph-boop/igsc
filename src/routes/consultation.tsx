@@ -18,6 +18,7 @@ import { PageTransition } from "@/components/page-transition";
 import { CheckBookingModal, ReferencePill } from "@/components/booking-modals";
 import { SchedulePicker } from "@/components/schedule-picker";
 import { callCRM } from "@/lib/bookings";
+import { IGS_PHONE_DISPLAY, IGS_EMAIL, IGS_ADDRESS, IGS_MAPS_URL, openIgsContact } from "@/lib/contact";
 
 export const Route = createFileRoute("/consultation")({
   head: () => ({
