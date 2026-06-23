@@ -11,6 +11,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PageTransition } from "@/components/page-transition";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Lightbox } from "@/components/lightbox";
 import aResAsset from "@/assets/proj-a-residence.jpg.asset.json";
 import oResAsset from "@/assets/proj-o-residence.jpg.asset.json";
 import iResAsset from "@/assets/proj-i-residence.jpg.asset.json";
@@ -98,15 +99,24 @@ export const Route = createFileRoute("/details")({
   component: DetailsPage,
 });
 
+const slugify = (s: string) => "service-" + s.toLowerCase().replace(/&/g, "").replace(/[^\w\s-]/g, "").trim().replace(/\s+/g, "-");
+
 const services = [
-  { icon: Home, title: "Residential Construction", desc: "Custom homes built to last with craftsmanship and care." },
-  { icon: Wrench, title: "Renovation & Remodeling", desc: "Reimagine your space with modern, functional upgrades." },
-  { icon: HardHat, title: "Civil Works", desc: "Reliable infrastructure for roads, drainage, and foundations." },
-  { icon: Ruler, title: "Design-Build Services", desc: "One team from concept to handover — seamless delivery." },
-  { icon: Compass, title: "Construction Management", desc: "Timelines, budgets, and quality kept on track end to end." },
-  { icon: PencilRuler, title: "Architectural Drawings", desc: "Precise, code-ready plans tailored to your vision." },
-  { icon: Box, title: "3D Rendering & Visualization", desc: "See your project in lifelike detail before we break ground." },
-];
+  { icon: Home, title: "Residential Construction", desc: "Custom homes built to last with craftsmanship and care.",
+    long: "From new builds to expansions, we deliver residential projects that combine craftsmanship, durable materials, and thoughtful space planning — designed around how your family actually lives." },
+  { icon: Wrench, title: "Renovation & Remodeling", desc: "Reimagine your space with modern, functional upgrades.",
+    long: "Full or partial remodels, kitchen and bath updates, room conversions, and modernization works — executed cleanly, on schedule, with minimal disruption to your routine." },
+  { icon: HardHat, title: "Civil Works", desc: "Reliable infrastructure for roads, drainage, and foundations.",
+    long: "Site development, foundations, drainage, retaining walls, and roadworks built to engineering specs. Reliable groundwork for residential, commercial, and institutional projects." },
+  { icon: Ruler, title: "Design-Build Services", desc: "One team from concept to handover — seamless delivery.",
+    long: "Architecture, engineering, and construction under one accountable team. One contract, one timeline, fewer surprises — from first sketches all the way to turnover." },
+  { icon: Compass, title: "Construction Management", desc: "Timelines, budgets, and quality kept on track end to end.",
+    long: "Project oversight, scheduling, cost control, subcontractor coordination, QA/QC, and clear weekly reporting — so you always know where the build stands." },
+  { icon: PencilRuler, title: "Architectural Drawings", desc: "Precise, code-ready plans tailored to your vision.",
+    long: "Concept design, floor plans, elevations, working drawings, and permit-ready documentation prepared by licensed professionals to local codes." },
+  { icon: Box, title: "3D Rendering & Visualization", desc: "See your project in lifelike detail before we break ground.",
+    long: "Photorealistic interior and exterior renders, walkthrough animations, and material studies that let you experience the design before construction starts." },
+].map((s) => ({ ...s, id: slugify(s.title) }));
 
 type ProjectType = "Residential" | "Apartment" | "Commercial" | "Renovation";
 type ProjectStatus = "Completed" | "Ongoing";
@@ -191,8 +201,15 @@ function DetailsPage() {
   const [query, setQuery] = useState("");
   const [sort, setSort] = useState<SortKey>("latest");
   const [visible, setVisible] = useState(6);
-  const [zoomImg, setZoomImg] = useState<string | null>(null);
-  const openZoom = (src: string) => setZoomImg(src);
+  const [zoomGroup, setZoomGroup] = useState<string[]>([]);
+  const [zoomIndex, setZoomIndex] = useState<number>(-1);
+  const openZoom = (src: string, group?: string[]) => {
+    const g = group && group.length ? group : [src];
+    setZoomGroup(g);
+    const idx = g.indexOf(src);
+    setZoomIndex(idx >= 0 ? idx : 0);
+  };
+  const closeZoom = () => { setZoomIndex(-1); setZoomGroup([]); };
 
   const filtered = useMemo(() => {
     let list = projects;
@@ -287,6 +304,19 @@ function DetailsPage() {
     requestAnimationFrame(() => scrollToHash("portfolio"));
   };
 
+  const scrollToService = (id: string) => {
+    if (typeof window === "undefined") return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    // brief highlight
+    el.classList.add("ring-2", "ring-primary", "shadow-glow");
+    window.setTimeout(() => {
+      el.classList.remove("ring-2", "ring-primary", "shadow-glow");
+    }, 1600);
+    window.history.replaceState(null, "", `#${id}`);
+  };
+
 
   // Handle initial hash on mount (refresh / direct link).
   useEffect(() => {
@@ -369,7 +399,7 @@ function DetailsPage() {
       <SiteHeader />
       <main className="w-full">
         {/* About */}
-        <section id="about" className="scroll-mt-24 py-14 sm:py-20 md:py-28">
+        <section id="about" className="scroll-mt-24 py-10 sm:py-14 md:py-20">
           <div className="max-w-[1760px] mx-auto px-4 sm:px-6 md:px-10 xl:px-14 2xl:px-20">
 
             <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
@@ -430,29 +460,63 @@ function DetailsPage() {
           {/* Mobile: horizontal swipe row. sm+: original grid. */}
           <div className="mt-14 sm:hidden -mx-4 px-4 overflow-x-auto snap-x snap-mandatory flex gap-4 pb-2 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {services.map((s) => (
-              <div key={s.title} className="snap-start shrink-0 w-[78%] glass rounded-3xl p-6">
+              <button
+                key={s.title}
+                type="button"
+                onClick={() => scrollToService(s.id)}
+                className="snap-start shrink-0 w-[78%] text-left glass rounded-3xl p-6 hover:shadow-card transition active:scale-[0.99]"
+              >
                 <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl gradient-brand text-primary-foreground shadow-soft">
                   <s.icon size={20} />
                 </div>
                 <h3 className="mt-5 text-lg font-display font-bold">{s.title}</h3>
                 <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
-              </div>
+              </button>
             ))}
           </div>
           <div className="mt-14 hidden sm:grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
             {services.map((s, i) => (
               <Reveal key={s.title} delay={i * 0.06}>
-                <div className="group glass rounded-3xl p-7 h-full hover:shadow-card transition-all hover:-translate-y-1">
+                <button
+                  type="button"
+                  onClick={() => scrollToService(s.id)}
+                  className="group text-left w-full glass rounded-3xl p-7 h-full hover:shadow-card transition-all hover:-translate-y-1"
+                >
                   <div className="inline-flex items-center justify-center h-12 w-12 rounded-2xl gradient-brand text-primary-foreground shadow-soft">
                     <s.icon size={20} />
                   </div>
                   <h3 className="mt-5 text-lg font-display font-bold">{s.title}</h3>
                   <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
-                </div>
+                  <span className="mt-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary group-hover:gap-3 transition-all">
+                    Learn more <ArrowRight size={14} />
+                  </span>
+                </button>
               </Reveal>
             ))}
           </div>
+
+          {/* Service details — anchor targets with brief highlight on scroll-in */}
+          <div className="mt-16 grid gap-4">
+            {services.map((s) => (
+              <div
+                key={s.id}
+                id={s.id}
+                className="scroll-mt-28 glass rounded-2xl p-6 md:p-7 border border-transparent transition-colors duration-500"
+              >
+                <div className="flex items-start gap-4">
+                  <span className="inline-flex items-center justify-center h-11 w-11 shrink-0 rounded-xl gradient-brand text-primary-foreground">
+                    <s.icon size={18} />
+                  </span>
+                  <div className="min-w-0">
+                    <h3 className="font-display font-bold text-lg md:text-xl">{s.title}</h3>
+                    <p className="mt-1.5 text-sm md:text-base text-muted-foreground leading-relaxed">{s.long}</p>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </Section>
+
 
         {/* Finish Packages */}
         <Section id="packages">
@@ -568,9 +632,18 @@ function DetailsPage() {
                       <input
                         value={query}
                         onChange={(e) => setQuery(e.target.value)}
-                        placeholder="Search projects..."
+                        placeholder="Search project"
+                        list="portfolioSearchList"
                         className="glass rounded-full pl-11 pr-5 py-2.5 text-sm w-full sm:w-72 focus:outline-none focus:ring-2 focus:ring-primary/40 transition"
                       />
+                      <datalist id="portfolioSearchList">
+                        {projects.map((p) => (
+                          <option key={p.id} value={p.title} />
+                        ))}
+                        {Array.from(new Set(projects.map((p) => p.location))).map((loc) => (
+                          <option key={loc} value={loc} />
+                        ))}
+                      </datalist>
                     </div>
                   </div>
                 </div>
@@ -587,7 +660,7 @@ function DetailsPage() {
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.45, delay: Math.min(i * 0.04, 0.3), ease: [0.22, 1, 0.36, 1] }}
                     >
-                      <ProjectCard project={p} onOpen={() => setActive(p)} />
+                      <ProjectCard project={p} onOpen={() => setActive(p)} onZoom={(src) => openZoom(src, filtered.slice(0, visible).map((x) => x.img))} />
                     </motion.div>
                   ))}
                 </AnimatePresence>
@@ -614,12 +687,13 @@ function DetailsPage() {
                   onClick={closeFolder}
                   className="inline-flex items-center gap-2 rounded-full px-6 py-2.5 text-sm font-semibold glass hover:shadow-soft transition"
                 >
-                  <ChevronLeft size={14} /> Back to Folders
+                  <ChevronLeft size={14} /> Back to Project Portfolio
                 </button>
               </Reveal>
             </>
           )}
         </Section>
+
 
         {/* Client Reviews moved below Client & Team Meetings */}
 
@@ -643,10 +717,15 @@ function DetailsPage() {
           <div className="mt-12 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4">
             {meetingImages.map((src, i) => (
               <Reveal key={src} delay={Math.min(i * 0.05, 0.3)}>
-                <div className={`relative rounded-2xl overflow-hidden shadow-card group ${i === 0 ? "col-span-2 row-span-2 aspect-[4/3] md:aspect-[4/5]" : "aspect-square"}`}>
-                  <img src={src} alt={`IG Sabroso client meeting ${i + 1}`} onDoubleClick={() => openZoom(src)} loading="lazy" decoding="async" sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 720px" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110 cursor-zoom-in select-none" />
+                <button
+                  type="button"
+                  onClick={() => openZoom(src, meetingImages)}
+                  aria-label={`Open meeting photo ${i + 1}`}
+                  className={`relative rounded-2xl overflow-hidden shadow-card group block w-full ${i === 0 ? "col-span-2 row-span-2 aspect-[4/3] md:aspect-[4/5]" : "aspect-square"}`}
+                >
+                  <img src={src} alt={`IG Sabroso client meeting ${i + 1}`} loading="lazy" decoding="async" sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 720px" className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-110 cursor-zoom-in select-none" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition" />
-                </div>
+                </button>
               </Reveal>
             ))}
           </div>
@@ -765,24 +844,18 @@ function DetailsPage() {
         </DialogContent>
       </Dialog>
 
-      {/* Fullscreen image lightbox (double-tap to open) */}
-      <Dialog open={!!zoomImg} onOpenChange={(o) => !o && setZoomImg(null)}>
-        <DialogContent className="w-[98vw] max-w-[1400px] p-0 bg-black/95 border-none shadow-none">
-          {zoomImg && (
-            <img
-              src={zoomImg}
-              alt="Full preview"
-              className="w-full max-h-[92vh] object-contain select-none"
-              onClick={() => setZoomImg(null)}
-            />
-          )}
-        </DialogContent>
-      </Dialog>
+      {/* Shared lightbox — used by About, Collaboration, Meetings, Portfolio, Project gallery */}
+      <Lightbox
+        images={zoomGroup}
+        index={zoomIndex}
+        onIndexChange={setZoomIndex}
+        onClose={closeZoom}
+      />
     </PageTransition>
   );
 }
 
-function ProjectDetail({ project, onClose, onZoom }: { project: Project; onClose: () => void; onZoom?: (src: string) => void }) {
+function ProjectDetail({ project, onClose, onZoom }: { project: Project; onClose: () => void; onZoom?: (src: string, group?: string[]) => void }) {
   // Build a gallery using project hero + 4 rotating gallery images
   const start = (Number(project.number) * 2) % galleryPool.length;
   const gallery = [project.img, ...Array.from({ length: 5 }, (_, i) => galleryPool[(start + i) % galleryPool.length])];
@@ -844,10 +917,7 @@ function ProjectDetail({ project, onClose, onZoom }: { project: Project; onClose
 
         {/* Right — meta */}
         <div>
-          <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-primary font-semibold">
-            <span className="h-px w-8 bg-primary" /> Project
-          </div>
-          <h2 className="mt-3 text-4xl md:text-5xl font-display font-bold leading-[1.05]">{project.title}</h2>
+          <h2 className="text-4xl md:text-5xl font-display font-bold leading-[1.05]">{project.title}</h2>
           <div className="mt-3 flex items-center gap-1.5 text-sm">
             <MapPin size={16} className="text-primary" /> {project.location}
           </div>
@@ -968,16 +1038,21 @@ function extractMeta(highlights: string[]) {
   return { beds, baths, cars };
 }
 
-function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void }) {
+function ProjectCard({ project, onOpen, onZoom }: { project: Project; onOpen: () => void; onZoom?: (src: string, group?: string[]) => void }) {
   const meta = extractMeta(project.highlights);
   return (
-    <div className="group relative h-full rounded-3xl overflow-hidden glass shadow-card hover:shadow-glow transition-all hover:-translate-y-1">
-      <div className="relative aspect-[4/3] overflow-hidden">
+    <div className="group relative h-full rounded-3xl overflow-hidden glass shadow-card hover:shadow-glow transition-all hover:-translate-y-1 flex flex-col">
+      <button
+        type="button"
+        onClick={() => onZoom?.(project.img)}
+        aria-label={`Preview ${project.title}`}
+        className="relative aspect-[4/3] overflow-hidden block w-full cursor-zoom-in"
+      >
         <img
           src={project.img}
           alt={project.title}
           loading="lazy"
-          className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-110"
+          className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-110"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent" />
         <div className="absolute top-3 left-3 flex flex-wrap gap-2">
@@ -991,8 +1066,8 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void
         <div className="pointer-events-none absolute -right-2 -bottom-6 text-[7rem] leading-none font-display font-black text-white/20 select-none">
           {project.number}
         </div>
-      </div>
-      <div className="p-5">
+      </button>
+      <div className="p-5 flex flex-col flex-1">
         <h3 className="font-display font-bold text-lg md:text-xl">{project.title}</h3>
         <div className="mt-1 flex items-center gap-1.5 text-xs text-muted-foreground">
           <MapPin size={12} className="text-primary" /> {project.location}
@@ -1021,23 +1096,27 @@ function ProjectCard({ project, onOpen }: { project: Project; onOpen: () => void
         </p>
         <button
           onClick={onOpen}
-          className="mt-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary hover:gap-3 transition-all"
+          className="mt-auto pt-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary hover:gap-3 transition-all self-start"
         >
-          View Details <ArrowRight size={14} />
+          Open Project <ArrowRight size={14} />
         </button>
       </div>
     </div>
   );
 }
 
+
 function Section({ id, children, muted = false }: { id?: string; children: React.ReactNode; muted?: boolean }) {
   return (
-    <section id={id} className={`scroll-mt-24 py-14 sm:py-20 md:py-28 ${muted ? "bg-surface/40" : ""}`}>
+    <section
+      id={id}
+      className={`scroll-mt-24 py-10 sm:py-14 md:py-20 ${muted ? "bg-gradient-to-b from-transparent via-surface/40 to-transparent" : ""}`}
+    >
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10">{children}</div>
     </section>
-
   );
 }
+
 
 function Eyebrow({ children, center }: { children: React.ReactNode; center?: boolean }) {
   return (
@@ -1062,7 +1141,7 @@ function Reveal({ children, delay = 0, className = "" }: { children: React.React
   );
 }
 
-function AboutSlideshow({ onZoom }: { onZoom?: (src: string) => void } = {}) {
+function AboutSlideshow({ onZoom }: { onZoom?: (src: string, group?: string[]) => void } = {}) {
   const [idx, setIdx] = useState(0);
   const [paused, setPaused] = useState(false);
   const [exterior, setExterior] = useState(exteriorImages[0]);
@@ -1084,11 +1163,10 @@ function AboutSlideshow({ onZoom }: { onZoom?: (src: string) => void } = {}) {
 
       {/* Main slideshow — full width */}
       <div
-        className="relative rounded-3xl shadow-card overflow-hidden aspect-[4/3] md:aspect-[16/10] lg:aspect-[16/9] group select-none"
+        className="relative rounded-3xl shadow-card overflow-hidden aspect-[4/3] md:aspect-[16/10] lg:aspect-[16/9] group select-none cursor-zoom-in"
         onMouseEnter={() => setPaused(true)}
         onMouseLeave={() => setPaused(false)}
-        onClick={() => setPaused((p) => !p)}
-        onDoubleClick={(e) => { e.stopPropagation(); onZoom?.(interiorSlides[idx]); }}
+        onClick={() => onZoom?.(interiorSlides[idx], interiorSlides)}
       >
         <AnimatePresence mode="wait">
           <motion.img
@@ -1184,20 +1262,26 @@ const ADDONS = [
 ] as const;
 
 function EstimatorSection() {
+  const [projectType, setProjectType] = useState("");
+  const [location, setLocation] = useState("");
   const [floors, setFloors] = useState(2);
-  const [area, setArea] = useState(150);
-  const [pkg, setPkg] = useState<Pkg>("Elegant");
+  const [area, setArea] = useState<number | "">("");
+  const [pkg, setPkg] = useState<Pkg | "">("");
   const [bedrooms, setBedrooms] = useState(4);
   const [bathrooms, setBathrooms] = useState(3);
-  const [site, setSite] = useState("Flat & Accessible");
-  const [addons, setAddons] = useState<string[]>(["gate", "carport", "interior"]);
+  const [site, setSite] = useState("");
+  const [addons, setAddons] = useState<string[]>([]);
+  const [showSummary, setShowSummary] = useState(false);
 
-  const base = area * PKG_RATE[pkg];
+  const safeArea = typeof area === "number" && area >= 10 ? area : 0;
+  const rate = pkg ? PKG_RATE[pkg] : 0;
+  const base = safeArea * rate;
   // Add-ons are excluded from the estimated total — manually quoted after consultation.
   const low = Math.round(base * 1.0);
   const high = Math.round(base * 1.18);
   const fmt = (n: number) => "₱" + n.toLocaleString("en-PH");
   const selectedAddons = ADDONS.filter((a) => addons.includes(a.id));
+  const canEstimate = !!pkg && safeArea >= 10;
 
   const inclusions = ["Structural Works", "Doors & Windows", "Electrical & Plumbing", "Paint Works", "Roofing & Ceiling", "Basic Fixtures & Fittings", "Flooring & Wall Finishes"];
 
@@ -1218,22 +1302,59 @@ function EstimatorSection() {
           <div className="mt-8 glass rounded-3xl p-6 md:p-7 shadow-card space-y-5">
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Project Type">
-                <SelectInput value="Residential House" onChange={() => {}} options={["Residential House", "Apartment", "Commercial"]} icon={<Home size={16} />} />
+                <TextInputWithIcon
+                  value={projectType}
+                  onChange={setProjectType}
+                  placeholder="e.g. Residential, Commercial, Renovation..."
+                  icon={<Home size={16} />}
+                  list="estProjectTypes"
+                />
+                <datalist id="estProjectTypes">
+                  <option value="Residential House" />
+                  <option value="Apartment" />
+                  <option value="Commercial" />
+                  <option value="Renovation" />
+                  <option value="Civil Works" />
+                </datalist>
               </Field>
               <Field label="Project Location">
-                <SelectInput value="Cavite, Philippines" onChange={() => {}} options={["Cavite, Philippines", "Laguna, Philippines", "Metro Manila"]} icon={<MapPin size={16} />} />
+                <TextInputWithIcon
+                  value={location}
+                  onChange={setLocation}
+                  placeholder="Barangay, City, Province / Country"
+                  icon={<MapPin size={16} />}
+                />
               </Field>
             </div>
             <div className="grid sm:grid-cols-2 gap-4">
               <Field label="Floor Area (sqm)">
                 <div className="flex items-center gap-2 bg-background rounded-xl border border-border px-4 py-3">
                   <Square size={16} className="text-primary" />
-                  <input type="number" min={0} value={area} onChange={(e) => setArea(Math.max(0, Number(e.target.value) || 0))} className="bg-transparent w-full focus:outline-none" />
+                  <input
+                    type="number"
+                    min={10}
+                    placeholder="Min. 10 sqm"
+                    value={area === "" ? "" : area}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      if (v === "") setArea("");
+                      else setArea(Math.max(0, Number(v) || 0));
+                    }}
+                    className="bg-transparent w-full focus:outline-none"
+                  />
                   <span className="text-xs text-muted-foreground px-2 py-0.5 rounded bg-muted">sqm</span>
                 </div>
+                {area !== "" && area < 10 && (
+                  <p className="mt-1.5 text-[11px] text-destructive">Floor area must be at least 10 sqm.</p>
+                )}
               </Field>
               <Field label="Number of Floors">
-                <SelectInput value={`${floors} Floor${floors > 1 ? "s" : ""}`} onChange={(v) => setFloors(Number(v.split(" ")[0]))} options={["1 Floor", "2 Floors", "3 Floors"]} icon={<Layers size={16} />} />
+                <SelectInput
+                  value={`${floors} Floor${floors > 1 ? "s" : ""}`}
+                  onChange={(v) => setFloors(Number(v.split(" ")[0]))}
+                  options={["1 Floor", "2 Floors", "3 Floors", "4 Floors", "5 Floors"]}
+                  icon={<Layers size={16} />}
+                />
               </Field>
             </div>
 
@@ -1244,6 +1365,7 @@ function EstimatorSection() {
                   return (
                     <button
                       key={p}
+                      type="button"
                       onClick={() => setPkg(p)}
                       className={`text-left rounded-2xl border-2 p-4 transition ${active ? "border-primary bg-primary/5" : "border-border hover:border-primary/50"}`}
                     >
@@ -1262,6 +1384,9 @@ function EstimatorSection() {
                   );
                 })}
               </div>
+              {!pkg && (
+                <p className="mt-2 text-[11px] text-muted-foreground">Please select a package to see your estimate.</p>
+              )}
             </Field>
 
             <div className="grid sm:grid-cols-3 gap-4">
@@ -1272,7 +1397,19 @@ function EstimatorSection() {
                 <SelectInput value={String(bathrooms)} onChange={(v) => setBathrooms(Number(v))} options={["1", "2", "3", "4", "5"]} icon={<Bath size={16} />} />
               </Field>
               <Field label="Site Condition">
-                <SelectInput value={site} onChange={setSite} options={["Flat & Accessible", "Sloped Site", "Tight Access"]} icon={<HardHat size={16} />} />
+                <TextInputWithIcon
+                  value={site}
+                  onChange={setSite}
+                  placeholder="Describe the site (e.g. flat, sloped, tight access)"
+                  icon={<HardHat size={16} />}
+                  list="estSiteList"
+                />
+                <datalist id="estSiteList">
+                  <option value="Flat & Accessible" />
+                  <option value="Sloped Site" />
+                  <option value="Tight Access" />
+                  <option value="Coastal / Soft Soil" />
+                </datalist>
               </Field>
             </div>
 
@@ -1297,98 +1434,177 @@ function EstimatorSection() {
                 Add-ons are manually estimated after project review, site condition checking, and final design scope.
               </p>
             </Field>
+
+            {/* Mobile: Estimate Summary button */}
+            <div className="md:hidden pt-2">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowSummary(true);
+                  requestAnimationFrame(() => {
+                    document.getElementById("estimator-mobile-summary")?.scrollIntoView({ behavior: "smooth", block: "start" });
+                  });
+                }}
+                className="w-full inline-flex items-center justify-center gap-2 gradient-brand text-primary-foreground rounded-full px-6 py-3 font-semibold shadow-glow"
+              >
+                <Calculator size={16} /> View Estimate Summary
+              </button>
+            </div>
           </div>
         </Reveal>
 
-        {/* Summary — hidden on mobile */}
+        {/* Summary — desktop */}
         <Reveal delay={0.12} className="hidden md:block">
-          <div className="lg:sticky lg:top-24 glass rounded-3xl p-6 md:p-8 shadow-card">
-            <div className="flex items-center gap-2 text-primary">
-              <Calculator size={18} />
-              <span className="text-[11px] uppercase tracking-[0.22em] font-bold">Estimate Summary</span>
-            </div>
-            <div className="mt-5 pb-5 border-b border-border">
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <div className="font-bold">Base Rate ({pkg} Package)</div>
-                  <div className="text-xs text-muted-foreground">Based on selected floor area</div>
-                </div>
-                <div className="text-right">
-                  <div className="text-primary font-bold">{fmt(PKG_RATE[pkg])} / sqm</div>
-                  <div className="text-xs text-muted-foreground">{area} sqm</div>
-                </div>
-              </div>
-            </div>
-            <div className="mt-5 pb-5 border-b border-border">
-              <div className="font-bold">Estimated Construction Range</div>
-              <div className="mt-1 text-2xl md:text-3xl font-display font-black text-primary">
-                {fmt(low)} – {fmt(high)}
-              </div>
-              <div className="text-xs text-muted-foreground mt-1">Based on project complexity and finishes</div>
-            </div>
-            {selectedAddons.length > 0 && (
-              <div className="mt-5 pb-5 border-b border-border">
-                <div className="font-bold">Selected Add-Ons</div>
-                <ul className="mt-2 space-y-1.5">
-                  {selectedAddons.map((a) => (
-                    <li key={a.id} className="flex items-center justify-between gap-3 text-sm">
-                      <span className="flex items-center gap-2">
-                        <CheckCircle2 size={14} className="text-primary shrink-0" />
-                        {a.label}
-                      </span>
-                      <span className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">
-                        Manual estimate required
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-                <p className="mt-2 text-[11px] text-muted-foreground">
-                  Add-ons receive a custom quote after consultation and are not included in the range above.
-                </p>
-              </div>
-            )}
-            <div className="mt-5">
-              <div className="flex items-center gap-2">
-                <Star size={16} className="text-primary" />
-                <span className="text-xs uppercase tracking-wider font-bold text-muted-foreground">Selected Package</span>
-              </div>
-              <div className="mt-1 font-display font-black text-xl">{pkg}</div>
-              <div className="text-xs text-muted-foreground">Quality materials, modern design</div>
-            </div>
-            <div className="mt-5">
-              <div className="font-bold mb-3">Inclusions Summary</div>
-              <ul className="grid sm:grid-cols-2 gap-2 text-sm">
-                {inclusions.map((i) => (
-                  <li key={i} className="flex items-start gap-2">
-                    <CheckCircle2 size={14} className="text-primary mt-0.5 shrink-0" />
-                    <span>{i}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="mt-6 rounded-2xl bg-primary/5 border border-primary/20 p-5 text-center">
-              <div className="text-[11px] uppercase tracking-[0.22em] font-bold text-muted-foreground">Estimated Total Budget</div>
-              <div className="mt-2 text-2xl md:text-3xl font-display font-black text-primary">
-                {fmt(low)} – {fmt(high)}
-              </div>
-              <div className="text-[11px] text-muted-foreground mt-1">This is an estimated budget only.</div>
-            </div>
-            <Link
-              to="/consultation"
-              className="mt-5 group w-full inline-flex items-center justify-center gap-3 gradient-brand text-primary-foreground rounded-full px-7 py-4 font-semibold shadow-glow hover:scale-[1.01] transition"
-            >
-              Get Detailed Estimate
-              <span className="bg-background/25 rounded-full p-2 group-hover:translate-x-1 transition-transform">
-                <ArrowRight size={16} />
-              </span>
-            </Link>
-            <p className="mt-3 text-[11px] text-muted-foreground text-center leading-relaxed">
-              Final cost may vary based on design, site condition, finishes, and scope of work.
-            </p>
-          </div>
+          <EstimateSummary
+            pkg={pkg}
+            area={typeof area === "number" ? area : 0}
+            rate={rate}
+            low={low}
+            high={high}
+            canEstimate={canEstimate}
+            selectedAddons={selectedAddons}
+            inclusions={inclusions}
+            fmt={fmt}
+          />
         </Reveal>
       </div>
+
+      {/* Summary — mobile (revealed by button) */}
+      {showSummary && (
+        <div id="estimator-mobile-summary" className="md:hidden mt-8">
+          <EstimateSummary
+            pkg={pkg}
+            area={typeof area === "number" ? area : 0}
+            rate={rate}
+            low={low}
+            high={high}
+            canEstimate={canEstimate}
+            selectedAddons={selectedAddons}
+            inclusions={inclusions}
+            fmt={fmt}
+          />
+        </div>
+      )}
     </Section>
+  );
+}
+
+function EstimateSummary({
+  pkg, area, rate, low, high, canEstimate, selectedAddons, inclusions, fmt,
+}: {
+  pkg: Pkg | "";
+  area: number;
+  rate: number;
+  low: number;
+  high: number;
+  canEstimate: boolean;
+  selectedAddons: { id: string; label: string }[];
+  inclusions: string[];
+  fmt: (n: number) => string;
+}) {
+  return (
+    <div className="lg:sticky lg:top-24 glass rounded-3xl p-6 md:p-8 shadow-card">
+      <div className="flex items-center gap-2 text-primary">
+        <Calculator size={18} />
+        <span className="text-[11px] uppercase tracking-[0.22em] font-bold">Estimate Summary</span>
+      </div>
+
+      {!canEstimate ? (
+        <div className="mt-5 text-sm text-muted-foreground">
+          Choose a <span className="font-semibold text-foreground">package</span> and enter a <span className="font-semibold text-foreground">floor area (min 10 sqm)</span> to see your estimated range.
+        </div>
+      ) : (
+        <>
+          <div className="mt-5 pb-5 border-b border-border">
+            <div className="flex items-start justify-between gap-4">
+              <div>
+                <div className="font-bold">Base Rate ({pkg} Package)</div>
+                <div className="text-xs text-muted-foreground">Based on selected floor area</div>
+              </div>
+              <div className="text-right">
+                <div className="text-primary font-bold">{fmt(rate)} / sqm</div>
+                <div className="text-xs text-muted-foreground">{area} sqm</div>
+              </div>
+            </div>
+          </div>
+          <div className="mt-5 pb-5 border-b border-border">
+            <div className="font-bold">Estimated Construction Range</div>
+            <div className="mt-1 text-2xl md:text-3xl font-display font-black text-primary">
+              {fmt(low)} – {fmt(high)}
+            </div>
+            <div className="text-xs text-muted-foreground mt-1">Based on project complexity and finishes</div>
+          </div>
+        </>
+      )}
+
+      {selectedAddons.length > 0 && (
+        <div className="mt-5 pb-5 border-b border-border">
+          <div className="font-bold">Selected Add-Ons</div>
+          <ul className="mt-2 space-y-1.5">
+            {selectedAddons.map((a) => (
+              <li key={a.id} className="flex items-center justify-between gap-3 text-sm">
+                <span className="flex items-center gap-2">
+                  <CheckCircle2 size={14} className="text-primary shrink-0" />
+                  {a.label}
+                </span>
+                <span className="text-[11px] uppercase tracking-wider font-semibold text-muted-foreground">
+                  Manual estimate required
+                </span>
+              </li>
+            ))}
+          </ul>
+          <p className="mt-2 text-[11px] text-muted-foreground">
+            Add-ons receive a custom quote after consultation and are not included in the range above.
+          </p>
+        </div>
+      )}
+
+      {pkg && (
+        <div className="mt-5">
+          <div className="flex items-center gap-2">
+            <Star size={16} className="text-primary" />
+            <span className="text-xs uppercase tracking-wider font-bold text-muted-foreground">Selected Package</span>
+          </div>
+          <div className="mt-1 font-display font-black text-xl">{pkg}</div>
+          <div className="text-xs text-muted-foreground">Quality materials, modern design</div>
+        </div>
+      )}
+
+      <div className="mt-5">
+        <div className="font-bold mb-3">Inclusions Summary</div>
+        <ul className="grid sm:grid-cols-2 gap-2 text-sm">
+          {inclusions.map((i) => (
+            <li key={i} className="flex items-start gap-2">
+              <CheckCircle2 size={14} className="text-primary mt-0.5 shrink-0" />
+              <span>{i}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      {canEstimate && (
+        <div className="mt-6 rounded-2xl bg-primary/5 border border-primary/20 p-5 text-center">
+          <div className="text-[11px] uppercase tracking-[0.22em] font-bold text-muted-foreground">Estimated Total Budget</div>
+          <div className="mt-2 text-2xl md:text-3xl font-display font-black text-primary">
+            {fmt(low)} – {fmt(high)}
+          </div>
+          <div className="text-[11px] text-muted-foreground mt-1">This is an estimated budget only.</div>
+        </div>
+      )}
+
+      <Link
+        to="/consultation"
+        className="mt-5 group w-full inline-flex items-center justify-center gap-3 gradient-brand text-primary-foreground rounded-full px-7 py-4 font-semibold shadow-glow hover:scale-[1.01] transition"
+      >
+        Get Detailed Estimate
+        <span className="bg-background/25 rounded-full p-2 group-hover:translate-x-1 transition-transform">
+          <ArrowRight size={16} />
+        </span>
+      </Link>
+      <p className="mt-3 text-[11px] text-muted-foreground text-center leading-relaxed">
+        Final cost may vary based on design, site condition, finishes, and scope of work.
+      </p>
+    </div>
   );
 }
 
@@ -1413,6 +1629,26 @@ function SelectInput({ value, onChange, options, icon }: { value: string; onChan
         {options.map((o) => <option key={o} value={o}>{o}</option>)}
       </select>
       <ChevronDown size={16} className="pointer-events-none absolute right-4 top-1/2 -translate-y-1/2 text-muted-foreground" />
+    </div>
+  );
+}
+
+function TextInputWithIcon({
+  value, onChange, placeholder, icon, list,
+}: {
+  value: string; onChange: (v: string) => void; placeholder?: string; icon?: React.ReactNode; list?: string;
+}) {
+  return (
+    <div className="relative">
+      {icon && <span className="absolute left-4 top-1/2 -translate-y-1/2 text-primary">{icon}</span>}
+      <input
+        type="text"
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        placeholder={placeholder}
+        list={list}
+        className={`w-full bg-background rounded-xl border border-border ${icon ? "pl-11" : "pl-4"} pr-4 py-3 text-sm font-medium focus:outline-none focus:ring-2 focus:ring-primary/40`}
+      />
     </div>
   );
 }
