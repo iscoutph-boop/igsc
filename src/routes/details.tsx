@@ -53,6 +53,7 @@ import apartmentThumbAsset from "@/assets/portfolio-apartment-thumb.png.asset.js
 import renovationThumbAsset from "@/assets/portfolio-renovation-thumb.png.asset.json";
 import residentialThumbAsset from "@/assets/portfolio-residential-thumb.png.asset.json";
 import commercialThumbAsset from "@/assets/portfolio-commercial-thumb.png.asset.json";
+import completedThumbAsset from "@/assets/portfolio-completed-thumb.png.asset.json";
 import { ChevronLeft, ChevronRight, MessageSquareQuote, Users, Handshake, Building2 } from "lucide-react";
 
 const aRes = aResAsset.url;
@@ -234,6 +235,7 @@ function DetailsPage() {
 
   const folderCover = (k: Filter) => {
     const customThumbs: Partial<Record<Filter, string>> = {
+      Completed: completedThumbAsset.url,
       Ongoing: ongoingThumbAsset.url,
       Residential: residentialThumbAsset.url,
       Apartment: apartmentThumbAsset.url,
