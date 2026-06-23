@@ -604,7 +604,7 @@ function DetailsPage() {
                       exit={{ opacity: 0, y: -10 }}
                       transition={{ duration: 0.45, delay: Math.min(i * 0.04, 0.3), ease: [0.22, 1, 0.36, 1] }}
                     >
-                      <ProjectCard project={p} onOpen={() => setActive(p)} onZoom={openZoom} />
+                      <ProjectCard project={p} onOpen={() => setActive(p)} onZoom={(src) => openZoom(src, filtered.slice(0, visible).map((x) => x.img))} />
                     </motion.div>
                   ))}
                 </AnimatePresence>
