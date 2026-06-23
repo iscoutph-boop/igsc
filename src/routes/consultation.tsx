@@ -117,7 +117,8 @@ function ConsultationPage() {
               </p>
             </motion.div>
 
-            <div className="mt-16 grid lg:grid-cols-5 gap-8">
+            {/* Mobile: form first, contact details below. Desktop: side-by-side. */}
+            <div className="mt-12 grid lg:grid-cols-5 gap-8">
               <motion.aside
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -129,9 +130,9 @@ function ConsultationPage() {
                 <p className="text-sm text-muted-foreground mt-2">We're here Monday — Saturday.</p>
 
                 <div className="mt-8 space-y-5">
-                  <Info icon={Phone} label="Phone" value="+63 917 123 4567" />
-                  <Info icon={Mail} label="Email" value="info@igsabrosoconstruction.com" />
-                  <Info icon={MapPin} label="Location" value="Dasmariñas, Cavite, Philippines" />
+                  <InfoButton icon={Phone} label="Phone" value={IGS_PHONE_DISPLAY} onClick={openIgsContact} />
+                  <InfoLink icon={Mail} label="Email" value={IGS_EMAIL} href={`mailto:${IGS_EMAIL}`} />
+                  <InfoLink icon={MapPin} label="Address" value={IGS_ADDRESS} href={IGS_MAPS_URL} external />
                   <Info icon={Clock} label="Business Hours" value="Mon – Sat · 8:00 AM – 5:00 PM" />
                 </div>
 
