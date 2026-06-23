@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Facebook, Instagram, Moon, Sun, ArrowRight, Menu, X, CalendarCheck } from "lucide-react";
+import { Facebook, Instagram, Moon, Sun, ArrowRight, Menu, X } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import logoAsset from "@/assets/logo.png.asset.json";
@@ -144,15 +144,6 @@ export function SiteHeader({ floating = false }: { floating?: boolean }) {
             <span className="bg-background/20 rounded-full p-1.5 group-hover:translate-x-0.5 transition-transform">
               <ArrowRight size={14} />
             </span>
-          </Link>
-
-          {/* Mobile booking icon — visible on small screens only */}
-          <Link
-            to="/consultation"
-            aria-label="Book a consultation"
-            className="sm:hidden inline-flex items-center justify-center h-9 w-9 rounded-full gradient-brand text-primary-foreground shadow-soft"
-          >
-            <CalendarCheck size={16} />
           </Link>
 
           <button

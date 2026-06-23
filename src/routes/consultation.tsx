@@ -18,7 +18,6 @@ import { PageTransition } from "@/components/page-transition";
 import { CheckBookingModal, ReferencePill } from "@/components/booking-modals";
 import { SchedulePicker } from "@/components/schedule-picker";
 import { callCRM } from "@/lib/bookings";
-import { IGS_PHONE_DISPLAY, IGS_EMAIL, IGS_ADDRESS, IGS_MAPS_URL, openIgsContact } from "@/lib/contact";
 
 export const Route = createFileRoute("/consultation")({
   head: () => ({
@@ -117,8 +116,7 @@ function ConsultationPage() {
               </p>
             </motion.div>
 
-            {/* Mobile: form first, contact details below. Desktop: side-by-side. */}
-            <div className="mt-12 grid lg:grid-cols-5 gap-8">
+            <div className="mt-16 grid lg:grid-cols-5 gap-8">
               <motion.aside
                 initial={{ opacity: 0, x: -20 }}
                 whileInView={{ opacity: 1, x: 0 }}
@@ -130,9 +128,9 @@ function ConsultationPage() {
                 <p className="text-sm text-muted-foreground mt-2">We're here Monday — Saturday.</p>
 
                 <div className="mt-8 space-y-5">
-                  <InfoButton icon={Phone} label="Phone" value={IGS_PHONE_DISPLAY} onClick={openIgsContact} />
-                  <InfoLink icon={Mail} label="Email" value={IGS_EMAIL} href={`mailto:${IGS_EMAIL}`} />
-                  <InfoLink icon={MapPin} label="Address" value={IGS_ADDRESS} href={IGS_MAPS_URL} external />
+                  <Info icon={Phone} label="Phone" value="+63 917 123 4567" />
+                  <Info icon={Mail} label="Email" value="info@igsabrosoconstruction.com" />
+                  <Info icon={MapPin} label="Location" value="Dasmariñas, Cavite, Philippines" />
                   <Info icon={Clock} label="Business Hours" value="Mon – Sat · 8:00 AM – 5:00 PM" />
                 </div>
 
@@ -159,18 +157,25 @@ function ConsultationPage() {
                   <Field label="Phone Number" name="phoneNumber" placeholder="+63 ..." required />
                   <Field label="Email Address" name="emailAddress" type="email" placeholder="you@example.com" className="sm:col-span-2" />
 
-                  <Field label="Project Type" name="projectType" placeholder="e.g. Residential, Renovation, Commercial..." required list="projectTypeList" />
-                  <datalist id="projectTypeList">
-                    <option value="Residential Construction" />
-                    <option value="Renovation & Remodeling" />
-                    <option value="Civil Works" />
-                    <option value="Design-Build" />
-                    <option value="Architectural Drawings" />
-                    <option value="3D Rendering & Visualization" />
-                    <option value="Construction Management" />
-                  </datalist>
+                  <div>
+                    <Label>Project Type <span className="text-destructive">*</span></Label>
+                    <select
+                      name="projectType"
+                      required
+                      defaultValue=""
+                      className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
+                    >
+                      <option value="" disabled>Select a service</option>
+                      <option>Residential Construction</option>
+                      <option>Renovation & Remodeling</option>
+                      <option>Civil Works</option>
+                      <option>Design-Build</option>
+                      <option>Architectural Drawings</option>
+                      <option>3D Rendering</option>
+                    </select>
+                  </div>
 
-                  <Field label="Project Location" name="projectLocation" placeholder="Barangay, City, Province" />
+                  <Field label="Project Location" name="projectLocation" placeholder="City, Province" />
 
                   <div className="sm:col-span-2">
                     <SchedulePicker
@@ -316,42 +321,14 @@ function Info({ icon: Icon, label, value }: { icon: React.ComponentType<{ size?:
   );
 }
 
-function InfoButton({ icon: Icon, label, value, onClick }: { icon: React.ComponentType<{ size?: number; className?: string }>; label: string; value: string; onClick: () => void }) {
-  return (
-    <button type="button" onClick={onClick} className="w-full text-left flex items-start gap-4 group">
-      <div className="h-11 w-11 shrink-0 rounded-2xl gradient-brand text-primary-foreground flex items-center justify-center shadow-soft group-hover:scale-105 transition">
-        <Icon size={18} />
-      </div>
-      <div className="min-w-0">
-        <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>
-        <div className="text-sm font-semibold mt-0.5 group-hover:text-primary transition">{value}</div>
-      </div>
-    </button>
-  );
-}
-
-function InfoLink({ icon: Icon, label, value, href, external }: { icon: React.ComponentType<{ size?: number; className?: string }>; label: string; value: string; href: string; external?: boolean }) {
-  return (
-    <a href={href} target={external ? "_blank" : undefined} rel={external ? "noopener noreferrer" : undefined} className="flex items-start gap-4 group">
-      <div className="h-11 w-11 shrink-0 rounded-2xl gradient-brand text-primary-foreground flex items-center justify-center shadow-soft group-hover:scale-105 transition">
-        <Icon size={18} />
-      </div>
-      <div className="min-w-0">
-        <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>
-        <div className="text-sm font-semibold mt-0.5 break-words group-hover:text-primary transition">{value}</div>
-      </div>
-    </a>
-  );
-}
-
 function Label({ children }: { children: React.ReactNode }) {
   return <label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">{children}</label>;
 }
 
 function Field({
-  label, name, type = "text", placeholder, required, className = "", list,
+  label, name, type = "text", placeholder, required, className = "",
 }: {
-  label: string; name: string; type?: string; placeholder?: string; required?: boolean; className?: string; list?: string;
+  label: string; name: string; type?: string; placeholder?: string; required?: boolean; className?: string;
 }) {
   return (
     <div className={className}>
@@ -361,7 +338,6 @@ function Field({
         type={type}
         required={required}
         placeholder={placeholder}
-        list={list}
         className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
       />
     </div>
