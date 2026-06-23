@@ -854,10 +854,7 @@ function ProjectDetail({ project, onClose, onZoom }: { project: Project; onClose
 
         {/* Right — meta */}
         <div>
-          <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-primary font-semibold">
-            <span className="h-px w-8 bg-primary" /> Project
-          </div>
-          <h2 className="mt-3 text-4xl md:text-5xl font-display font-bold leading-[1.05]">{project.title}</h2>
+          <h2 className="text-4xl md:text-5xl font-display font-bold leading-[1.05]">{project.title}</h2>
           <div className="mt-3 flex items-center gap-1.5 text-sm">
             <MapPin size={16} className="text-primary" /> {project.location}
           </div>
