@@ -235,6 +235,7 @@ function DetailsPage() {
 
   const folderCover = (k: Filter) => {
     const customThumbs: Partial<Record<Filter, string>> = {
+      Completed: completedThumbAsset.url,
       Ongoing: ongoingThumbAsset.url,
       Residential: residentialThumbAsset.url,
       Apartment: apartmentThumbAsset.url,
