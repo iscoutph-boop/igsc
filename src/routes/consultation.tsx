@@ -159,25 +159,18 @@ function ConsultationPage() {
                   <Field label="Phone Number" name="phoneNumber" placeholder="+63 ..." required />
                   <Field label="Email Address" name="emailAddress" type="email" placeholder="you@example.com" className="sm:col-span-2" />
 
-                  <div>
-                    <Label>Project Type <span className="text-destructive">*</span></Label>
-                    <select
-                      name="projectType"
-                      required
-                      defaultValue=""
-                      className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
-                    >
-                      <option value="" disabled>Select a service</option>
-                      <option>Residential Construction</option>
-                      <option>Renovation & Remodeling</option>
-                      <option>Civil Works</option>
-                      <option>Design-Build</option>
-                      <option>Architectural Drawings</option>
-                      <option>3D Rendering</option>
-                    </select>
-                  </div>
+                  <Field label="Project Type" name="projectType" placeholder="e.g. Residential, Renovation, Commercial..." required list="projectTypeList" />
+                  <datalist id="projectTypeList">
+                    <option value="Residential Construction" />
+                    <option value="Renovation & Remodeling" />
+                    <option value="Civil Works" />
+                    <option value="Design-Build" />
+                    <option value="Architectural Drawings" />
+                    <option value="3D Rendering & Visualization" />
+                    <option value="Construction Management" />
+                  </datalist>
 
-                  <Field label="Project Location" name="projectLocation" placeholder="City, Province" />
+                  <Field label="Project Location" name="projectLocation" placeholder="Barangay, City, Province" />
 
                   <div className="sm:col-span-2">
                     <SchedulePicker
