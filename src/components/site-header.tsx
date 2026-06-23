@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Facebook, Instagram, Moon, Sun, ArrowRight, Menu, X } from "lucide-react";
+import { Facebook, Instagram, Moon, Sun, ArrowRight, Menu, X, CalendarCheck } from "lucide-react";
 import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import logoAsset from "@/assets/logo.png.asset.json";
