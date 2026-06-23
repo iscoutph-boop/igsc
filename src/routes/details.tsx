@@ -1184,20 +1184,26 @@ const ADDONS = [
 ] as const;
 
 function EstimatorSection() {
+  const [projectType, setProjectType] = useState("");
+  const [location, setLocation] = useState("");
   const [floors, setFloors] = useState(2);
-  const [area, setArea] = useState(150);
-  const [pkg, setPkg] = useState<Pkg>("Elegant");
+  const [area, setArea] = useState<number | "">("");
+  const [pkg, setPkg] = useState<Pkg | "">("");
   const [bedrooms, setBedrooms] = useState(4);
   const [bathrooms, setBathrooms] = useState(3);
-  const [site, setSite] = useState("Flat & Accessible");
-  const [addons, setAddons] = useState<string[]>(["gate", "carport", "interior"]);
+  const [site, setSite] = useState("");
+  const [addons, setAddons] = useState<string[]>([]);
+  const [showSummary, setShowSummary] = useState(false);
 
-  const base = area * PKG_RATE[pkg];
+  const safeArea = typeof area === "number" && area >= 10 ? area : 0;
+  const rate = pkg ? PKG_RATE[pkg] : 0;
+  const base = safeArea * rate;
   // Add-ons are excluded from the estimated total — manually quoted after consultation.
   const low = Math.round(base * 1.0);
   const high = Math.round(base * 1.18);
   const fmt = (n: number) => "₱" + n.toLocaleString("en-PH");
   const selectedAddons = ADDONS.filter((a) => addons.includes(a.id));
+  const canEstimate = !!pkg && safeArea >= 10;
 
   const inclusions = ["Structural Works", "Doors & Windows", "Electrical & Plumbing", "Paint Works", "Roofing & Ceiling", "Basic Fixtures & Fittings", "Flooring & Wall Finishes"];
 
