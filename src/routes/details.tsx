@@ -301,7 +301,30 @@ function DetailsPage() {
     if (typeof window !== "undefined" && window.location.hash !== "#portfolio") {
       window.history.pushState(null, "", "#portfolio");
     }
+  const handleServiceClick = (f: Filter) => {
+    if (f === "All") {
+      setFolder(null);
+      setFilter("All");
+    } else {
+      openFolder(f);
+    }
+    if (typeof window !== "undefined" && window.location.hash !== "#portfolio") {
+      window.history.pushState(null, "", "#portfolio");
+    }
     requestAnimationFrame(() => scrollToHash("portfolio"));
+  };
+
+  const scrollToService = (id: string) => {
+    if (typeof window === "undefined") return;
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+    // brief highlight
+    el.classList.add("ring-2", "ring-primary", "shadow-glow");
+    window.setTimeout(() => {
+      el.classList.remove("ring-2", "ring-primary", "shadow-glow");
+    }, 1600);
+    window.history.replaceState(null, "", `#${id}`);
   };
 
 
