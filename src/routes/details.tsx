@@ -11,6 +11,7 @@ import { SiteHeader } from "@/components/site-header";
 import { SiteFooter } from "@/components/site-footer";
 import { PageTransition } from "@/components/page-transition";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
+import { Lightbox } from "@/components/lightbox";
 import aResAsset from "@/assets/proj-a-residence.jpg.asset.json";
 import oResAsset from "@/assets/proj-o-residence.jpg.asset.json";
 import iResAsset from "@/assets/proj-i-residence.jpg.asset.json";
