@@ -399,7 +399,7 @@ function DetailsPage() {
       <SiteHeader />
       <main className="w-full">
         {/* About */}
-        <section id="about" className="scroll-mt-24 py-14 sm:py-20 md:py-28">
+        <section id="about" className="scroll-mt-24 py-10 sm:py-14 md:py-20">
           <div className="max-w-[1760px] mx-auto px-4 sm:px-6 md:px-10 xl:px-14 2xl:px-20">
 
             <div className="grid lg:grid-cols-12 gap-10 lg:gap-12 items-center">
@@ -1108,7 +1108,7 @@ function ProjectCard({ project, onOpen, onZoom }: { project: Project; onOpen: ()
 
 function Section({ id, children, muted = false }: { id?: string; children: React.ReactNode; muted?: boolean }) {
   return (
-    <section id={id} className={`scroll-mt-24 py-14 sm:py-20 md:py-28 ${muted ? "bg-surface/40" : ""}`}>
+    <section id={id} className={`scroll-mt-24 py-10 sm:py-14 md:py-20 ${muted ? "bg-surface/40" : ""}`}>
       <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10">{children}</div>
     </section>
 
