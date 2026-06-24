@@ -172,23 +172,23 @@ export function FloatingContact() {
         whileTap={{ scale: 0.94 }}
         onClick={() => { setOpen((v) => !v); if (!open) setMode("menu"); }}
         aria-label="Open IG Sabroso contact"
-        className="relative bg-background border-2 border-primary rounded-full h-16 w-16 shadow-glow flex items-center justify-center overflow-hidden"
+        className="relative rounded-full h-12 w-12 sm:h-14 sm:w-14 shadow-glow flex items-center justify-center overflow-hidden bg-transparent"
       >
         <AnimatePresence mode="wait" initial={false}>
           {open ? (
-            <motion.span key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }} className="text-foreground">
-              <X size={22} />
+            <motion.span key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }} className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-background border-2 border-primary inline-flex items-center justify-center text-foreground">
+              <X size={20} />
             </motion.span>
           ) : (
             <motion.img
-              key="logo"
-              src={logoAsset.url}
-              alt="IGS"
+              key="support"
+              src={supportIconAsset.url}
+              alt="Contact support"
               initial={{ scale: 0.7, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.7, opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="h-12 w-12 object-contain"
+              className="h-full w-full object-contain"
             />
           )}
         </AnimatePresence>
