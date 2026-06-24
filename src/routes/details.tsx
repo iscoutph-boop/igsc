@@ -439,6 +439,21 @@ function DetailsPage() {
                     </button>
                   ))}
                 </div>
+
+                <button
+                  type="button"
+                  onClick={() => setOverviewOpen(true)}
+                  className="mt-5 group inline-flex w-full items-center justify-between gap-3 rounded-2xl gradient-brand text-primary-foreground px-5 py-4 shadow-soft hover:shadow-glow transition-all hover:-translate-y-0.5"
+                >
+                  <span className="flex items-center gap-3">
+                    <Building2 size={18} className="opacity-90" />
+                    <span className="text-left">
+                      <span className="block text-[10px] uppercase tracking-[0.18em] opacity-80">Learn more</span>
+                      <span className="block text-sm font-bold">Company Overview</span>
+                    </span>
+                  </span>
+                  <ArrowRight size={16} className="transition-transform group-hover:translate-x-1" />
+                </button>
               </Reveal>
               <Reveal delay={0.15} className="lg:col-span-8 xl:col-span-9">
                 <AboutSlideshow onZoom={openZoom} />
