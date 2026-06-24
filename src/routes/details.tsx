@@ -210,6 +210,7 @@ function DetailsPage() {
     setZoomIndex(idx >= 0 ? idx : 0);
   };
   const closeZoom = () => { setZoomIndex(-1); setZoomGroup([]); };
+  const [overviewOpen, setOverviewOpen] = useState(false);
 
   const filtered = useMemo(() => {
     let list = projects;
