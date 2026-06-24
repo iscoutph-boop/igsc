@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, Bot, Headphones, X, Send, ArrowRight } from "lucide-react";
 import logoAsset from "@/assets/logo.png.asset.json";
+import supportIconAsset from "@/assets/support-icon.png.asset.json";
 import { IGS_PHONE_WA } from "@/lib/contact";
 
 type Mode = null | "menu" | "bot" | "agent";
