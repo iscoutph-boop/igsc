@@ -503,32 +503,8 @@ function DetailsPage() {
                   </div>
                   <h3 className="mt-5 text-lg font-display font-bold">{s.title}</h3>
                   <p className="mt-2 text-sm text-muted-foreground leading-relaxed">{s.desc}</p>
-                  <span className="mt-4 inline-flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-primary group-hover:gap-3 transition-all">
-                    Learn more <ArrowRight size={14} />
-                  </span>
                 </button>
               </Reveal>
-            ))}
-          </div>
-
-          {/* Service details — anchor targets with brief highlight on scroll-in */}
-          <div className="mt-16 grid gap-4">
-            {services.map((s) => (
-              <div
-                key={s.id}
-                id={s.id}
-                className="scroll-mt-28 glass rounded-2xl p-6 md:p-7 border border-transparent transition-colors duration-500"
-              >
-                <div className="flex items-start gap-4">
-                  <span className="inline-flex items-center justify-center h-11 w-11 shrink-0 rounded-xl gradient-brand text-primary-foreground">
-                    <s.icon size={18} />
-                  </span>
-                  <div className="min-w-0">
-                    <h3 className="font-display font-bold text-lg md:text-xl">{s.title}</h3>
-                    <p className="mt-1.5 text-sm md:text-base text-muted-foreground leading-relaxed">{s.long}</p>
-                  </div>
-                </div>
-              </div>
             ))}
           </div>
         </Section>
