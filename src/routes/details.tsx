@@ -860,6 +860,66 @@ function DetailsPage() {
         </DialogContent>
       </Dialog>
 
+      {/* Company Overview Modal */}
+      <Dialog open={overviewOpen} onOpenChange={setOverviewOpen}>
+        <DialogContent className="w-[96vw] sm:w-auto max-w-3xl p-0 overflow-hidden bg-background border-border max-h-[92vh] overflow-y-auto">
+          <div className="relative">
+            <div className="gradient-brand text-primary-foreground px-6 sm:px-10 py-8">
+              <div className="text-[10px] uppercase tracking-[0.22em] font-bold opacity-90">IG Sabroso Construction</div>
+              <h3 className="mt-2 text-2xl sm:text-3xl font-display font-bold leading-tight">Company Overview</h3>
+              <p className="mt-2 text-sm opacity-90 max-w-xl">Our vision, mission, and the values that guide every build.</p>
+            </div>
+
+            <div className="px-6 sm:px-10 py-8 space-y-8">
+              <div className="grid sm:grid-cols-2 gap-5">
+                <div className="rounded-2xl border border-border bg-surface/40 p-5">
+                  <div className="flex items-center gap-2 text-primary text-[10px] uppercase tracking-[0.22em] font-bold">
+                    <Sparkles size={14} /> Vision
+                  </div>
+                  <p className="mt-3 text-sm leading-relaxed text-foreground/90">
+                    To provide quality construction services built on integrity, reliability, and craftsmanship,
+                    while creating sustainable job opportunities that help improve the lives of fellow Filipino
+                    workers and their families.
+                  </p>
+                </div>
+                <div className="rounded-2xl border border-border bg-surface/40 p-5">
+                  <div className="flex items-center gap-2 text-primary text-[10px] uppercase tracking-[0.22em] font-bold">
+                    <Compass size={14} /> Mission
+                  </div>
+                  <p className="mt-3 text-sm leading-relaxed text-foreground/90">
+                    To be among the top construction companies in the Philippines, with multiple branches
+                    nationwide, recognized for quality, integrity, and the positive impact we create for our
+                    clients, employees, and communities.
+                  </p>
+                </div>
+              </div>
+
+              <div>
+                <div className="text-[10px] uppercase tracking-[0.22em] font-bold text-primary">Our Values</div>
+                <h4 className="mt-1 text-xl font-display font-bold">The <span className="text-gradient-brand">IGS</span> way.</h4>
+                <div className="mt-4 space-y-3">
+                  {[
+                    { letter: "I", title: "Innovate, Improve, Inspire", body: "IGS, embrace change, explore new possibilities, and continuously enhance the way we work and serve our clients." },
+                    { letter: "G", title: "Good Communication", body: "IGS, foster open, honest, and timely communication to strengthen relationships, promote collaboration, and ensure every project is delivered with transparency, trust, and professionalism." },
+                    { letter: "S", title: "Striving to Quality Excellence", body: "IGS, uphold the highest standards of quality through skilled craftsmanship, attention to detail, and a commitment to continuous improvement, ensuring every project is built to last." },
+                  ].map((v) => (
+                    <div key={v.letter} className="flex gap-4 rounded-2xl border border-border p-4 hover:border-primary/50 transition">
+                      <div className="shrink-0 h-11 w-11 rounded-xl gradient-brand text-primary-foreground inline-flex items-center justify-center font-display font-bold text-lg shadow-soft">
+                        {v.letter}
+                      </div>
+                      <div className="min-w-0">
+                        <div className="text-sm font-bold">{v.title}</div>
+                        <p className="mt-1 text-sm text-muted-foreground leading-relaxed">{v.body}</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
       {/* Shared lightbox — used by About, Collaboration, Meetings, Portfolio, Project gallery */}
       <Lightbox
         images={zoomGroup}
