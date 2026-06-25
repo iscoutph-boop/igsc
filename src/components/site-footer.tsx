@@ -56,11 +56,33 @@ export function SiteFooter() {
         <div>
           <h4 className="text-xs uppercase tracking-[0.18em] text-muted-foreground mb-4">Services</h4>
           <ul className="space-y-2.5 text-sm">
-            <li><Link to="/details" hash="services" className="hover:text-primary transition">Residential Construction</Link></li>
-            <li><Link to="/details" hash="services" className="hover:text-primary transition">Renovation & Remodeling</Link></li>
-            <li><Link to="/details" hash="services" className="hover:text-primary transition">Civil Works</Link></li>
-            <li><Link to="/details" hash="services" className="hover:text-primary transition">Design-Build Services</Link></li>
-            <li><Link to="/details" hash="services" className="hover:text-primary transition">3D Rendering</Link></li>
+            {[
+              "Residential Construction",
+              "Renovation & Remodeling",
+              "Civil Works",
+              "Design-Build Services",
+              "3D Rendering",
+            ].map((label) => (
+              <li key={label}>
+                <Link
+                  to="/details"
+                  hash="services"
+                  className="hover:text-primary transition"
+                  onClick={() => {
+                    if (typeof window === "undefined") return;
+                    const scroll = () => {
+                      const el = document.getElementById("services");
+                      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                    };
+                    // Defer so navigation/hash update completes first.
+                    window.setTimeout(scroll, 60);
+                    window.setTimeout(scroll, 300);
+                  }}
+                >
+                  {label}
+                </Link>
+              </li>
+            ))}
           </ul>
         </div>
 
