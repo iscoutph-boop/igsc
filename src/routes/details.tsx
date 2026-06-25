@@ -711,7 +711,7 @@ function DetailsPage() {
                   type="button"
                   onClick={() => openZoom(src, meetingImages)}
                   aria-label={`Open meeting photo ${i + 1}`}
-                  className={`relative rounded-2xl overflow-hidden shadow-card group block w-full ${i === 0 ? "col-span-2 row-span-2 aspect-[4/3] md:aspect-[4/5]" : "aspect-square"}`}
+                  className="relative rounded-2xl overflow-hidden shadow-card group block w-full aspect-square"
                 >
                   <img src={src} alt={`IG Sabroso client meeting ${i + 1}`} loading="lazy" decoding="async" sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 720px" className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-110 cursor-zoom-in select-none" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition" />
