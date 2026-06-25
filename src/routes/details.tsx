@@ -769,9 +769,9 @@ function DetailsPage() {
             </p>
           </Reveal>
 
-          <div className="mt-14 grid md:grid-cols-3 gap-6">
+          <div className="mt-14 -mx-6 md:mx-0 px-6 md:px-0 flex md:grid md:grid-cols-3 gap-6 overflow-x-auto md:overflow-visible snap-x snap-mandatory scroll-smooth [-webkit-overflow-scrolling:touch] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {testimonials.map((t, i) => (
-              <Reveal key={t.name} delay={i * 0.08}>
+              <Reveal key={t.name} delay={i * 0.08} className="snap-center shrink-0 basis-[85%] sm:basis-[60%] md:basis-auto md:shrink">
                 <div className="relative h-full glass rounded-3xl p-7 shadow-card hover:shadow-glow transition-all hover:-translate-y-1">
                   <MessageSquareQuote className="text-primary/30 absolute top-5 right-5" size={36} />
                   <div className="flex items-center gap-1 text-primary">
