@@ -322,14 +322,31 @@ function DetailsPage() {
   // Handle initial hash on mount (refresh / direct link).
   useEffect(() => {
     if (typeof window === "undefined") return;
+    const applyFolderHash = () => {
+      const h = window.location.hash.replace(/^#/, "");
+      const m = h.match(/^portfolio-(residential|apartment|commercial|renovation|completed|ongoing)$/i);
+      if (m) {
+        const key = (m[1][0].toUpperCase() + m[1].slice(1).toLowerCase()) as Filter;
+        setFolder(key);
+        setFilter(key);
+        requestAnimationFrame(() => scrollToHash("portfolio", false));
+        return true;
+      }
+      return false;
+    };
     if (window.location.hash) {
-      const id = window.requestAnimationFrame(() => scrollToHash(window.location.hash, false));
-      const t = window.setTimeout(() => scrollToHash(window.location.hash, false), 250);
-      return () => {
-        window.cancelAnimationFrame(id);
-        window.clearTimeout(t);
-      };
+      if (!applyFolderHash()) {
+        const id = window.requestAnimationFrame(() => scrollToHash(window.location.hash, false));
+        const t = window.setTimeout(() => scrollToHash(window.location.hash, false), 250);
+        return () => {
+          window.cancelAnimationFrame(id);
+          window.clearTimeout(t);
+        };
+      }
     }
+    const onHash = () => applyFolderHash();
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
   }, []);
 
   // Listen for hashchange / back-forward to scroll to the appropriate section.
