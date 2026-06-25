@@ -322,14 +322,31 @@ function DetailsPage() {
   // Handle initial hash on mount (refresh / direct link).
   useEffect(() => {
     if (typeof window === "undefined") return;
+    const applyFolderHash = () => {
+      const h = window.location.hash.replace(/^#/, "");
+      const m = h.match(/^portfolio-(residential|apartment|commercial|renovation|completed|ongoing)$/i);
+      if (m) {
+        const key = (m[1][0].toUpperCase() + m[1].slice(1).toLowerCase()) as Filter;
+        setFolder(key);
+        setFilter(key);
+        requestAnimationFrame(() => scrollToHash("portfolio", false));
+        return true;
+      }
+      return false;
+    };
     if (window.location.hash) {
-      const id = window.requestAnimationFrame(() => scrollToHash(window.location.hash, false));
-      const t = window.setTimeout(() => scrollToHash(window.location.hash, false), 250);
-      return () => {
-        window.cancelAnimationFrame(id);
-        window.clearTimeout(t);
-      };
+      if (!applyFolderHash()) {
+        const id = window.requestAnimationFrame(() => scrollToHash(window.location.hash, false));
+        const t = window.setTimeout(() => scrollToHash(window.location.hash, false), 250);
+        return () => {
+          window.cancelAnimationFrame(id);
+          window.clearTimeout(t);
+        };
+      }
     }
+    const onHash = () => applyFolderHash();
+    window.addEventListener("hashchange", onHash);
+    return () => window.removeEventListener("hashchange", onHash);
   }, []);
 
   // Listen for hashchange / back-forward to scroll to the appropriate section.
@@ -568,8 +585,8 @@ function DetailsPage() {
                     transition={{ duration: 0.45, delay: Math.min(i * 0.05, 0.25) }}
                     className="group relative text-left bg-card rounded-3xl overflow-hidden shadow-card hover:shadow-glow hover:-translate-y-1 transition-all border border-border/50"
                   >
-                    <div className="relative aspect-[4/3] overflow-hidden">
-                      <img src={folderCover(f.key)} alt={f.label} loading="lazy" className="h-full w-full object-cover transition-transform duration-700 group-hover:scale-[1.08]" />
+                    <div className="relative aspect-[4/3] overflow-hidden bg-muted">
+                      <img src={folderCover(f.key)} alt={f.label} loading="lazy" className="h-full w-full object-contain transition-transform duration-700 group-hover:scale-[1.04]" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/25 to-transparent" />
                       <div className="absolute top-4 left-4 inline-flex items-center gap-1.5 rounded-full bg-white/95 backdrop-blur text-foreground px-3 py-1.5 text-[10px] uppercase tracking-[0.18em] font-bold shadow-sm">
                         <Building2 size={12} className="text-primary group-hover:scale-110 transition-transform" /> {f.key === "Ongoing" ? "ON-GOING" : f.key.toUpperCase()}
@@ -602,8 +619,6 @@ function DetailsPage() {
                     <button onClick={closeFolder} className="hover:text-foreground transition inline-flex items-center gap-1.5">
                       <ChevronLeft size={16} /> All Folders
                     </button>
-                    <span>›</span>
-                    <span className="text-primary font-semibold">{folder}</span>
                   </div>
                   <div className="flex flex-wrap gap-3">
                     <div className="relative">
@@ -713,7 +728,7 @@ function DetailsPage() {
                   type="button"
                   onClick={() => openZoom(src, meetingImages)}
                   aria-label={`Open meeting photo ${i + 1}`}
-                  className={`relative rounded-2xl overflow-hidden shadow-card group block w-full ${i === 0 ? "col-span-2 row-span-2 aspect-[4/3] md:aspect-[4/5]" : "aspect-square"}`}
+                  className="relative rounded-2xl overflow-hidden shadow-card group block w-full aspect-square"
                 >
                   <img src={src} alt={`IG Sabroso client meeting ${i + 1}`} loading="lazy" decoding="async" sizes="(max-width: 768px) 100vw, (max-width: 1280px) 50vw, 720px" className="h-full w-full object-cover object-center transition-transform duration-700 group-hover:scale-110 cursor-zoom-in select-none" />
                   <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition" />
