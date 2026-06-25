@@ -74,5 +74,5 @@ export const callCRMFn = createServerFn({ method: "POST" })
     if (!json.success) {
       throw new Error(typeof json.message === "string" ? json.message : "CRM request failed.");
     }
-    return json;
+    return json as Record<string, unknown>;
   });
