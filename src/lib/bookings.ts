@@ -1,8 +1,7 @@
-// CRM integration with Google Apps Script Web App.
-// Uses text/plain to avoid CORS preflight.
-
-const GOOGLE_APPS_SCRIPT_WEB_APP_URL =
-  "https://script.google.com/macros/s/AKfycbym6yZbnhNFA6xVAYRQhW1hB7lXGFVFXTKdgj3lUMZscjN2HZq6K547FZgFDiQkypTd9g/exec";
+// CRM integration. All calls are routed through a TanStack server function
+// that validates and sanitizes input with zod before forwarding to the
+// Google Apps Script CRM. The Apps Script URL is server-only.
+import { callCRMFn } from "./bookings.functions";
 
 export type CRMAction =
   | "createBooking"
@@ -40,21 +39,10 @@ export async function callCRM<T = Record<string, unknown>>(
   action: CRMAction,
   payload: Record<string, unknown>,
 ): Promise<CRMResponse<T>> {
-  const response = await fetch(GOOGLE_APPS_SCRIPT_WEB_APP_URL, {
-    method: "POST",
-    headers: {
-      "Content-Type": "text/plain;charset=utf-8",
-    },
-    body: JSON.stringify({ action, payload }),
-  });
-
-  const data = (await response.json()) as CRMResponse<T>;
-
-  console.log("IGS CRM response:", data);
-
+  const text = await callCRMFn({ data: { action, payload } as never });
+  const data = JSON.parse(text) as CRMResponse<T>;
   if (!data.success) {
     throw new Error(data.message || "CRM request failed.");
   }
-
   return data;
 }
