@@ -56,11 +56,11 @@ export function SiteFooter() {
         <div>
           <h4 className="text-xs uppercase tracking-[0.18em] text-muted-foreground mb-4">Services</h4>
           <ul className="space-y-2.5 text-sm">
-            <li><Link to="/details" hash="portfolio-residential" className="hover:text-primary transition">Residential Construction</Link></li>
-            <li><Link to="/details" hash="portfolio-renovation" className="hover:text-primary transition">Renovation & Remodeling</Link></li>
-            <li><Link to="/details" hash="portfolio-commercial" className="hover:text-primary transition">Civil Works</Link></li>
-            <li><span className="text-muted-foreground/70 cursor-default">Design-Build Services</span></li>
-            <li><span className="text-muted-foreground/70 cursor-default">3D Rendering</span></li>
+            <li><Link to="/details" hash="services" className="hover:text-primary transition">Residential Construction</Link></li>
+            <li><Link to="/details" hash="services" className="hover:text-primary transition">Renovation & Remodeling</Link></li>
+            <li><Link to="/details" hash="services" className="hover:text-primary transition">Civil Works</Link></li>
+            <li><Link to="/details" hash="services" className="hover:text-primary transition">Design-Build Services</Link></li>
+            <li><Link to="/details" hash="services" className="hover:text-primary transition">3D Rendering</Link></li>
           </ul>
         </div>
 
