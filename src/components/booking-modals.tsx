@@ -626,7 +626,7 @@ function RescheduleForm({
         newPreferredTime,
         rescheduleNotes: notes,
       };
-      console.log("IGS reschedule payload:", reschedulePayload);
+      // PII intentionally not logged.
       await callCRM("rescheduleBooking", reschedulePayload);
 
       // Re-fetch booking, but always trust the freshly selected raw values for display.
