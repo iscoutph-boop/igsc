@@ -63,7 +63,7 @@ function ConsultationPage() {
     setErrorMsg(null);
     setLoading(true);
     try {
-      console.log("IGS booking payload:", payload);
+      // PII intentionally not logged.
       const data = await callCRM("createBooking", payload);
       if ((data as { warnings?: unknown }).warnings) {
         console.warn("CRM warnings:", (data as { warnings?: unknown }).warnings);
