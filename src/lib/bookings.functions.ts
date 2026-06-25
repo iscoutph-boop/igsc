@@ -70,9 +70,12 @@ export const callCRMFn = createServerFn({ method: "POST" })
       headers: { "Content-Type": "text/plain;charset=utf-8" },
       body: JSON.stringify({ action: data.action, payload: data.payload }),
     });
-    const json = (await response.json()) as Record<string, unknown> & { success?: boolean; message?: string };
+    const text = await response.text();
+    const json = JSON.parse(text) as { success?: boolean; message?: string };
     if (!json.success) {
       throw new Error(typeof json.message === "string" ? json.message : "CRM request failed.");
     }
-    return json as Record<string, unknown>;
+    // Return as JSON string to preserve arbitrary CRM response shape across the
+    // server-fn serialization boundary; the client parses it back.
+    return text;
   });
