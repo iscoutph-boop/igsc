@@ -602,8 +602,6 @@ function DetailsPage() {
                     <button onClick={closeFolder} className="hover:text-foreground transition inline-flex items-center gap-1.5">
                       <ChevronLeft size={16} /> All Folders
                     </button>
-                    <span>›</span>
-                    <span className="text-primary font-semibold">{folder}</span>
                   </div>
                   <div className="flex flex-wrap gap-3">
                     <div className="relative">
