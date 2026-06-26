@@ -74,7 +74,7 @@ function ElevenLabsAgent() {
     };
   }, []);
 
-  return <div ref={containerRef} className="w-full h-full min-h-[180px] relative flex items-center justify-center" />;
+  return <div ref={containerRef} className="w-full flex-1 min-h-[180px] self-stretch relative flex items-center justify-center" />;
 }
 
 export function FloatingContact() {
