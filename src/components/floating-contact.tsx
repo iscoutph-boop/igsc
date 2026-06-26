@@ -36,26 +36,24 @@ function ElevenLabsAgent() {
     const el = document.createElement("elevenlabs-convai") as HTMLElement;
     el.setAttribute("agent-id", ELEVENLABS_AGENT_ID);
 
-    // Contain the widget inside the chat box instead of letting it
-    // attach to the full viewport.
-    el.style.setProperty("position", "relative", "important");
-    el.style.setProperty("width", "100%", "important");
-    el.style.setProperty("height", "100%", "important");
-    el.style.setProperty("top", "auto", "important");
-    el.style.setProperty("left", "auto", "important");
-    el.style.setProperty("right", "auto", "important");
-    el.style.setProperty("bottom", "auto", "important");
+    // Make the widget lay out inside its parent container rather than
+    // attaching to the full viewport.
+    el.style.setProperty("display", "contents", "important");
     el.style.setProperty("--el-overlay-padding", "0px", "important");
 
     containerRef.current?.appendChild(el);
 
-    // Center the widget bubble inside the chat box body.
+    // Make the widget overlay fill and center inside the chat box body.
     const injectCentering = () => {
       const shadow = el.shadowRoot;
       if (!shadow) return;
       const style = document.createElement("style");
       style.textContent = `
         .overlay {
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: 0 !important;
           justify-content: center !important;
           align-items: center !important;
         }
@@ -76,7 +74,7 @@ function ElevenLabsAgent() {
     };
   }, []);
 
-  return <div ref={containerRef} className="w-full flex-1 min-h-[180px] flex items-center justify-center" />;
+  return <div ref={containerRef} className="w-full h-full min-h-[180px] relative flex items-center justify-center" />;
 }
 
 export function FloatingContact() {
