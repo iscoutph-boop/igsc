@@ -38,14 +38,14 @@ function ElevenLabsAgent() {
 
     // Contain the widget inside the chat box instead of letting it
     // attach to the full viewport.
-    el.style.position = "relative";
-    el.style.width = "100%";
-    el.style.height = "100%";
-    el.style.top = "auto";
-    el.style.left = "auto";
-    el.style.right = "auto";
-    el.style.bottom = "auto";
-    el.style.setProperty("--el-overlay-padding", "0px");
+    el.style.setProperty("position", "relative", "important");
+    el.style.setProperty("width", "100%", "important");
+    el.style.setProperty("height", "100%", "important");
+    el.style.setProperty("top", "auto", "important");
+    el.style.setProperty("left", "auto", "important");
+    el.style.setProperty("right", "auto", "important");
+    el.style.setProperty("bottom", "auto", "important");
+    el.style.setProperty("--el-overlay-padding", "0px", "important");
 
     containerRef.current?.appendChild(el);
 
