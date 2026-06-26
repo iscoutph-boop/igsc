@@ -189,7 +189,7 @@ export function FloatingContact() {
                   <span className="h-10 w-10 rounded-full bg-foreground text-background inline-flex items-center justify-center"><Headphones size={18} /></span>
                   <span className="flex-1">
                     <span className="block text-sm font-bold">Talk to our Receptionist</span>
-                    <span className="block text-xs text-muted-foreground">Speak with our AI receptionist</span>
+                    <span className="block text-xs text-muted-foreground">{"\n"}</span>
                   </span>
                   <ArrowRight size={14} className="text-muted-foreground group-hover:translate-x-1 transition" />
                 </button>
