@@ -198,8 +198,8 @@ export function FloatingContact() {
               </div>
             ) : mode === "agent" ? (
               <>
-                <div className="flex-1 overflow-y-auto p-4 bg-surface/40 flex flex-col items-center justify-center gap-4">
-                  <div className="text-center">
+                <div className="flex-1 overflow-y-auto p-4 bg-surface/40 flex flex-col items-center">
+                  <div className="text-center pt-2">
                     <div className="text-sm font-bold">Talk to our Receptionist</div>
                     <div className="text-xs text-muted-foreground">Start a voice call below</div>
                   </div>
