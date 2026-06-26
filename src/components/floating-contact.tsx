@@ -17,9 +17,36 @@ const BOT_QUESTIONS = [
   "Which service do you need? (construction, design-build, 3D rendering, etc.)",
 ];
 
-const AGENT_INTRO: Msg[] = [
-  { from: "bot", text: "Hi! You're now connected to an IGS agent line. Please describe your inquiry and our team will reply on your preferred channel." },
-];
+const ELEVENLABS_AGENT_ID = "agent_2001kvsbegs7fj19ds3f3sehg7xe";
+const ELEVENLABS_WIDGET_SCRIPT = "https://unpkg.com/@elevenlabs/convai-widget-embed";
+
+function ElevenLabsAgent() {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    let script = document.querySelector(`script[src="${ELEVENLABS_WIDGET_SCRIPT}"]`) as HTMLScriptElement | null;
+    if (!script) {
+      script = document.createElement("script");
+      script.src = ELEVENLABS_WIDGET_SCRIPT;
+      script.async = true;
+      script.type = "text/javascript";
+      document.body.appendChild(script);
+    }
+
+    const el = document.createElement("elevenlabs-convai") as HTMLElement;
+    el.setAttribute("agent-id", ELEVENLABS_AGENT_ID);
+    el.className = "w-full";
+    containerRef.current?.appendChild(el);
+
+    return () => {
+      if (containerRef.current && containerRef.current.contains(el)) {
+        containerRef.current.removeChild(el);
+      }
+    };
+  }, []);
+
+  return <div ref={containerRef} className="w-full min-h-[120px] flex items-center justify-center" />;
+}
 
 export function FloatingContact() {
   const [open, setOpen] = useState(false);
@@ -48,7 +75,7 @@ export function FloatingContact() {
 
   const startAgent = () => {
     setMode("agent");
-    setMessages(AGENT_INTRO);
+    setMessages([]);
   };
 
   const sendMessage = () => {
@@ -57,24 +84,20 @@ export function FloatingContact() {
     setInput("");
     setMessages((m) => [...m, { from: "user", text }]);
 
-    if (mode === "bot") {
-      const next = step + 1;
-      setTimeout(() => {
-        if (next < BOT_QUESTIONS.length) {
-          setMessages((m) => [...m, { from: "bot", text: BOT_QUESTIONS[next] }]);
-          setStep(next);
-        } else {
-          setMessages((m) => [
-            ...m,
-            { from: "bot", text: "Thank you! Our team will reach out shortly. Ready to lock in a slot? Tap 'Book Consultation' below." },
-          ]);
-        }
-      }, 350);
-    } else if (mode === "agent") {
-      setTimeout(() => {
-        setMessages((m) => [...m, { from: "bot", text: "Got it — an IGS team member will follow up. You can also message us on WhatsApp for a faster response." }]);
-      }, 400);
-    }
+    if (mode !== "bot") return;
+
+    const next = step + 1;
+    setTimeout(() => {
+      if (next < BOT_QUESTIONS.length) {
+        setMessages((m) => [...m, { from: "bot", text: BOT_QUESTIONS[next] }]);
+        setStep(next);
+      } else {
+        setMessages((m) => [
+          ...m,
+          { from: "bot", text: "Thank you! Our team will reach out shortly. Ready to lock in a slot? Tap 'Book Consultation' below." },
+        ]);
+      }
+    }, 350);
   };
 
   const openWhatsApp = () => {
@@ -136,12 +159,27 @@ export function FloatingContact() {
                 <button onClick={startAgent} className="w-full flex items-center gap-3 rounded-2xl p-3 border border-border hover:border-primary/60 hover:bg-primary/5 transition text-left group">
                   <span className="h-10 w-10 rounded-full bg-foreground text-background inline-flex items-center justify-center"><Headphones size={18} /></span>
                   <span className="flex-1">
-                    <span className="block text-sm font-bold">Agent Chat</span>
-                    <span className="block text-xs text-muted-foreground">Send a message to our team</span>
+                    <span className="block text-sm font-bold">Talk to our Receptionist</span>
+                    <span className="block text-xs text-muted-foreground">Speak with our AI receptionist</span>
                   </span>
                   <ArrowRight size={14} className="text-muted-foreground group-hover:translate-x-1 transition" />
                 </button>
               </div>
+            ) : mode === "agent" ? (
+              <>
+                <div className="flex-1 overflow-y-auto p-4 bg-surface/40 flex flex-col items-center justify-center gap-4">
+                  <div className="text-center">
+                    <div className="text-sm font-bold">Talk to our Receptionist</div>
+                    <div className="text-xs text-muted-foreground">Start a voice call below</div>
+                  </div>
+                  <ElevenLabsAgent />
+                </div>
+                <div className="p-3 border-t border-border bg-background flex items-center justify-center">
+                  <button onClick={reset} aria-label="Back" className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
+                    <X size={14} /> Back to menu
+                  </button>
+                </div>
+              </>
             ) : (
               <>
                 <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-2.5 bg-surface/40">
