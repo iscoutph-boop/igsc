@@ -35,8 +35,39 @@ function ElevenLabsAgent() {
 
     const el = document.createElement("elevenlabs-convai") as HTMLElement;
     el.setAttribute("agent-id", ELEVENLABS_AGENT_ID);
-    el.className = "w-full";
+
+    // Contain the widget inside the chat box instead of letting it
+    // attach to the full viewport.
+    el.style.position = "relative";
+    el.style.width = "100%";
+    el.style.height = "100%";
+    el.style.top = "auto";
+    el.style.left = "auto";
+    el.style.right = "auto";
+    el.style.bottom = "auto";
+    el.style.setProperty("--el-overlay-padding", "0px");
+
     containerRef.current?.appendChild(el);
+
+    // Center the widget bubble inside the chat box body.
+    const injectCentering = () => {
+      const shadow = el.shadowRoot;
+      if (!shadow) return;
+      const style = document.createElement("style");
+      style.textContent = `
+        .overlay {
+          justify-content: center !important;
+          align-items: center !important;
+        }
+      `;
+      shadow.appendChild(style);
+    };
+
+    if (customElements.get("elevenlabs-convai")) {
+      injectCentering();
+    } else {
+      customElements.whenDefined("elevenlabs-convai").then(injectCentering);
+    }
 
     return () => {
       if (containerRef.current && containerRef.current.contains(el)) {
@@ -45,7 +76,7 @@ function ElevenLabsAgent() {
     };
   }, []);
 
-  return <div ref={containerRef} className="w-full min-h-[120px] flex items-center justify-center" />;
+  return <div ref={containerRef} className="w-full flex-1 min-h-[180px] flex items-center justify-center" />;
 }
 
 export function FloatingContact() {
