@@ -35,8 +35,37 @@ function ElevenLabsAgent() {
 
     const el = document.createElement("elevenlabs-convai") as HTMLElement;
     el.setAttribute("agent-id", ELEVENLABS_AGENT_ID);
-    el.className = "w-full";
+
+    // Make the widget lay out inside its parent container rather than
+    // attaching to the full viewport.
+    el.style.setProperty("display", "contents", "important");
+    el.style.setProperty("--el-overlay-padding", "0px", "important");
+
     containerRef.current?.appendChild(el);
+
+    // Make the widget overlay fill and center inside the chat box body.
+    const injectCentering = () => {
+      const shadow = el.shadowRoot;
+      if (!shadow) return;
+      const style = document.createElement("style");
+      style.textContent = `
+        .overlay {
+          top: 0 !important;
+          left: 0 !important;
+          right: 0 !important;
+          bottom: 0 !important;
+          justify-content: center !important;
+          align-items: center !important;
+        }
+      `;
+      shadow.appendChild(style);
+    };
+
+    if (customElements.get("elevenlabs-convai")) {
+      injectCentering();
+    } else {
+      customElements.whenDefined("elevenlabs-convai").then(injectCentering);
+    }
 
     return () => {
       if (containerRef.current && containerRef.current.contains(el)) {
@@ -45,7 +74,7 @@ function ElevenLabsAgent() {
     };
   }, []);
 
-  return <div ref={containerRef} className="w-full min-h-[120px] flex items-center justify-center" />;
+  return <div ref={containerRef} className="w-full flex-1 min-h-[180px] self-stretch relative flex items-center justify-center" />;
 }
 
 export function FloatingContact() {
@@ -167,8 +196,8 @@ export function FloatingContact() {
               </div>
             ) : mode === "agent" ? (
               <>
-                <div className="flex-1 overflow-y-auto p-4 bg-surface/40 flex flex-col items-center justify-center gap-4">
-                  <div className="text-center">
+                <div className="flex-1 overflow-y-auto p-4 bg-surface/40 flex flex-col items-center">
+                  <div className="text-center pt-2">
                     <div className="text-sm font-bold">Talk to our Receptionist</div>
                     <div className="text-xs text-muted-foreground">Start a voice call below</div>
                   </div>
