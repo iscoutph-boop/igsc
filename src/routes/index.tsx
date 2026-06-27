@@ -6,6 +6,7 @@ import { SiteHeader } from "@/components/site-header";
 import { PageTransition } from "@/components/page-transition";
 import { CheckBookingModal } from "@/components/booking-modals";
 import helmetAsset from "@/assets/helmet-hero.png.asset.json";
+import excavatorMobile from "@/assets/excavator-hero-mobile.jpg";
 
 
 export const Route = createFileRoute("/")({
