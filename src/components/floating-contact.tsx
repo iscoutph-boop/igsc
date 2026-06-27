@@ -242,7 +242,7 @@ export function FloatingContact() {
         whileTap={{ scale: 0.94 }}
         onClick={() => { setOpen((v) => !v); if (!open) setMode("menu"); }}
         aria-label="Open IG Sabroso contact"
-        className="relative rounded-full h-12 w-12 sm:h-14 sm:w-14 shadow-glow flex items-center justify-center overflow-hidden bg-transparent"
+        className="relative rounded-full h-[52px] w-[52px] sm:h-14 sm:w-14 max-[390px]:h-12 max-[390px]:w-12 shadow-glow flex items-center justify-center overflow-hidden bg-transparent"
       >
         <AnimatePresence mode="wait" initial={false}>
           {open ? (
