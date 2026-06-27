@@ -137,7 +137,10 @@ export function FloatingContact() {
   const reset = () => { setMode("menu"); setMessages([]); setStep(0); setInput(""); };
 
   return (
-    <div className="fixed bottom-5 right-5 sm:bottom-6 sm:right-6 z-[60] flex flex-col items-end gap-3">
+    <div
+      className="fixed right-4 sm:right-6 z-[60] flex flex-col items-end gap-3"
+      style={{ bottom: "calc(16px + env(safe-area-inset-bottom))" }}
+    >
       <AnimatePresence>
         {open && (
           <motion.div
@@ -239,11 +242,11 @@ export function FloatingContact() {
         whileTap={{ scale: 0.94 }}
         onClick={() => { setOpen((v) => !v); if (!open) setMode("menu"); }}
         aria-label="Open IG Sabroso contact"
-        className="relative rounded-full h-12 w-12 sm:h-14 sm:w-14 shadow-glow flex items-center justify-center overflow-hidden bg-transparent"
+        className="relative rounded-full h-[52px] w-[52px] sm:h-14 sm:w-14 max-[390px]:h-12 max-[390px]:w-12 shadow-glow flex items-center justify-center overflow-hidden bg-transparent"
       >
         <AnimatePresence mode="wait" initial={false}>
           {open ? (
-            <motion.span key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }} className="h-12 w-12 sm:h-14 sm:w-14 rounded-full bg-background border-2 border-primary inline-flex items-center justify-center text-foreground">
+            <motion.span key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }} className="h-[52px] w-[52px] sm:h-14 sm:w-14 max-[390px]:h-12 max-[390px]:w-12 rounded-full bg-background border-2 border-primary inline-flex items-center justify-center text-foreground">
               <X size={20} />
             </motion.span>
           ) : (
