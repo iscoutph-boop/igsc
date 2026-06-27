@@ -223,12 +223,12 @@ function HomePage() {
 
 function MobileStatCard({ icon, value, label }: { icon: React.ReactNode; value: string; label: string }) {
   return (
-    <div className="glass rounded-2xl p-4 shadow-card">
+    <div className="glass rounded-[24px] p-[18px] shadow-card min-h-[150px] flex flex-col">
       <div className="inline-flex items-center justify-center h-9 w-9 rounded-xl gradient-brand text-primary-foreground mb-3">
         {icon}
       </div>
-      <div className="text-3xl font-display font-black leading-none">{value}</div>
-      <div className="mt-2 text-[11px] text-muted-foreground leading-snug">{label}</div>
+      <div className="text-[42px] font-display font-black leading-none">{value}</div>
+      <div className="mt-2 text-[13px] text-muted-foreground leading-snug">{label}</div>
     </div>
   );
 }
