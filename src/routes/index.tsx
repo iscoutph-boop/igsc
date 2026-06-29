@@ -28,63 +28,62 @@ function HomePage() {
   return (
     <PageTransition>
       {/* ============== MOBILE LAYOUT (< md) ============== */}
-      <main className="md:hidden relative w-full max-w-full min-h-[100svh] bg-background overflow-x-hidden pb-[calc(96px+env(safe-area-inset-bottom))]">
+      <main className="md:hidden relative w-full max-w-[100vw] min-h-[100svh] bg-background overflow-x-hidden pb-[calc(110px+env(safe-area-inset-bottom))]">
         <SiteHeader />
 
         {/* Hero — text left, image right (light theme) */}
-        <section className="relative w-full px-5 pt-6 pb-6">
+        <section className="relative w-full overflow-hidden">
           {/* Image on right, behind text */}
-          <div className="absolute right-0 top-0 bottom-0 w-[58%] pointer-events-none">
+          <div className="absolute right-0 top-0 h-[clamp(420px,72vw,560px)] w-[62%] pointer-events-none">
             <img
               src={excavatorMobile}
               alt="Orange excavator at an IG Sabroso construction site"
               className="absolute inset-0 h-full w-full object-cover object-left"
             />
             {/* Soft fade into background on the left edge of the image */}
-            <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--background)_0%,rgba(0,0,0,0)_28%,rgba(0,0,0,0)_100%)]" />
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--background)_0%,rgba(255,255,255,0.55)_18%,rgba(255,255,255,0)_46%)]" />
+            {/* Bottom fade so image blends into white before CTAs */}
+            <div className="absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(180deg,rgba(255,255,255,0)_0%,var(--background)_100%)]" />
           </div>
 
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="relative z-10"
+            className="relative z-10 px-5 pt-7 pb-4"
           >
             <div className="h-[3px] w-9 bg-primary rounded-full mb-4" />
             <h1
-              className="font-display font-black tracking-[-0.035em] text-foreground leading-[0.95] max-w-[52%]"
-              style={{ fontSize: "clamp(34px, 9.2vw, 48px)" }}
+              className="font-display font-black tracking-[-0.04em] text-foreground leading-[0.95] max-w-[55%] break-words"
+              style={{ fontSize: "clamp(40px, 12vw, 58px)" }}
             >
-              Building better spaces, lasting value.
+              Building<br />better<br />spaces,<br />lasting<br />value.
             </h1>
 
-            {/* Spacer matches image height so layout doesn't collapse */}
-            <div aria-hidden className="h-[220px]" />
-
-            <p className="mt-2 text-[14.5px] leading-[1.55] text-muted-foreground max-w-[92%]">
+            <p className="mt-6 text-[15px] leading-[1.55] text-muted-foreground max-w-[58%]">
               Manage your booking with ease — view details, reschedule, or cancel anytime.
             </p>
           </motion.div>
         </section>
 
         {/* CTAs */}
-        <section className="relative px-5 pt-2 pb-6 space-y-3.5">
+        <section className="relative z-10 px-4 pt-4 pb-5 space-y-3">
           <Link
             to="/details"
             hash="about"
-            className="group relative w-full inline-flex items-center justify-center gap-3 gradient-brand text-primary-foreground rounded-full pl-6 pr-2 h-[58px] text-[13px] font-bold tracking-[0.18em] shadow-[0_14px_28px_rgba(228,68,22,0.32)]"
+            className="group relative w-full inline-flex items-center justify-center gap-3 gradient-brand text-primary-foreground rounded-full pl-7 pr-2 h-[64px] max-[390px]:h-[58px] text-[14px] font-bold tracking-[0.22em] shadow-[0_18px_34px_rgba(228,68,22,0.34)]"
           >
-            <span className="absolute inset-0 rounded-full ring-1 ring-white/20" />
+            <span className="absolute inset-0 rounded-full ring-1 ring-white/25" />
             DISCOVER MORE
-            <span className="bg-white/20 rounded-full h-10 w-10 inline-flex items-center justify-center group-hover:translate-x-1 transition-transform">
-              <ArrowRight size={15} />
+            <span className="bg-white/20 rounded-full h-11 w-11 inline-flex items-center justify-center group-hover:translate-x-1 transition-transform">
+              <ArrowRight size={16} />
             </span>
           </Link>
 
           <button
             onClick={() => setBookingOpen(true)}
             aria-label="Manage your booking"
-            className="w-full inline-flex items-center justify-center gap-3 rounded-full bg-white text-foreground border border-black/5 shadow-[0_8px_20px_rgba(0,0,0,0.10)] h-[54px] hover:bg-white/95 transition"
+            className="w-full inline-flex items-center justify-between gap-3 rounded-full bg-white text-foreground border border-black/5 shadow-[0_8px_22px_rgba(0,0,0,0.10)] h-[58px] max-[390px]:h-[54px] px-5 hover:bg-white/95 transition"
           >
             <CalendarCheck size={18} className="text-primary shrink-0" />
             <span className="font-semibold text-[15px]">Manage Booking</span>
@@ -93,15 +92,15 @@ function HomePage() {
         </section>
 
         {/* Brand card */}
-        <section className="px-5 pb-8">
-          <div className="rounded-[22px] bg-white border border-black/5 shadow-card px-5 py-6">
+        <section className="px-4 pb-6">
+          <div className="rounded-[22px] bg-white border border-black/5 shadow-card px-5 py-5">
             <div className="flex items-center justify-center gap-3 text-[11px] uppercase tracking-[0.22em] text-foreground/70">
               <Hammer className="text-primary" size={13} />
               <span className="font-medium">IG Sabroso</span>
               <span className="h-px w-5 bg-primary/60" />
               <span className="text-primary font-semibold">Built to Last</span>
             </div>
-            <p className="mt-4 text-[12px] uppercase tracking-[0.22em] text-muted-foreground text-center leading-[1.55]">
+            <p className="mt-4 text-[11.5px] uppercase tracking-[0.22em] text-muted-foreground text-center leading-[1.6]">
               Build with confidence —<br />build with Sabroso.
             </p>
           </div>
