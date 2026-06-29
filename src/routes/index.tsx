@@ -33,15 +33,15 @@ function HomePage() {
 
         {/* Hero — text left, image right (light theme) */}
         <section className="relative w-full overflow-hidden">
-          {/* Image on right, behind text */}
-          <div className="absolute right-0 top-0 h-[clamp(420px,72vw,560px)] w-[62%] pointer-events-none">
+          {/* Image on right, behind text — pushed further right & down */}
+          <div className="absolute right-[-6%] top-6 h-[clamp(380px,68vw,520px)] w-[60%] pointer-events-none">
             <img
               src={excavatorMobile}
               alt="Orange excavator at an IG Sabroso construction site"
               className="absolute inset-0 h-full w-full object-cover object-left"
             />
-            {/* Soft fade into background on the left edge of the image */}
-            <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--background)_0%,rgba(255,255,255,0.55)_18%,rgba(255,255,255,0)_46%)]" />
+            {/* Stronger left fade so headline stays clean */}
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--background)_0%,rgba(255,255,255,0.92)_22%,rgba(255,255,255,0.35)_48%,rgba(255,255,255,0)_72%)]" />
             {/* Bottom fade so image blends into white before CTAs */}
             <div className="absolute inset-x-0 bottom-0 h-24 bg-[linear-gradient(180deg,rgba(255,255,255,0)_0%,var(--background)_100%)]" />
           </div>
@@ -50,28 +50,38 @@ function HomePage() {
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="relative z-10 px-5 pt-7 pb-4"
+            className="relative z-10 px-5 pt-4 pb-3"
           >
-            <div className="h-[3px] w-9 bg-primary rounded-full mb-4" />
+            <div className="h-[3px] w-9 bg-primary rounded-full mb-3" />
             <h1
-              className="font-display font-black tracking-[-0.04em] text-foreground leading-[0.95] max-w-[55%] break-words"
-              style={{ fontSize: "clamp(40px, 12vw, 58px)" }}
+              className="font-display font-black text-foreground leading-[0.95] break-words"
+              style={{
+                fontSize: "clamp(38px, 10.8vw, 54px)",
+                letterSpacing: "-0.045em",
+                maxWidth: "320px",
+              }}
             >
               Building<br />better<br />spaces,<br />lasting<br />value.
             </h1>
 
-            <p className="mt-6 text-[15px] leading-[1.55] text-muted-foreground max-w-[58%]">
+            <p
+              className="mt-5 leading-[1.5] text-foreground/70"
+              style={{
+                fontSize: "clamp(14px, 3.6vw, 17px)",
+                maxWidth: "280px",
+              }}
+            >
               Manage your booking with ease — view details, reschedule, or cancel anytime.
             </p>
           </motion.div>
         </section>
 
         {/* CTAs */}
-        <section className="relative z-10 px-4 pt-4 pb-5 space-y-3">
+        <section className="relative z-10 px-8 pt-5 pb-5 flex flex-col items-center space-y-[18px]">
           <Link
             to="/details"
             hash="about"
-            className="group relative w-full inline-flex items-center justify-center gap-3 gradient-brand text-primary-foreground rounded-full pl-7 pr-2 h-[64px] max-[390px]:h-[58px] text-[14px] font-bold tracking-[0.22em] shadow-[0_18px_34px_rgba(228,68,22,0.34)]"
+            className="group relative w-full max-w-[520px] inline-flex items-center justify-center gap-3 gradient-brand text-primary-foreground rounded-full pl-7 pr-2 h-[68px] max-[390px]:h-[62px] max-[360px]:h-[58px] text-[13.5px] font-bold tracking-[0.22em] shadow-[0_10px_24px_rgba(228,68,22,0.28)]"
           >
             <span className="absolute inset-0 rounded-full ring-1 ring-white/25" />
             DISCOVER MORE
@@ -83,7 +93,8 @@ function HomePage() {
           <button
             onClick={() => setBookingOpen(true)}
             aria-label="Manage your booking"
-            className="w-full inline-flex items-center justify-between gap-3 rounded-full bg-white text-foreground border border-black/5 shadow-[0_8px_22px_rgba(0,0,0,0.10)] h-[58px] max-[390px]:h-[54px] px-5 hover:bg-white/95 transition"
+            className="inline-flex items-center justify-between gap-3 rounded-full bg-white text-foreground border border-black/5 shadow-[0_6px_18px_rgba(0,0,0,0.08)] h-[60px] max-[390px]:h-[56px] max-[360px]:h-[52px] px-6 hover:bg-white/95 transition"
+            style={{ width: "calc(100% - 56px)", minWidth: "260px", maxWidth: "420px" }}
           >
             <CalendarCheck size={18} className="text-primary shrink-0" />
             <span className="font-semibold text-[15px]">Manage Booking</span>
@@ -104,13 +115,8 @@ function HomePage() {
               Build with confidence —<br />build with Sabroso.
             </p>
           </div>
-
-          {/* Stats */}
-          <div className="mt-4 grid grid-cols-2 gap-3">
-            <MobileStatCard icon={<ShieldCheck size={16} />} value="10+" label="Years of construction experience" />
-            <MobileStatCard icon={<Building2 size={16} />} value="300+" label="Projects completed" />
-          </div>
         </section>
+
       </main>
 
 
