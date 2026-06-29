@@ -31,78 +31,83 @@ function HomePage() {
       <main className="md:hidden relative w-full max-w-full min-h-[100svh] bg-background overflow-x-hidden pb-[calc(96px+env(safe-area-inset-bottom))]">
         <SiteHeader />
 
-        {/* Dark cinematic hero */}
-        <section className="relative w-full overflow-hidden">
-          <div className="absolute inset-0 -z-0">
+        {/* Hero — text left, image right (light theme) */}
+        <section className="relative w-full px-5 pt-6 pb-6">
+          {/* Image on right, behind text */}
+          <div className="absolute right-0 top-0 bottom-0 w-[58%] pointer-events-none">
             <img
               src={excavatorMobile}
-              alt="Orange excavator inside an industrial warehouse"
-              className="absolute inset-0 h-full w-full object-cover object-right"
+              alt="Orange excavator at an IG Sabroso construction site"
+              className="absolute inset-0 h-full w-full object-cover object-left"
             />
-            {/* Left fade for text legibility + top/bottom darkening */}
-            <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(0,0,0,0.92)_0%,rgba(0,0,0,0.75)_40%,rgba(0,0,0,0.25)_75%,rgba(0,0,0,0.15)_100%)]" />
-            <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(0,0,0,0.55)_0%,rgba(0,0,0,0)_25%,rgba(0,0,0,0)_70%,rgba(0,0,0,0.6)_100%)]" />
+            {/* Soft fade into background on the left edge of the image */}
+            <div className="absolute inset-0 bg-[linear-gradient(90deg,var(--background)_0%,rgba(0,0,0,0)_28%,rgba(0,0,0,0)_100%)]" />
           </div>
 
           <motion.div
-            initial={{ opacity: 0, y: 16 }}
+            initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="relative z-10 px-6 pt-12 pb-10"
+            transition={{ duration: 0.5 }}
+            className="relative z-10"
           >
-            <div className="h-[3px] w-10 bg-primary rounded-full mb-5" />
+            <div className="h-[3px] w-9 bg-primary rounded-full mb-4" />
             <h1
-              className="font-display font-black tracking-[-0.035em] text-white leading-[0.95] max-w-[62%]"
-              style={{ fontSize: "clamp(42px, 11vw, 60px)" }}
+              className="font-display font-black tracking-[-0.035em] text-foreground leading-[0.95] max-w-[52%]"
+              style={{ fontSize: "clamp(34px, 9.2vw, 48px)" }}
             >
               Building better spaces, lasting value.
             </h1>
-            <p className="mt-5 text-[16px] leading-[1.5] text-white/85 max-w-[88%]">
+
+            {/* Spacer matches image height so layout doesn't collapse */}
+            <div aria-hidden className="h-[220px]" />
+
+            <p className="mt-2 text-[14.5px] leading-[1.55] text-muted-foreground max-w-[92%]">
               Manage your booking with ease — view details, reschedule, or cancel anytime.
             </p>
-
-            {/* Primary CTA */}
-            <Link
-              to="/details"
-              hash="about"
-              className="group mt-7 relative w-full inline-flex items-center justify-center gap-3 gradient-brand text-primary-foreground rounded-full pl-6 pr-2 h-[64px] text-[14px] font-bold tracking-[0.18em] shadow-[0_18px_36px_rgba(228,68,22,0.35)]"
-            >
-              <span className="absolute inset-0 rounded-full ring-1 ring-white/20" />
-              DISCOVER MORE
-              <span className="bg-white/20 rounded-full h-11 w-11 inline-flex items-center justify-center group-hover:translate-x-1 transition-transform">
-                <ArrowRight size={16} />
-              </span>
-            </Link>
-
-            {/* Secondary CTA — smaller, centered */}
-            <div className="mt-5 flex justify-center">
-              <button
-                onClick={() => setBookingOpen(true)}
-                aria-label="Manage your booking"
-                className="inline-flex items-center gap-2.5 rounded-2xl bg-white text-foreground border border-black/5 shadow-[0_8px_20px_rgba(0,0,0,0.18)] px-5 h-[52px] min-w-[260px] hover:bg-white/95 transition"
-              >
-                <CalendarCheck size={18} className="text-primary shrink-0" />
-                <span className="font-semibold text-[15px]">Manage Booking</span>
-                <ArrowRight size={16} className="text-primary ml-1 shrink-0" />
-              </button>
-            </div>
           </motion.div>
         </section>
 
-        {/* Light section: brand row + tagline + stats */}
-        <section className="relative -mt-4 w-full rounded-t-[22px] bg-[oklch(0.97_0.008_80)] dark:bg-card px-5 pt-8 pb-10">
-          <div className="flex items-center justify-center gap-3 text-[11px] uppercase tracking-[0.22em] text-foreground/70">
-            <Hammer className="text-primary" size={12} />
-            <span>IG Sabroso</span>
-            <span className="h-px w-5 bg-primary/60" />
-            <span className="text-primary font-semibold">Built to Last</span>
+        {/* CTAs */}
+        <section className="relative px-5 pt-2 pb-6 space-y-3.5">
+          <Link
+            to="/details"
+            hash="about"
+            className="group relative w-full inline-flex items-center justify-center gap-3 gradient-brand text-primary-foreground rounded-full pl-6 pr-2 h-[58px] text-[13px] font-bold tracking-[0.18em] shadow-[0_14px_28px_rgba(228,68,22,0.32)]"
+          >
+            <span className="absolute inset-0 rounded-full ring-1 ring-white/20" />
+            DISCOVER MORE
+            <span className="bg-white/20 rounded-full h-10 w-10 inline-flex items-center justify-center group-hover:translate-x-1 transition-transform">
+              <ArrowRight size={15} />
+            </span>
+          </Link>
+
+          <button
+            onClick={() => setBookingOpen(true)}
+            aria-label="Manage your booking"
+            className="w-full inline-flex items-center justify-center gap-3 rounded-full bg-white text-foreground border border-black/5 shadow-[0_8px_20px_rgba(0,0,0,0.10)] h-[54px] hover:bg-white/95 transition"
+          >
+            <CalendarCheck size={18} className="text-primary shrink-0" />
+            <span className="font-semibold text-[15px]">Manage Booking</span>
+            <ArrowRight size={16} className="text-primary shrink-0" />
+          </button>
+        </section>
+
+        {/* Brand card */}
+        <section className="px-5 pb-8">
+          <div className="rounded-[22px] bg-white border border-black/5 shadow-card px-5 py-6">
+            <div className="flex items-center justify-center gap-3 text-[11px] uppercase tracking-[0.22em] text-foreground/70">
+              <Hammer className="text-primary" size={13} />
+              <span className="font-medium">IG Sabroso</span>
+              <span className="h-px w-5 bg-primary/60" />
+              <span className="text-primary font-semibold">Built to Last</span>
+            </div>
+            <p className="mt-4 text-[12px] uppercase tracking-[0.22em] text-muted-foreground text-center leading-[1.55]">
+              Build with confidence —<br />build with Sabroso.
+            </p>
           </div>
 
-          <p className="mt-4 mb-7 text-[12.5px] uppercase tracking-[0.22em] text-muted-foreground text-center leading-[1.5]">
-            Build with confidence — build with Sabroso.
-          </p>
-
-          <div className="grid grid-cols-2 gap-3.5">
+          {/* Stats */}
+          <div className="mt-4 grid grid-cols-2 gap-3">
             <MobileStatCard icon={<ShieldCheck size={16} />} value="10+" label="Years of construction experience" />
             <MobileStatCard icon={<Building2 size={16} />} value="300+" label="Projects completed" />
           </div>
