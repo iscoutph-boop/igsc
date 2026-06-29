@@ -75,12 +75,12 @@ export function SiteHeader({ floating = false }: { floating?: boolean }) {
           : "sticky top-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border"
       }
     >
-      <div className="max-w-[1500px] mx-auto px-4 md:px-10 py-3 md:py-5 flex items-center gap-2.5 md:gap-4">
-        <Link to="/" className="flex items-center gap-2 md:gap-3 shrink-0 min-w-0 group">
-          <img src={logoAsset.url} alt="IG Sabroso Construction" className="h-10 w-10 md:h-12 md:w-12 object-contain transition-transform group-hover:scale-105" />
-          <div className="leading-tight min-w-0">
-            <div className="font-display font-bold tracking-tight text-[12px] sm:text-[15px] md:text-base truncate">IG SABROSO CONSTRUCTION</div>
-            <div className="text-[10px] sm:text-[11px] md:text-xs text-muted-foreground truncate">Elevate Your Lifestyle</div>
+      <div className="max-w-[1500px] mx-auto px-5 md:px-10 py-5 flex items-center gap-4">
+        <Link to="/" className="flex items-center gap-3 shrink-0 group">
+          <img src={logoAsset.url} alt="IG Sabroso Construction" className="h-11 w-11 md:h-12 md:w-12 object-contain transition-transform group-hover:scale-105" />
+          <div className="leading-tight">
+            <div className="font-display font-bold tracking-tight text-[12px] sm:text-[15px] md:text-base">IG SABROSO CONSTRUCTION</div>
+            <div className="text-[10px] sm:text-[11px] md:text-xs text-muted-foreground">Elevate Your Lifestyle</div>
           </div>
         </Link>
 

@@ -139,7 +139,7 @@ export function FloatingContact() {
   return (
     <div
       className="fixed right-4 sm:right-6 z-[60] flex flex-col items-end gap-3"
-      style={{ bottom: "calc(env(safe-area-inset-bottom) + 16px)" }}
+      style={{ bottom: "calc(16px + env(safe-area-inset-bottom))" }}
     >
       <AnimatePresence>
         {open && (
