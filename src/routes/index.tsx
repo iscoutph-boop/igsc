@@ -14,8 +14,8 @@ export const Route = createFileRoute("/")({
     meta: [
       { title: "IG Sabroso Construction — Your Dependable Building Partner" },
       { name: "description", content: "Premium construction, renovation, and civil works in Dasmariñas, Cavite. Build with confidence — build with Sabroso." },
-      { property: "og:title", content: "IG Sabroso Construction" },
-      { property: "og:description", content: "Already booked an appointment? View details, reschedule, or cancel anytime here." },
+      { property: "og:title", content: "IG Sabroso Construction — Your Dependable Building Partner" },
+      { property: "og:description", content: "Premium construction, renovation, and civil works in Dasmariñas, Cavite. Build with confidence — build with Sabroso." },
     ],
   }),
   component: HomePage,
