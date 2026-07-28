@@ -15,6 +15,7 @@ class NoopIntersectionObserver implements IntersectionObserver {
   readonly root = null;
   readonly rootMargin = "0px";
   readonly thresholds = [];
+  readonly scrollMargin = "0px";
 
   disconnect() {}
   observe() {}
