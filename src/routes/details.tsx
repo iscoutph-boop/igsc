@@ -1719,4 +1719,3 @@ function TextInputWithIcon({
     </div>
   );
 }
-
