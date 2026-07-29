@@ -128,7 +128,7 @@ export function SiteHeaderHome() {
 
             <button
               ref={openerRef}
-              className="xl:hidden inline-flex h-11 w-11 items-center justify-center rounded-full bg-white/10 text-white border border-white/15 backdrop-blur-md"
+              className="xl:hidden inline-flex h-10 w-10 sm:h-11 sm:w-11 shrink-0 items-center justify-center rounded-full bg-white/10 text-white border border-white/15 backdrop-blur-md"
               aria-label={open ? "Close menu" : "Open menu"}
               aria-expanded={open}
               aria-controls="home-mobile-nav"
