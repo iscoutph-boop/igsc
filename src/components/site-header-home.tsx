@@ -121,7 +121,7 @@ export function SiteHeaderHome() {
             <Link
               to="/consultation"
               aria-label="Book a consultation"
-              className="sm:hidden inline-flex items-center justify-center h-11 w-11 rounded-full gradient-brand text-primary-foreground shadow-[0_10px_20px_rgba(228,68,22,0.35)]"
+              className="sm:hidden inline-flex items-center justify-center h-10 w-10 rounded-full gradient-brand text-primary-foreground shadow-[0_10px_20px_rgba(228,68,22,0.35)] shrink-0"
             >
               <CalendarCheck size={16} />
             </Link>
