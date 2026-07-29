@@ -76,7 +76,11 @@ export function CheckBookingModal({
   useEffect(() => {
     if (!open) {
       setView({ kind: "lookup" });
-      setRef(""); setContact(""); setErr(null); setLoading(false); setNotFoundMsg(null);
+      setRef("");
+      setContact("");
+      setErr(null);
+      setLoading(false);
+      setNotFoundMsg(null);
     } else if (initialReference) {
       setRef(initialReference);
     }
@@ -96,17 +100,23 @@ export function CheckBookingModal({
         bookingReference: ref.trim(),
         contact: contact.trim(),
       });
-      const rawBooking = (data.booking ?? (data.data?.booking as BookingRecord | undefined)) as Record<string, unknown> | undefined;
+      const rawBooking = (data.booking ?? (data.data?.booking as BookingRecord | undefined)) as
+        Record<string, unknown> | undefined;
       if (!rawBooking) {
-        setNotFoundMsg("Booking not found. Please check your booking reference and contact detail.");
+        setNotFoundMsg(
+          "Booking not found. Please check your booking reference and contact detail.",
+        );
       } else {
         const normalizedRef = String(
           rawBooking.bookingReference ?? rawBooking["Booking Reference"] ?? ref.trim(),
         );
         const booking = { ...rawBooking, bookingReference: normalizedRef } as BookingRecord;
-        setView({ kind: "details", booking, ctx: { reference: ref.trim(), contact: contact.trim() } });
+        setView({
+          kind: "details",
+          booking,
+          ctx: { reference: ref.trim(), contact: contact.trim() },
+        });
       }
-
     } catch (e2) {
       setNotFoundMsg(
         e2 instanceof Error && e2.message
@@ -155,12 +165,15 @@ export function CheckBookingModal({
                 <>
                   <h3 className="mt-4 text-2xl font-display font-bold">Manage Your Booking</h3>
                   <p className="mt-1 text-sm text-muted-foreground">
-                    Enter your booking reference and contact detail to view your appointment, reschedule, or cancel your booking.
+                    Enter your booking reference and contact detail to view your appointment,
+                    reschedule, or cancel your booking.
                   </p>
 
                   <form onSubmit={submitLookup} className="mt-6 space-y-4">
                     <div>
-                      <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Booking Reference</label>
+                      <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        Booking Reference
+                      </label>
                       <input
                         value={ref}
                         onChange={(e) => setRef(e.target.value)}
@@ -169,7 +182,9 @@ export function CheckBookingModal({
                       />
                     </div>
                     <div>
-                      <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Email or Phone Number</label>
+                      <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                        Email or Phone Number
+                      </label>
                       <input
                         value={contact}
                         onChange={(e) => setContact(e.target.value)}
@@ -183,7 +198,9 @@ export function CheckBookingModal({
                       <div className="rounded-2xl border border-destructive/30 bg-destructive/10 p-4 flex items-start gap-3">
                         <AlertCircle size={18} className="text-destructive shrink-0 mt-0.5" />
                         <div>
-                          <div className="text-sm font-bold text-destructive">Booking not found</div>
+                          <div className="text-sm font-bold text-destructive">
+                            Booking not found
+                          </div>
                           <div className="text-xs text-muted-foreground mt-0.5">{notFoundMsg}</div>
                         </div>
                       </div>
@@ -194,7 +211,11 @@ export function CheckBookingModal({
                       disabled={loading}
                       className="w-full inline-flex items-center justify-center gap-2 gradient-brand text-primary-foreground rounded-full px-6 py-3.5 font-semibold shadow-glow hover:scale-[1.01] transition disabled:opacity-70"
                     >
-                      {loading ? <Loader2 size={16} className="animate-spin" /> : <CalendarCheck size={16} />}
+                      {loading ? (
+                        <Loader2 size={16} className="animate-spin" />
+                      ) : (
+                        <CalendarCheck size={16} />
+                      )}
                       {loading ? "Checking..." : "Find My Booking"}
                     </button>
                   </form>
@@ -204,7 +225,9 @@ export function CheckBookingModal({
               {view.kind === "details" && (
                 <DetailsCard
                   booking={view.booking}
-                  onReschedule={() => setView({ kind: "reschedule", booking: view.booking, ctx: view.ctx })}
+                  onReschedule={() =>
+                    setView({ kind: "reschedule", booking: view.booking, ctx: view.ctx })
+                  }
                   onCancel={() => setView({ kind: "cancel", booking: view.booking, ctx: view.ctx })}
                 />
               )}
@@ -228,14 +251,26 @@ export function CheckBookingModal({
 
               {view.kind === "reschedule-done" && (
                 <>
-                  <h3 className="mt-4 text-2xl font-display font-bold">Reschedule Request Received</h3>
+                  <h3 className="mt-4 text-2xl font-display font-bold">
+                    Reschedule Request Received
+                  </h3>
                   <div className="mt-3 rounded-2xl border border-emerald-500/30 bg-emerald-500/10 p-4 flex items-start gap-3">
                     <CheckCircle2 size={18} className="text-emerald-600 shrink-0 mt-0.5" />
                     <p className="text-sm text-foreground/90">
-                      Your reschedule request has been received. Our team will contact you to confirm the new schedule.
+                      Your reschedule request has been received. Our team will contact you to
+                      confirm the new schedule.
                     </p>
                   </div>
-                  <DetailsCard booking={view.booking} onReschedule={() => { /* hidden after submit */ }} onCancel={() => { /* hidden after submit */ }} hideActions />
+                  <DetailsCard
+                    booking={view.booking}
+                    onReschedule={() => {
+                      /* hidden after submit */
+                    }}
+                    onCancel={() => {
+                      /* hidden after submit */
+                    }}
+                    hideActions
+                  />
                   <button
                     onClick={onClose}
                     className="mt-5 w-full inline-flex items-center justify-center gap-2 gradient-brand text-primary-foreground rounded-full px-6 py-3 font-semibold shadow-glow hover:scale-[1.01] transition"
@@ -270,7 +305,10 @@ function statusBadgeClasses(status: string) {
   return "bg-amber-500 text-white";
 }
 
-function getBookingValue(booking: Record<string, unknown> | BookingRecord, ...keys: string[]): string {
+function getBookingValue(
+  booking: Record<string, unknown> | BookingRecord,
+  ...keys: string[]
+): string {
   const b = booking as Record<string, unknown>;
   for (const key of keys) {
     const v = b?.[key];
@@ -402,14 +440,17 @@ function formatDisplayTime(timeValue: string): string {
 function repairApiScheduleText(rawSchedule: string): string {
   // If the API already sent a human-readable schedule but its time is before
   // business hours, it is almost certainly UTC text; add 8 hours for PHT.
-  return rawSchedule.replace(/\b(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/i, (match, hourText, minuteText, suffixText) => {
-    let hour = Number(hourText);
-    const minute = String(minuteText || "00").padStart(2, "0");
-    const suffix = String(suffixText).toLowerCase();
-    if (suffix === "pm" && hour < 12) hour += 12;
-    if (suffix === "am" && hour === 12) hour = 0;
-    return hour < 8 ? formatShiftedPhtTime(hour, minute) : match;
-  });
+  return rawSchedule.replace(
+    /\b(\d{1,2})(?::(\d{2}))?\s*(am|pm)\b/i,
+    (match, hourText, minuteText, suffixText) => {
+      let hour = Number(hourText);
+      const minute = String(minuteText || "00").padStart(2, "0");
+      const suffix = String(suffixText).toLowerCase();
+      if (suffix === "pm" && hour < 12) hour += 12;
+      if (suffix === "am" && hour === 12) hour = 0;
+      return hour < 8 ? formatShiftedPhtTime(hour, minute) : match;
+    },
+  );
 }
 
 function extractDisplayTimeFromScheduleText(rawSchedule: string): string {
@@ -417,8 +458,6 @@ function extractDisplayTimeFromScheduleText(rawSchedule: string): string {
   const timeMatch = repaired.match(/\b\d{1,2}(?::\d{2})?\s*(?:am|pm)\b/i);
   return timeMatch ? formatDisplayTime(timeMatch[0]) : "";
 }
-
-
 
 function formatPreferredSchedule(
   preferredDate: string,
@@ -431,7 +470,11 @@ function formatPreferredSchedule(
 
   if (preferredScheduleFromApi) {
     const rawSchedule = preferredScheduleFromApi.trim();
-    if (rawSchedule && rawSchedule !== "Not provided" && rawSchedule !== "Pending schedule confirmation") {
+    if (
+      rawSchedule &&
+      rawSchedule !== "Not provided" &&
+      rawSchedule !== "Pending schedule confirmation"
+    ) {
       if (/\dT\d/.test(rawSchedule)) {
         const parsedDate = formatDisplayDate(rawSchedule);
         const parsedTime = formatDisplayTime(rawSchedule);
@@ -476,18 +519,23 @@ function DetailsCard({
   const status = rawStatus === "Not provided" ? "Pending Confirmation" : rawStatus;
   const cancelled = status.toLowerCase().includes("cancel");
 
-  const preferredScheduleFromApi = getBookingValue(booking, "preferredSchedule", "Preferred Schedule");
+  const preferredScheduleFromApi = getBookingValue(
+    booking,
+    "preferredSchedule",
+    "Preferred Schedule",
+  );
   const schedule = formatPreferredSchedule(
     preferredDateRaw === "Not provided" ? "" : preferredDateRaw,
     preferredTimeRaw === "Not provided" ? "" : preferredTimeRaw,
     preferredScheduleFromApi === "Not provided" ? "" : preferredScheduleFromApi,
   );
 
-  const contact = email !== "Not provided" && phone !== "Not provided"
-    ? `${email} · ${phone}`
-    : email !== "Not provided"
-      ? email
-      : phone;
+  const contact =
+    email !== "Not provided" && phone !== "Not provided"
+      ? `${email} · ${phone}`
+      : email !== "Not provided"
+        ? email
+        : phone;
 
   return (
     <>
@@ -499,7 +547,9 @@ function DetailsCard({
         className="mt-4 rounded-2xl border border-primary/20 bg-[oklch(0.985_0.012_70)] dark:bg-surface/40 p-5 shadow-soft"
       >
         <div className="flex items-center justify-end">
-          <span className={`text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full ${statusBadgeClasses(status)}`}>
+          <span
+            className={`text-[10px] uppercase tracking-wider font-bold px-2.5 py-1 rounded-full ${statusBadgeClasses(status)}`}
+          >
             {status}
           </span>
         </div>
@@ -542,12 +592,17 @@ function SimpleRow({ label, value, mono }: { label: string; value: string; mono?
   if (!value || value.trim() === "") return null;
   return (
     <div className="flex items-start justify-between gap-4 py-2.5">
-      <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-bold pt-0.5 shrink-0">{label}</div>
-      <div className={`text-sm font-semibold text-right break-words min-w-0 ${mono ? "font-mono tracking-wider" : ""}`}>{value}</div>
+      <div className="text-[11px] uppercase tracking-wider text-muted-foreground font-bold pt-0.5 shrink-0">
+        {label}
+      </div>
+      <div
+        className={`text-sm font-semibold text-right break-words min-w-0 ${mono ? "font-mono tracking-wider" : ""}`}
+      >
+        {value}
+      </div>
     </div>
   );
 }
-
 
 function toPlainDateValue(value: unknown): string {
   if (!value) return "";
@@ -641,7 +696,9 @@ function RescheduleForm({
           bookingReference: booking.bookingReference,
           contact: ctx.contact,
         });
-        const rawBooking = (refreshedResult.booking ?? (refreshedResult.data?.booking as BookingRecord | undefined)) as Record<string, unknown> | undefined;
+        const rawBooking = (refreshedResult.booking ??
+          (refreshedResult.data?.booking as BookingRecord | undefined)) as
+          Record<string, unknown> | undefined;
         if (rawBooking) {
           // Strip any backend-formatted schedule fields so the UI re-renders
           // from the freshly selected Philippine-time values (no TZ shift).
@@ -654,7 +711,11 @@ function RescheduleForm({
           delete cleaned["Preferred Time"];
           const merged: Record<string, unknown> = {
             ...cleaned,
-            bookingReference: String(rawBooking.bookingReference ?? rawBooking["Booking Reference"] ?? booking.bookingReference),
+            bookingReference: String(
+              rawBooking.bookingReference ??
+                rawBooking["Booking Reference"] ??
+                booking.bookingReference,
+            ),
             preferredDate: newPreferredDate,
             preferredTime: newPreferredTime,
           };
@@ -693,7 +754,9 @@ function RescheduleForm({
           required
         />
         <div>
-          <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Reason / Notes</label>
+          <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            Reason / Notes
+          </label>
           <textarea
             value={notes}
             onChange={(e) => setNotes(e.target.value)}
@@ -761,7 +824,8 @@ function CancelConfirm({
     <>
       <h3 className="mt-4 text-2xl font-display font-bold">Cancel Booking?</h3>
       <p className="mt-1 text-sm text-muted-foreground">
-        Are you sure you want to request cancellation for booking <span className="font-semibold text-foreground">{booking.bookingReference}</span>?
+        Are you sure you want to request cancellation for booking{" "}
+        <span className="font-semibold text-foreground">{booking.bookingReference}</span>?
       </p>
 
       <div className="mt-5 rounded-2xl border border-destructive/30 bg-destructive/10 p-4 flex items-start gap-3">
@@ -772,7 +836,9 @@ function CancelConfirm({
       </div>
 
       <div className="mt-4">
-        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Cancellation Reason (optional)</label>
+        <label className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+          Cancellation Reason (optional)
+        </label>
         <textarea
           value={reason}
           onChange={(e) => setReason(e.target.value)}
@@ -823,7 +889,10 @@ function ResultCard({
   reference: string;
   onClose: () => void;
 }) {
-  const accent = tone === "success" ? "border-emerald-500/30 bg-emerald-500/10" : "border-primary/30 bg-primary/10";
+  const accent =
+    tone === "success"
+      ? "border-emerald-500/30 bg-emerald-500/10"
+      : "border-primary/30 bg-primary/10";
   return (
     <>
       <h3 className="mt-4 text-2xl font-display font-bold">{title}</h3>
@@ -833,7 +902,14 @@ function ResultCard({
         className={`mt-4 rounded-2xl border ${accent} p-5`}
       >
         <div className="flex items-start gap-3">
-          <CheckCircle2 size={20} className={tone === "success" ? "text-emerald-600 shrink-0 mt-0.5" : "text-primary shrink-0 mt-0.5"} />
+          <CheckCircle2
+            size={20}
+            className={
+              tone === "success"
+                ? "text-emerald-600 shrink-0 mt-0.5"
+                : "text-primary shrink-0 mt-0.5"
+            }
+          />
           <p className="text-sm text-foreground/90">{message}</p>
         </div>
         <div className="mt-4 rounded-xl bg-background/70 border border-border px-4 py-2.5 text-xs font-mono tracking-wider text-center">
@@ -849,7 +925,6 @@ function ResultCard({
     </>
   );
 }
-
 
 // Small reusable copy-to-clipboard reference pill used in the consultation success card.
 export function ReferencePill({ reference }: { reference: string }) {

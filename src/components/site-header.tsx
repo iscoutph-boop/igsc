@@ -37,7 +37,9 @@ export function SiteHeader({ floating = false }: { floating?: boolean }) {
   const { theme, toggle } = useTheme();
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const routerHash = useRouterState({ select: (s) => s.location.hash });
-  const [activeHash, setActiveHash] = useState<string>(routerHash || "");
+  // Hashes only exist in the browser. Start from stable markup so SSR hydration
+  // cannot disagree with a deep-linking client render.
+  const [activeHash, setActiveHash] = useState("");
   const [open, setOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const mobilePanelRef = useRef<HTMLDivElement>(null);
@@ -63,8 +65,45 @@ export function SiteHeader({ floating = false }: { floating?: boolean }) {
   }, [pathname]);
 
   useEffect(() => {
-    if (routerHash) setActiveHash(routerHash);
-  }, [routerHash]);
+    if (!routerHash) return;
+
+    setActiveHash(routerHash);
+    if (pathname !== "/details") return;
+
+    const scrollToSection = () => {
+      const target = document.getElementById(routerHash);
+      if (!target) return;
+      target.scrollIntoView({
+        behavior: "auto",
+        block: "start",
+      });
+    };
+
+    const animationFrame = window.requestAnimationFrame(scrollToSection);
+    const fallbackTimer = window.setTimeout(scrollToSection, 180);
+
+    return () => {
+      window.cancelAnimationFrame(animationFrame);
+      window.clearTimeout(fallbackTimer);
+    };
+  }, [pathname, routerHash]);
+
+  const handleSectionNavigation = (hash?: string) => {
+    setOpen(false);
+    if (!hash) return;
+
+    const scrollToSection = () => {
+      const target = document.getElementById(hash);
+      if (!target) return;
+      target.scrollIntoView({
+        behavior: "auto",
+        block: "start",
+      });
+    };
+
+    window.setTimeout(scrollToSection, 0);
+    window.setTimeout(scrollToSection, 240);
+  };
 
   useEffect(() => {
     if (!open) return;
@@ -148,6 +187,7 @@ export function SiteHeader({ floating = false }: { floating?: boolean }) {
                 key={item.label}
                 to={item.to}
                 hash={item.hash}
+                onClick={() => handleSectionNavigation(item.hash)}
                 className={`relative px-4 py-2 text-sm font-medium rounded-full transition-colors ${
                   active ? "text-primary-foreground" : "text-foreground/80 hover:text-foreground"
                 }`}
@@ -290,7 +330,7 @@ export function SiteHeader({ floating = false }: { floating?: boolean }) {
                         key={item.label}
                         to={item.to}
                         hash={item.hash}
-                        onClick={() => setOpen(false)}
+                        onClick={() => handleSectionNavigation(item.hash)}
                         className={`flex items-center justify-between border-b border-border px-1 py-4 text-base font-semibold transition hover:text-primary ${
                           isActive(item) ? "text-primary" : "text-foreground"
                         }`}

@@ -23,11 +23,7 @@ export function RefinementSection({
   return (
     <section
       id={id}
-      className={cn(
-        "scroll-mt-20 py-20 [contain-intrinsic-size:1px_900px] [content-visibility:auto] sm:py-24 lg:py-28",
-        toneClasses[tone],
-        className,
-      )}
+      className={cn("scroll-mt-20 py-20 sm:py-24 lg:py-28", toneClasses[tone], className)}
     >
       <div className="mx-auto w-full max-w-[1440px] px-5 sm:px-8 lg:px-12">{children}</div>
     </section>

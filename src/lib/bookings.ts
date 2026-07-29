@@ -3,11 +3,7 @@
 // Google Apps Script CRM. The Apps Script URL is server-only.
 import { callCRMFn } from "./bookings.functions";
 
-export type CRMAction =
-  | "createBooking"
-  | "findBooking"
-  | "rescheduleBooking"
-  | "cancelBooking";
+export type CRMAction = "createBooking" | "findBooking" | "rescheduleBooking" | "cancelBooking";
 
 export interface CRMResponse<T = Record<string, unknown>> {
   success: boolean;

@@ -17,12 +17,20 @@ function shouldSkipIntro() {
 }
 
 export function IntroLoader() {
-  const [mounted, setMounted] = useState(() => !shouldSkipIntro());
+  // Keep the first server and client render identical, then decide whether the
+  // session-only intro should appear after hydration.
+  const [mounted, setMounted] = useState(false);
   const [logoReady, setLogoReady] = useState(false);
   const [entered, setEntered] = useState(false);
   const [movingUp, setMovingUp] = useState(false);
   const [revealing, setRevealing] = useState(false);
   const logoRef = useRef<HTMLImageElement>(null);
+
+  useEffect(() => {
+    if (!shouldSkipIntro()) {
+      setMounted(true);
+    }
+  }, []);
 
   // Scroll-lock lifecycle — re-runs when `mounted` flips so cleanup restores overflow
   useEffect(() => {

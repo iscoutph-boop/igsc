@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import { ChevronLeft, ChevronRight, X } from "lucide-react";
 
@@ -18,19 +18,28 @@ export type LightboxProps = {
  * - Swipe left/right on mobile
  * - ESC to close, ←/→ to navigate
  */
-export function Lightbox({ images, index, onClose, onIndexChange, alt = "Preview" }: LightboxProps) {
+export function Lightbox({
+  images,
+  index,
+  onClose,
+  onIndexChange,
+  alt = "Preview",
+}: LightboxProps) {
   const open = index >= 0 && index < images.length;
   const touchStart = useRef<number | null>(null);
   const [i, setI] = useState(index);
 
   useEffect(() => setI(index), [index]);
 
-  const go = (next: number) => {
-    if (!images.length) return;
-    const n = (next + images.length) % images.length;
-    setI(n);
-    onIndexChange?.(n);
-  };
+  const go = useCallback(
+    (next: number) => {
+      if (!images.length) return;
+      const n = (next + images.length) % images.length;
+      setI(n);
+      onIndexChange?.(n);
+    },
+    [images.length, onIndexChange],
+  );
 
   useEffect(() => {
     if (!open) return;
@@ -46,7 +55,7 @@ export function Lightbox({ images, index, onClose, onIndexChange, alt = "Preview
       window.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
     };
-  }, [open, i, images.length]);
+  }, [go, i, onClose, open]);
 
   if (!open) return null;
   const src = images[i];
@@ -67,7 +76,10 @@ export function Lightbox({ images, index, onClose, onIndexChange, alt = "Preview
         <button
           type="button"
           aria-label="Close"
-          onClick={(e) => { e.stopPropagation(); onClose(); }}
+          onClick={(e) => {
+            e.stopPropagation();
+            onClose();
+          }}
           className="absolute top-4 right-4 z-10 h-11 w-11 rounded-full bg-white/15 hover:bg-white/25 text-white inline-flex items-center justify-center backdrop-blur-md border border-white/25 transition"
         >
           <X size={20} />
@@ -85,7 +97,10 @@ export function Lightbox({ images, index, onClose, onIndexChange, alt = "Preview
           <button
             type="button"
             aria-label="Previous image"
-            onClick={(e) => { e.stopPropagation(); go(i - 1); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              go(i - 1);
+            }}
             className="absolute left-3 sm:left-6 top-1/2 -translate-y-1/2 z-10 h-12 w-12 rounded-full bg-white/15 hover:bg-white/25 text-white inline-flex items-center justify-center backdrop-blur-md border border-white/25 transition"
           >
             <ChevronLeft size={22} />
@@ -101,7 +116,9 @@ export function Lightbox({ images, index, onClose, onIndexChange, alt = "Preview
           src={src}
           alt={alt}
           onClick={(e) => e.stopPropagation()}
-          onTouchStart={(e) => { touchStart.current = e.touches[0].clientX; }}
+          onTouchStart={(e) => {
+            touchStart.current = e.touches[0].clientX;
+          }}
           onTouchEnd={(e) => {
             if (touchStart.current == null) return;
             const dx = e.changedTouches[0].clientX - touchStart.current;
@@ -117,7 +134,10 @@ export function Lightbox({ images, index, onClose, onIndexChange, alt = "Preview
           <button
             type="button"
             aria-label="Next image"
-            onClick={(e) => { e.stopPropagation(); go(i + 1); }}
+            onClick={(e) => {
+              e.stopPropagation();
+              go(i + 1);
+            }}
             className="absolute right-3 sm:right-6 top-1/2 -translate-y-1/2 z-10 h-12 w-12 rounded-full bg-white/15 hover:bg-white/25 text-white inline-flex items-center justify-center backdrop-blur-md border border-white/25 transition"
           >
             <ChevronRight size={22} />

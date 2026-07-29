@@ -38,12 +38,13 @@ export function SiteHeaderHome() {
     document.body.style.overflow = "hidden";
     // move focus into the panel
     const t = window.setTimeout(() => firstItemRef.current?.focus(), 40);
+    const opener = openerRef.current;
     return () => {
       document.removeEventListener("keydown", onKey);
       document.body.style.overflow = prev;
       window.clearTimeout(t);
       // restore focus to opener
-      openerRef.current?.focus();
+      opener?.focus();
     };
   }, [open]);
 
@@ -90,7 +91,9 @@ export function SiteHeaderHome() {
                   }`}
                 >
                   {item.label}
-                  {active && <span className="mt-1 block h-[2px] w-6 mx-auto bg-primary rounded-full" />}
+                  {active && (
+                    <span className="mt-1 block h-[2px] w-6 mx-auto bg-primary rounded-full" />
+                  )}
                 </Link>
               );
             })}
@@ -152,7 +155,10 @@ export function SiteHeaderHome() {
             exit={{ height: 0, opacity: 0 }}
             className="xl:hidden overflow-hidden border-t border-white/10 bg-black/60 backdrop-blur-xl"
           >
-            <nav aria-label="Mobile primary" className="mx-auto max-w-[1440px] px-6 py-4 flex flex-col gap-1">
+            <nav
+              aria-label="Mobile primary"
+              className="mx-auto max-w-[1440px] px-6 py-4 flex flex-col gap-1"
+            >
               {navItems.map((item, i) => (
                 <Link
                   key={item.label}
@@ -166,7 +172,10 @@ export function SiteHeaderHome() {
                 </Link>
               ))}
               <button
-                onClick={() => { toggle(); setOpen(false); }}
+                onClick={() => {
+                  toggle();
+                  setOpen(false);
+                }}
                 className="mt-2 flex items-center gap-2 px-3 py-3 rounded-xl text-white/70 hover:bg-white/10 hover:text-white text-sm font-medium"
               >
                 {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}

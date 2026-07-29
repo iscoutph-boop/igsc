@@ -24,7 +24,9 @@ function ElevenLabsAgent() {
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    let script = document.querySelector(`script[src="${ELEVENLABS_WIDGET_SCRIPT}"]`) as HTMLScriptElement | null;
+    let script = document.querySelector(
+      `script[src="${ELEVENLABS_WIDGET_SCRIPT}"]`,
+    ) as HTMLScriptElement | null;
     if (!script) {
       script = document.createElement("script");
       script.src = ELEVENLABS_WIDGET_SCRIPT;
@@ -41,7 +43,8 @@ function ElevenLabsAgent() {
     el.style.setProperty("display", "contents", "important");
     el.style.setProperty("--el-overlay-padding", "0px", "important");
 
-    containerRef.current?.appendChild(el);
+    const container = containerRef.current;
+    container?.appendChild(el);
 
     // Make the widget overlay fill and center inside the chat box body.
     const injectCentering = () => {
@@ -68,13 +71,18 @@ function ElevenLabsAgent() {
     }
 
     return () => {
-      if (containerRef.current && containerRef.current.contains(el)) {
-        containerRef.current.removeChild(el);
+      if (container?.contains(el)) {
+        container.removeChild(el);
       }
     };
   }, []);
 
-  return <div ref={containerRef} className="w-full flex-1 min-h-[180px] self-stretch relative flex items-center justify-center" />;
+  return (
+    <div
+      ref={containerRef}
+      className="w-full flex-1 min-h-[180px] self-stretch relative flex items-center justify-center"
+    />
+  );
 }
 
 export function FloatingContact() {
@@ -87,7 +95,10 @@ export function FloatingContact() {
 
   // Allow other components to programmatically open the widget.
   useEffect(() => {
-    const handler = () => { setOpen(true); setMode("menu"); };
+    const handler = () => {
+      setOpen(true);
+      setMode("menu");
+    };
     window.addEventListener("igs:open-contact", handler);
     return () => window.removeEventListener("igs:open-contact", handler);
   }, []);
@@ -99,7 +110,13 @@ export function FloatingContact() {
   const startBot = () => {
     setMode("bot");
     setStep(0);
-    setMessages([{ from: "bot", text: "Hi! I'm the IGS assistant. I'll ask a few quick questions to help you book a consultation." }, { from: "bot", text: BOT_QUESTIONS[0] }]);
+    setMessages([
+      {
+        from: "bot",
+        text: "Hi! I'm the IGS assistant. I'll ask a few quick questions to help you book a consultation.",
+      },
+      { from: "bot", text: BOT_QUESTIONS[0] },
+    ]);
   };
 
   const startAgent = () => {
@@ -123,18 +140,28 @@ export function FloatingContact() {
       } else {
         setMessages((m) => [
           ...m,
-          { from: "bot", text: "Thank you! Our team will reach out shortly. Ready to lock in a slot? Tap 'Book Consultation' below." },
+          {
+            from: "bot",
+            text: "Thank you! Our team will reach out shortly. Ready to lock in a slot? Tap 'Book Consultation' below.",
+          },
         ]);
       }
     }, 350);
   };
 
   const openWhatsApp = () => {
-    const msg = encodeURIComponent("Hi IG Sabroso Construction! I'd like to inquire about a project.");
+    const msg = encodeURIComponent(
+      "Hi IG Sabroso Construction! I'd like to inquire about a project.",
+    );
     window.open(`https://wa.me/${IGS_PHONE_WA}?text=${msg}`, "_blank", "noopener,noreferrer");
   };
 
-  const reset = () => { setMode("menu"); setMessages([]); setStep(0); setInput(""); };
+  const reset = () => {
+    setMode("menu");
+    setMessages([]);
+    setStep(0);
+    setInput("");
+  };
 
   return (
     <div
@@ -162,7 +189,10 @@ export function FloatingContact() {
               </div>
               <button
                 aria-label="Close"
-                onClick={() => { setOpen(false); reset(); }}
+                onClick={() => {
+                  setOpen(false);
+                  reset();
+                }}
                 className="p-1.5 rounded-full hover:bg-white/15 transition"
               >
                 <X size={18} />
@@ -172,29 +202,57 @@ export function FloatingContact() {
             {/* Body */}
             {mode === "menu" || mode === null ? (
               <div className="p-4 space-y-2.5">
-                <button onClick={openWhatsApp} className="w-full flex items-center gap-3 rounded-2xl p-3 border border-border hover:border-emerald-500/60 hover:bg-emerald-500/5 transition text-left group">
-                  <span className="h-10 w-10 rounded-full bg-emerald-500 text-white inline-flex items-center justify-center"><MessageCircle size={18} /></span>
+                <button
+                  onClick={openWhatsApp}
+                  className="w-full flex items-center gap-3 rounded-2xl p-3 border border-border hover:border-emerald-500/60 hover:bg-emerald-500/5 transition text-left group"
+                >
+                  <span className="h-10 w-10 rounded-full bg-emerald-500 text-white inline-flex items-center justify-center">
+                    <MessageCircle size={18} />
+                  </span>
                   <span className="flex-1">
                     <span className="block text-sm font-bold">WhatsApp Chat</span>
-                    <span className="block text-xs text-muted-foreground">Fastest replies via WhatsApp</span>
+                    <span className="block text-xs text-muted-foreground">
+                      Fastest replies via WhatsApp
+                    </span>
                   </span>
-                  <ArrowRight size={14} className="text-muted-foreground group-hover:translate-x-1 transition" />
+                  <ArrowRight
+                    size={14}
+                    className="text-muted-foreground group-hover:translate-x-1 transition"
+                  />
                 </button>
-                <button onClick={startBot} className="w-full flex items-center gap-3 rounded-2xl p-3 border border-border hover:border-primary/60 hover:bg-primary/5 transition text-left group">
-                  <span className="h-10 w-10 rounded-full gradient-brand text-primary-foreground inline-flex items-center justify-center"><Bot size={18} /></span>
+                <button
+                  onClick={startBot}
+                  className="w-full flex items-center gap-3 rounded-2xl p-3 border border-border hover:border-primary/60 hover:bg-primary/5 transition text-left group"
+                >
+                  <span className="h-10 w-10 rounded-full gradient-brand text-primary-foreground inline-flex items-center justify-center">
+                    <Bot size={18} />
+                  </span>
                   <span className="flex-1">
                     <span className="block text-sm font-bold">Chat Bot</span>
-                    <span className="block text-xs text-muted-foreground">Quick project Q&A to prep your inquiry</span>
+                    <span className="block text-xs text-muted-foreground">
+                      Quick project Q&A to prep your inquiry
+                    </span>
                   </span>
-                  <ArrowRight size={14} className="text-muted-foreground group-hover:translate-x-1 transition" />
+                  <ArrowRight
+                    size={14}
+                    className="text-muted-foreground group-hover:translate-x-1 transition"
+                  />
                 </button>
-                <button onClick={startAgent} className="w-full flex items-center gap-3 rounded-2xl p-3 border border-border hover:border-primary/60 hover:bg-primary/5 transition text-left group">
-                  <span className="h-10 w-10 rounded-full bg-foreground text-background inline-flex items-center justify-center"><Headphones size={18} /></span>
+                <button
+                  onClick={startAgent}
+                  className="w-full flex items-center gap-3 rounded-2xl p-3 border border-border hover:border-primary/60 hover:bg-primary/5 transition text-left group"
+                >
+                  <span className="h-10 w-10 rounded-full bg-foreground text-background inline-flex items-center justify-center">
+                    <Headphones size={18} />
+                  </span>
                   <span className="flex-1">
                     <span className="block text-sm font-bold">Talk to our Receptionist</span>
                     <span className="block text-xs text-muted-foreground">{"\n"}</span>
                   </span>
-                  <ArrowRight size={14} className="text-muted-foreground group-hover:translate-x-1 transition" />
+                  <ArrowRight
+                    size={14}
+                    className="text-muted-foreground group-hover:translate-x-1 transition"
+                  />
                 </button>
               </div>
             ) : mode === "agent" ? (
@@ -207,30 +265,54 @@ export function FloatingContact() {
                   <ElevenLabsAgent />
                 </div>
                 <div className="p-3 border-t border-border bg-background flex items-center justify-center">
-                  <button onClick={reset} aria-label="Back" className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1">
+                  <button
+                    onClick={reset}
+                    aria-label="Back"
+                    className="text-xs text-muted-foreground hover:text-foreground flex items-center gap-1"
+                  >
                     <X size={14} /> Back to menu
                   </button>
                 </div>
               </>
             ) : (
               <>
-                <div ref={scrollRef} className="flex-1 overflow-y-auto p-4 space-y-2.5 bg-surface/40">
+                <div
+                  ref={scrollRef}
+                  className="flex-1 overflow-y-auto p-4 space-y-2.5 bg-surface/40"
+                >
                   {messages.map((m, idx) => (
-                    <div key={idx} className={`max-w-[85%] text-sm rounded-2xl px-3 py-2 ${m.from === "bot" ? "bg-background border border-border" : "ml-auto gradient-brand text-primary-foreground"}`}>
+                    <div
+                      key={idx}
+                      className={`max-w-[85%] text-sm rounded-2xl px-3 py-2 ${m.from === "bot" ? "bg-background border border-border" : "ml-auto gradient-brand text-primary-foreground"}`}
+                    >
                       {m.text}
                     </div>
                   ))}
                 </div>
                 <div className="p-3 border-t border-border bg-background flex items-center gap-2">
-                  <button onClick={reset} aria-label="Back" className="p-2 rounded-full hover:bg-muted transition"><X size={16} /></button>
+                  <button
+                    onClick={reset}
+                    aria-label="Back"
+                    className="p-2 rounded-full hover:bg-muted transition"
+                  >
+                    <X size={16} />
+                  </button>
                   <input
                     value={input}
                     onChange={(e) => setInput(e.target.value)}
-                    onKeyDown={(e) => { if (e.key === "Enter") sendMessage(); }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") sendMessage();
+                    }}
                     placeholder="Type a message..."
                     className="flex-1 bg-muted rounded-full px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/30"
                   />
-                  <button onClick={sendMessage} aria-label="Send" className="h-9 w-9 inline-flex items-center justify-center rounded-full gradient-brand text-primary-foreground"><Send size={15} /></button>
+                  <button
+                    onClick={sendMessage}
+                    aria-label="Send"
+                    className="h-9 w-9 inline-flex items-center justify-center rounded-full gradient-brand text-primary-foreground"
+                  >
+                    <Send size={15} />
+                  </button>
                 </div>
               </>
             )}
@@ -240,13 +322,23 @@ export function FloatingContact() {
 
       <motion.button
         whileTap={{ scale: 0.94 }}
-        onClick={() => { setOpen((v) => !v); if (!open) setMode("menu"); }}
+        onClick={() => {
+          setOpen((v) => !v);
+          if (!open) setMode("menu");
+        }}
         aria-label="Open IG Sabroso contact"
         className="relative rounded-full h-[52px] w-[52px] sm:h-14 sm:w-14 max-[390px]:h-12 max-[390px]:w-12 shadow-glow flex items-center justify-center overflow-hidden bg-transparent"
       >
         <AnimatePresence mode="wait" initial={false}>
           {open ? (
-            <motion.span key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.2 }} className="h-[52px] w-[52px] sm:h-14 sm:w-14 max-[390px]:h-12 max-[390px]:w-12 rounded-full bg-background border-2 border-primary inline-flex items-center justify-center text-foreground">
+            <motion.span
+              key="x"
+              initial={{ rotate: -90, opacity: 0 }}
+              animate={{ rotate: 0, opacity: 1 }}
+              exit={{ rotate: 90, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="h-[52px] w-[52px] sm:h-14 sm:w-14 max-[390px]:h-12 max-[390px]:w-12 rounded-full bg-background border-2 border-primary inline-flex items-center justify-center text-foreground"
+            >
               <X size={20} />
             </motion.span>
           ) : (

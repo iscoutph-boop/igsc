@@ -11,9 +11,20 @@ export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
       { title: "IG Sabroso Construction — Your Dependable Building Partner" },
-      { name: "description", content: "Premium construction, renovation, and civil works in Dasmariñas, Cavite. Build with confidence — build with Sabroso." },
-      { property: "og:title", content: "IG Sabroso Construction — Your Dependable Building Partner" },
-      { property: "og:description", content: "Premium construction, renovation, and civil works in Dasmariñas, Cavite. Build with confidence — build with Sabroso." },
+      {
+        name: "description",
+        content:
+          "Premium construction, renovation, and civil works in Dasmariñas, Cavite. Build with confidence — build with Sabroso.",
+      },
+      {
+        property: "og:title",
+        content: "IG Sabroso Construction — Your Dependable Building Partner",
+      },
+      {
+        property: "og:description",
+        content:
+          "Premium construction, renovation, and civil works in Dasmariñas, Cavite. Build with confidence — build with Sabroso.",
+      },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
     ],
@@ -50,7 +61,11 @@ function HomePage() {
         {/* ============= md+ layout (tablet + desktop) ============= */}
         <section
           className="relative z-10 hidden md:block mx-auto w-full max-w-[1440px] px-8 lg:px-12"
-          style={{ minHeight: "100svh", paddingTop: "clamp(112px, 14vh, 176px)", paddingBottom: "clamp(28px, 5vh, 56px)" }}
+          style={{
+            minHeight: "100svh",
+            paddingTop: "clamp(112px, 14vh, 176px)",
+            paddingBottom: "clamp(28px, 5vh, 56px)",
+          }}
         >
           {/* Upper zone: booking L / headline + metrics R */}
           <div className="grid grid-cols-12 gap-8 lg:gap-10">
@@ -106,7 +121,11 @@ function HomePage() {
         {/* ============= mobile layout (< md) ============= */}
         <section
           className="relative z-10 md:hidden mx-auto w-full max-w-[520px] px-5 flex flex-col gap-6"
-          style={{ minHeight: "100svh", paddingTop: "clamp(96px, 18vh, 132px)", paddingBottom: "calc(env(safe-area-inset-bottom) + 32px)" }}
+          style={{
+            minHeight: "100svh",
+            paddingTop: "clamp(96px, 18vh, 132px)",
+            paddingBottom: "calc(env(safe-area-inset-bottom) + 32px)",
+          }}
         >
           <motion.h1
             initial={{ opacity: 0, y: 12 }}
@@ -217,13 +236,29 @@ function MetricsRow() {
   );
 }
 
-function Metric({ value, label, align }: { value: string; label: string; align: "left" | "right" }) {
+function Metric({
+  value,
+  label,
+  align,
+}: {
+  value: string;
+  label: string;
+  align: "left" | "right";
+}) {
   const isRight = align === "right";
   return (
-    <div className={`flex items-start gap-4 ${isRight ? "flex-row-reverse text-right" : "text-left"}`}>
-      <div className={`w-[3px] self-stretch min-h-[52px] bg-primary rounded-full`} aria-hidden="true" />
+    <div
+      className={`flex items-start gap-4 ${isRight ? "flex-row-reverse text-right" : "text-left"}`}
+    >
+      <div
+        className={`w-[3px] self-stretch min-h-[52px] bg-primary rounded-full`}
+        aria-hidden="true"
+      />
       <div>
-        <div className="font-display font-black leading-none text-white" style={{ fontSize: "clamp(32px, 4.2vw, 52px)" }}>
+        <div
+          className="font-display font-black leading-none text-white"
+          style={{ fontSize: "clamp(32px, 4.2vw, 52px)" }}
+        >
           {value}
         </div>
         <div className="mt-2 text-[11.5px] uppercase tracking-[0.16em] text-white/75 max-w-[180px]">

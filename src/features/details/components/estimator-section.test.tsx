@@ -9,11 +9,17 @@ describe("EstimatorSection", () => {
 
     render(<EstimatorSection />);
 
+    expect(screen.queryByText("Please select a project type.")).toBeNull();
+
     const action = screen.getByRole("link", {
       name: "Get Detailed Estimate",
     });
 
     expect(action.getAttribute("aria-disabled")).toBe("true");
+
+    await user.click(screen.getByRole("button", { name: "Continue" }));
+
+    expect(screen.getByText("Please select a project type.")).toBeTruthy();
 
     await user.selectOptions(screen.getByLabelText("Project Type"), "Residential");
     await user.type(screen.getByLabelText("Project Location"), "Imus City, Cavite");

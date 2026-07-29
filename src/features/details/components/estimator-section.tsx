@@ -12,7 +12,7 @@ import {
   RotateCcw,
 } from "lucide-react";
 import { calculateEstimate, validateEstimate } from "../model";
-import type { EstimateInput, PackageType } from "../types";
+import type { EstimateErrors, EstimateInput, PackageType } from "../types";
 import { EstimateSummary } from "./estimate-summary";
 import { RefinementSection } from "./refinement-shell";
 import { SectionHeading } from "./section-heading";
@@ -35,7 +35,9 @@ const addOnOptions = ["Gate & Fence", "Carport", "Interior Fit-Out", "Smart Home
 
 export function EstimatorSection() {
   const [input, setInput] = useState<EstimateInput>(initialInput);
+  const [showErrors, setShowErrors] = useState(false);
   const errors = validateEstimate(input);
+  const visibleErrors: EstimateErrors = showErrors ? errors : {};
   const result = calculateEstimate(input);
 
   const update = <Key extends keyof EstimateInput>(key: Key, value: EstimateInput[Key]) => {
@@ -88,7 +90,11 @@ export function EstimatorSection() {
           <fieldset>
             <legend className="sr-only">Project basics</legend>
             <div className="grid gap-5 md:grid-cols-2">
-              <Field id="estimate-project-type" label="Project Type" error={errors.projectType}>
+              <Field
+                id="estimate-project-type"
+                label="Project Type"
+                error={visibleErrors.projectType}
+              >
                 <div className="relative">
                   <Building2
                     aria-hidden="true"
@@ -99,9 +105,9 @@ export function EstimatorSection() {
                     id="estimate-project-type"
                     value={input.projectType}
                     onChange={(event) => update("projectType", event.target.value)}
-                    aria-invalid={Boolean(errors.projectType)}
+                    aria-invalid={Boolean(visibleErrors.projectType)}
                     aria-describedby={
-                      errors.projectType ? "estimate-project-type-error" : undefined
+                      visibleErrors.projectType ? "estimate-project-type-error" : undefined
                     }
                     className="h-12 w-full appearance-none rounded-xl border border-input bg-background pl-11 pr-4 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                   >
@@ -114,7 +120,7 @@ export function EstimatorSection() {
                 </div>
               </Field>
 
-              <Field id="estimate-location" label="Project Location" error={errors.location}>
+              <Field id="estimate-location" label="Project Location" error={visibleErrors.location}>
                 <div className="relative">
                   <MapPin
                     aria-hidden="true"
@@ -125,15 +131,17 @@ export function EstimatorSection() {
                     id="estimate-location"
                     value={input.location}
                     onChange={(event) => update("location", event.target.value)}
-                    aria-invalid={Boolean(errors.location)}
-                    aria-describedby={errors.location ? "estimate-location-error" : undefined}
+                    aria-invalid={Boolean(visibleErrors.location)}
+                    aria-describedby={
+                      visibleErrors.location ? "estimate-location-error" : undefined
+                    }
                     placeholder="Barangay, City, Province"
                     className="h-12 w-full rounded-xl border border-input bg-background pl-11 pr-4 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
                 </div>
               </Field>
 
-              <Field id="estimate-area" label="Floor Area (sqm)" error={errors.area}>
+              <Field id="estimate-area" label="Floor Area (sqm)" error={visibleErrors.area}>
                 <div className="relative">
                   <Calculator
                     aria-hidden="true"
@@ -146,8 +154,8 @@ export function EstimatorSection() {
                     min={10}
                     value={input.area || ""}
                     onChange={(event) => update("area", Number(event.target.value))}
-                    aria-invalid={Boolean(errors.area)}
-                    aria-describedby={errors.area ? "estimate-area-error" : undefined}
+                    aria-invalid={Boolean(visibleErrors.area)}
+                    aria-describedby={visibleErrors.area ? "estimate-area-error" : undefined}
                     placeholder="Minimum 10 sqm"
                     className="h-12 w-full rounded-xl border border-input bg-background pl-11 pr-14 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary focus:ring-2 focus:ring-primary/20"
                   />
@@ -157,7 +165,7 @@ export function EstimatorSection() {
                 </div>
               </Field>
 
-              <Field id="estimate-floors" label="Number of Floors" error={errors.floors}>
+              <Field id="estimate-floors" label="Number of Floors" error={visibleErrors.floors}>
                 <div className="relative">
                   <Layers3
                     aria-hidden="true"
@@ -168,8 +176,8 @@ export function EstimatorSection() {
                     id="estimate-floors"
                     value={input.floors || ""}
                     onChange={(event) => update("floors", Number(event.target.value))}
-                    aria-invalid={Boolean(errors.floors)}
-                    aria-describedby={errors.floors ? "estimate-floors-error" : undefined}
+                    aria-invalid={Boolean(visibleErrors.floors)}
+                    aria-describedby={visibleErrors.floors ? "estimate-floors-error" : undefined}
                     className="h-12 w-full appearance-none rounded-xl border border-input bg-background pl-11 pr-4 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20"
                   >
                     <option value="">Select number of floors</option>
@@ -215,12 +223,12 @@ export function EstimatorSection() {
                   </label>
                 ))}
               </div>
-              {errors.packageType ? (
+              {visibleErrors.packageType ? (
                 <p
                   id="estimate-package-error"
                   className="mt-2 text-xs font-medium text-destructive"
                 >
-                  {errors.packageType}
+                  {visibleErrors.packageType}
                 </p>
               ) : null}
             </div>
@@ -287,9 +295,16 @@ export function EstimatorSection() {
             <button
               type="button"
               onClick={() => {
-                document
-                  .getElementById("estimate-summary")
-                  ?.scrollIntoView({ behavior: "smooth", block: "center" });
+                setShowErrors(true);
+                if (Object.keys(errors).length === 0) {
+                  const prefersReducedMotion = window.matchMedia(
+                    "(prefers-reduced-motion: reduce)",
+                  ).matches;
+                  document.getElementById("estimate-summary")?.scrollIntoView({
+                    behavior: prefersReducedMotion ? "auto" : "smooth",
+                    block: "center",
+                  });
+                }
               }}
               className="min-h-12 rounded-full bg-primary px-7 text-sm font-bold text-primary-foreground transition-transform hover:-translate-y-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-4 active:translate-y-px"
             >
@@ -297,7 +312,10 @@ export function EstimatorSection() {
             </button>
             <button
               type="button"
-              onClick={() => setInput(initialInput)}
+              onClick={() => {
+                setInput(initialInput);
+                setShowErrors(false);
+              }}
               className="inline-flex min-h-11 items-center justify-center gap-2 rounded-full px-5 text-sm font-semibold text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
             >
               <RotateCcw aria-hidden="true" size={16} />

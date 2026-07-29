@@ -9,7 +9,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setTheme] = useState<Theme>("light");
 
   useEffect(() => {
-    const stored = (typeof localStorage !== "undefined" && localStorage.getItem("sabroso-theme")) as Theme | null;
+    const stored = (typeof localStorage !== "undefined" &&
+      localStorage.getItem("sabroso-theme")) as Theme | null;
     if (stored === "dark" || stored === "light") setTheme(stored);
     // No saved preference → keep light as default (do not follow system).
   }, []);
@@ -18,11 +19,17 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const root = document.documentElement;
     root.classList.toggle("dark", theme === "dark");
     root.style.colorScheme = theme;
-    try { localStorage.setItem("sabroso-theme", theme); } catch {}
+    try {
+      localStorage.setItem("sabroso-theme", theme);
+    } catch {
+      // Storage can be unavailable in private or restricted browser contexts.
+    }
   }, [theme]);
 
   return (
-    <ThemeContext.Provider value={{ theme, setTheme, toggle: () => setTheme(theme === "dark" ? "light" : "dark") }}>
+    <ThemeContext.Provider
+      value={{ theme, setTheme, toggle: () => setTheme(theme === "dark" ? "light" : "dark") }}
+    >
       {children}
     </ThemeContext.Provider>
   );
