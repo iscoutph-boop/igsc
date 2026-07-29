@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, Bot, Headphones, X, Send, ArrowRight } from "lucide-react";
 import logoAsset from "@/assets/logo.png.asset.json";
@@ -86,6 +87,8 @@ function ElevenLabsAgent() {
 }
 
 export function FloatingContact() {
+  const pathname = useRouterState({ select: (state) => state.location.pathname });
+  const isHome = pathname === "/";
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<Mode>(null);
   const [messages, setMessages] = useState<Msg[]>([]);
@@ -165,8 +168,11 @@ export function FloatingContact() {
 
   return (
     <div
-      className="fixed right-4 sm:right-6 z-[60] flex flex-col items-end gap-3"
-      style={{ bottom: "calc(16px + env(safe-area-inset-bottom))" }}
+      className={`fixed z-[60] flex flex-col items-end gap-3 ${
+        isHome
+          ? "right-0 bottom-[calc(72px+env(safe-area-inset-bottom))] md:right-5 md:bottom-[calc(16px+env(safe-area-inset-bottom))]"
+          : "right-4 bottom-[calc(16px+env(safe-area-inset-bottom))] sm:right-6"
+      }`}
     >
       <AnimatePresence>
         {open && (
@@ -327,7 +333,11 @@ export function FloatingContact() {
           if (!open) setMode("menu");
         }}
         aria-label="Open IG Sabroso contact"
-        className="relative rounded-full h-[52px] w-[52px] sm:h-14 sm:w-14 max-[390px]:h-12 max-[390px]:w-12 shadow-glow flex items-center justify-center overflow-hidden bg-transparent"
+        className={`relative flex items-center justify-center rounded-full ${
+          isHome
+            ? "size-[72px] bg-primary text-white shadow-[0_18px_42px_rgba(236,61,18,0.3)] md:size-[52px]"
+            : "h-[52px] w-[52px] overflow-hidden bg-transparent shadow-glow sm:h-14 sm:w-14 max-[390px]:h-12 max-[390px]:w-12"
+        }`}
       >
         <AnimatePresence mode="wait" initial={false}>
           {open ? (
@@ -337,9 +347,24 @@ export function FloatingContact() {
               animate={{ rotate: 0, opacity: 1 }}
               exit={{ rotate: 90, opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="h-[52px] w-[52px] sm:h-14 sm:w-14 max-[390px]:h-12 max-[390px]:w-12 rounded-full bg-background border-2 border-primary inline-flex items-center justify-center text-foreground"
+              className={`inline-flex items-center justify-center rounded-full border-2 border-primary bg-background text-foreground ${
+                isHome
+                  ? "size-[72px] md:size-[52px]"
+                  : "h-[52px] w-[52px] sm:h-14 sm:w-14 max-[390px]:h-12 max-[390px]:w-12"
+              }`}
             >
               <X size={20} />
+            </motion.span>
+          ) : isHome ? (
+            <motion.span
+              key="home-support"
+              initial={{ scale: 0.82, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.82, opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className="relative z-10 inline-flex size-full items-center justify-center rounded-full"
+            >
+              <Headphones className="size-8 md:size-5" aria-hidden="true" />
             </motion.span>
           ) : (
             <motion.img
@@ -354,7 +379,10 @@ export function FloatingContact() {
             />
           )}
         </AnimatePresence>
-        {!open && (
+        {!open && isHome ? (
+          <span aria-hidden="true" className="absolute -inset-4 -z-10 rounded-full bg-primary/12" />
+        ) : null}
+        {!open && !isHome && (
           <span className="absolute inset-0 rounded-full border-2 border-primary/40 animate-ping pointer-events-none" />
         )}
       </motion.button>
