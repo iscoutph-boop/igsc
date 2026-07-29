@@ -58,19 +58,19 @@ export function SiteHeaderHome() {
       <div className="mx-auto max-w-[1440px] px-5 sm:px-8 lg:px-12">
         <div className="flex items-center gap-4 py-4 sm:py-5">
           {/* Logo + wordmark */}
-          <Link to="/" className="flex min-w-0 items-center gap-3 shrink-0 group">
+          <Link to="/" className="flex min-w-0 items-center gap-2.5 sm:gap-3 group">
             <img
               src={logoAsset.url}
               alt="IG Sabroso Construction"
               width={48}
               height={48}
-              className="h-10 w-10 sm:h-11 sm:w-11 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)] transition-transform group-hover:scale-105"
+              className="h-9 w-9 sm:h-11 sm:w-11 object-contain drop-shadow-[0_2px_8px_rgba(0,0,0,0.35)] transition-transform group-hover:scale-105 shrink-0"
             />
-            <div className="leading-tight text-white">
-              <div className="font-display font-bold tracking-tight text-[12.5px] sm:text-[14px] md:text-base">
+            <div className="leading-tight text-white min-w-0">
+              <div className="font-display font-bold tracking-tight text-[10.5px] sm:text-[13px] md:text-base truncate">
                 IG SABROSO CONSTRUCTION
               </div>
-              <div className="text-[10px] sm:text-[11px] md:text-xs text-white/70">
+              <div className="text-[9px] sm:text-[11px] md:text-xs text-white/70 truncate">
                 Elevate Your Lifestyle
               </div>
             </div>
