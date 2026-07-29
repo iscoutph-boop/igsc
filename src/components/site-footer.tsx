@@ -1,7 +1,13 @@
 import { Link } from "@tanstack/react-router";
-import { Facebook, Instagram, Phone, Mail, MapPin } from "lucide-react";
+import { Facebook, Phone, Mail, MapPin } from "lucide-react";
 import logoAsset from "@/assets/logo.png.asset.json";
-import { IGS_PHONE_DISPLAY, IGS_EMAIL, IGS_ADDRESS, IGS_MAPS_URL, openIgsContact } from "@/lib/contact";
+import {
+  IGS_PHONE_DISPLAY,
+  IGS_EMAIL,
+  IGS_ADDRESS,
+  IGS_MAPS_URL,
+  openIgsContact,
+} from "@/lib/contact";
 
 function TikTokIcon({ size = 16 }: { size?: number }) {
   return (
@@ -19,7 +25,6 @@ function TikTokIcon({ size = 16 }: { size?: number }) {
 }
 
 const FACEBOOK_URL = "https://www.facebook.com/search/top?q=ig%20sabroso%20construction";
-const INSTAGRAM_URL = "https://www.tiktok.com/@igs.construction";
 const TIKTOK_URL = "https://www.tiktok.com/@igs.construction";
 
 export function SiteFooter() {
@@ -28,33 +33,78 @@ export function SiteFooter() {
       <div className="max-w-[1500px] mx-auto px-6 md:px-10 py-14 grid gap-10 md:grid-cols-4">
         <div className="md:col-span-1">
           <Link to="/" className="flex items-center gap-3 group">
-            <img src={logoAsset.url} alt="IG Sabroso" className="h-12 w-12 object-contain transition-transform group-hover:scale-105" />
+            <img
+              src={logoAsset.url}
+              alt="IG Sabroso"
+              className="h-12 w-12 object-contain transition-transform group-hover:scale-105"
+            />
             <div className="leading-tight">
               <div className="font-display font-bold text-sm">IG SABROSO</div>
               <div className="text-[11px] text-muted-foreground">CONSTRUCTION</div>
             </div>
           </Link>
-          <p className="mt-4 text-sm text-muted-foreground">Elevate Your Lifestyle. Built on trust, driven by excellence.</p>
+          <p className="mt-4 text-sm text-muted-foreground">
+            Elevate Your Lifestyle. Built on trust, driven by excellence.
+          </p>
           <div className="mt-5 flex items-center gap-2 text-muted-foreground">
-            <a href={FACEBOOK_URL} target="_blank" rel="noopener noreferrer" aria-label="Facebook" className="p-2 rounded-full hover:text-primary hover:bg-accent transition"><Facebook size={16} /></a>
-            <a href={INSTAGRAM_URL} target="_blank" rel="noopener noreferrer" aria-label="Instagram" className="p-2 rounded-full hover:text-primary hover:bg-accent transition"><Instagram size={16} /></a>
-            <a href={TIKTOK_URL} target="_blank" rel="noopener noreferrer" aria-label="TikTok" className="p-2 rounded-full hover:text-primary hover:bg-accent transition"><TikTokIcon size={16} /></a>
+            <a
+              href={FACEBOOK_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Facebook"
+              className="p-2 rounded-full hover:text-primary hover:bg-accent transition"
+            >
+              <Facebook size={16} />
+            </a>
+            <a
+              href={TIKTOK_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="TikTok"
+              className="p-2 rounded-full hover:text-primary hover:bg-accent transition"
+            >
+              <TikTokIcon size={16} />
+            </a>
           </div>
         </div>
 
         <div>
-          <h4 className="text-xs uppercase tracking-[0.18em] text-muted-foreground mb-4">Quick Links</h4>
+          <h4 className="text-xs uppercase tracking-[0.18em] text-muted-foreground mb-4">
+            Quick Links
+          </h4>
           <ul className="space-y-2.5 text-sm">
-            <li><Link to="/" className="hover:text-primary transition">Home</Link></li>
-            <li><Link to="/details" hash="about" className="hover:text-primary transition">About</Link></li>
-            <li><Link to="/details" hash="portfolio" className="hover:text-primary transition">Projects</Link></li>
-            <li><Link to="/details" hash="process" className="hover:text-primary transition">Process</Link></li>
-            <li><Link to="/consultation" className="hover:text-primary transition">Consultation</Link></li>
+            <li>
+              <Link to="/" className="hover:text-primary transition">
+                Home
+              </Link>
+            </li>
+            <li>
+              <Link to="/details" hash="about" className="hover:text-primary transition">
+                About
+              </Link>
+            </li>
+            <li>
+              <Link to="/details" hash="portfolio" className="hover:text-primary transition">
+                Projects
+              </Link>
+            </li>
+            <li>
+              <Link to="/details" hash="process" className="hover:text-primary transition">
+                Process
+              </Link>
+            </li>
+            <li>
+              <Link to="/consultation" className="hover:text-primary transition">
+                Consultation
+              </Link>
+            </li>
           </ul>
         </div>
 
         <div>
-          <h4 className="text-xs uppercase tracking-[0.18em] text-muted-foreground mb-4">Services</h4>
+          <h4 className="text-xs uppercase tracking-[0.18em] text-muted-foreground mb-4">
+            Services
+          </h4>
           <ul className="space-y-2.5 text-sm">
             {[
               "Residential Construction",
@@ -72,7 +122,15 @@ export function SiteFooter() {
                     if (typeof window === "undefined") return;
                     const scroll = () => {
                       const el = document.getElementById("services");
-                      if (el) el.scrollIntoView({ behavior: "smooth", block: "start" });
+                      if (el) {
+                        const prefersReducedMotion = window.matchMedia(
+                          "(prefers-reduced-motion: reduce)",
+                        ).matches;
+                        el.scrollIntoView({
+                          behavior: prefersReducedMotion ? "auto" : "smooth",
+                          block: "start",
+                        });
+                      }
                     };
                     // Defer so navigation/hash update completes first.
                     window.setTimeout(scroll, 60);
@@ -87,7 +145,9 @@ export function SiteFooter() {
         </div>
 
         <div>
-          <h4 className="text-xs uppercase tracking-[0.18em] text-muted-foreground mb-4">Contact</h4>
+          <h4 className="text-xs uppercase tracking-[0.18em] text-muted-foreground mb-4">
+            Contact
+          </h4>
           <ul className="space-y-3 text-sm">
             <li>
               <button
@@ -100,7 +160,10 @@ export function SiteFooter() {
               </button>
             </li>
             <li>
-              <a href={`mailto:${IGS_EMAIL}`} className="flex items-start gap-2.5 hover:text-primary transition break-all">
+              <a
+                href={`mailto:${IGS_EMAIL}`}
+                className="flex items-start gap-2.5 hover:text-primary transition break-all"
+              >
                 <Mail size={15} className="text-primary mt-0.5 shrink-0" />
                 <span>{IGS_EMAIL}</span>
               </a>

@@ -66,6 +66,9 @@ export function SchedulePicker({
   required,
 }: SchedulePickerProps) {
   const [open, setOpen] = React.useState(false);
+  const controlId = React.useId();
+  const dateControlId = `${controlId}-date`;
+  const timeControlId = `${controlId}-time`;
   const today = React.useMemo(() => {
     const d = new Date();
     d.setHours(0, 0, 0, 0);
@@ -86,12 +89,16 @@ export function SchedulePicker({
       )}
     >
       <div>
-        <label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+        <label
+          htmlFor={dateControlId}
+          className="text-xs uppercase tracking-wider text-muted-foreground font-semibold"
+        >
           Preferred Date{required && <span className="text-destructive"> *</span>}
         </label>
         <Popover open={open} onOpenChange={setOpen}>
           <PopoverTrigger asChild>
             <Button
+              id={dateControlId}
               type="button"
               variant="outline"
               className={cn(
@@ -117,17 +124,19 @@ export function SchedulePicker({
             />
           </PopoverContent>
         </Popover>
-        {dateName && (
-          <input type="hidden" name={dateName} value={toIsoDate(date)} />
-        )}
+        {dateName && <input type="hidden" name={dateName} value={toIsoDate(date)} />}
       </div>
 
       <div>
-        <label className="text-xs uppercase tracking-wider text-muted-foreground font-semibold">
+        <label
+          htmlFor={timeControlId}
+          className="text-xs uppercase tracking-wider text-muted-foreground font-semibold"
+        >
           Preferred Time{required && <span className="text-destructive"> *</span>}
         </label>
         <Select value={time || undefined} onValueChange={onTimeChange}>
           <SelectTrigger
+            id={timeControlId}
             className={cn(
               "mt-2 w-full rounded-xl bg-background/60 border-border px-4 py-6 text-sm h-auto",
               !time && "text-muted-foreground",
@@ -135,9 +144,7 @@ export function SchedulePicker({
           >
             <div className="flex items-center gap-2">
               <Clock className="h-4 w-4 text-primary" />
-              <SelectValue placeholder="Pick a time">
-                {timeLabel}
-              </SelectValue>
+              <SelectValue placeholder="Pick a time">{timeLabel}</SelectValue>
             </div>
           </SelectTrigger>
           <SelectContent className="max-h-72">
@@ -148,9 +155,7 @@ export function SchedulePicker({
             ))}
           </SelectContent>
         </Select>
-        {timeName && (
-          <input type="hidden" name={timeName} value={time} />
-        )}
+        {timeName && <input type="hidden" name={timeName} value={time} />}
       </div>
     </div>
   );

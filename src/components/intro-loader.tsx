@@ -1,8 +1,23 @@
 import { useEffect, useRef, useState } from "react";
 import logoAsset from "@/assets/logo.png.asset.json";
 
+const INTRO_SESSION_KEY = "igs-intro-seen";
+
+function shouldSkipIntro() {
+  if (typeof window === "undefined") {
+    return true;
+  }
+
+  const seen = window.sessionStorage.getItem(INTRO_SESSION_KEY) === "true";
+  const reduceMotion =
+    typeof window.matchMedia === "function" &&
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  return seen || reduceMotion;
+}
+
 export function IntroLoader() {
-  const [mounted, setMounted] = useState(true);
+  const [mounted, setMounted] = useState(() => !shouldSkipIntro());
   const [logoReady, setLogoReady] = useState(false);
   const [entered, setEntered] = useState(false);
   const [movingUp, setMovingUp] = useState(false);
@@ -21,6 +36,8 @@ export function IntroLoader() {
 
   // Reliable logo readiness — handles cached images that complete before React attaches onLoad
   useEffect(() => {
+    if (!mounted) return;
+
     const img = logoRef.current;
     const markReady = () => setLogoReady(true);
 
@@ -37,20 +54,21 @@ export function IntroLoader() {
       img?.removeEventListener("error", markReady);
       window.clearTimeout(t);
     };
-  }, []);
+  }, [mounted]);
 
   // Animation lifecycle — only runs once the logo asset is ready
   useEffect(() => {
-    if (!logoReady) return;
-
-
-
+    if (!logoReady || !mounted) return;
 
     const rAF = requestAnimationFrame(() => setEntered(true));
     const moveTimer = window.setTimeout(() => setMovingUp(true), 700);
     const revealTimer = window.setTimeout(() => setRevealing(true), 1150);
-    const unmountTimer = window.setTimeout(() => setMounted(false), 1700);
-    const fallbackTimer = window.setTimeout(() => setMounted(false), 2600);
+    const finish = () => {
+      window.sessionStorage.setItem(INTRO_SESSION_KEY, "true");
+      setMounted(false);
+    };
+    const unmountTimer = window.setTimeout(finish, 1700);
+    const fallbackTimer = window.setTimeout(finish, 2600);
 
     return () => {
       cancelAnimationFrame(rAF);
@@ -59,7 +77,7 @@ export function IntroLoader() {
       window.clearTimeout(unmountTimer);
       window.clearTimeout(fallbackTimer);
     };
-  }, [logoReady]);
+  }, [logoReady, mounted]);
 
   if (!mounted) return null;
 
@@ -92,9 +110,7 @@ export function IntroLoader() {
           flexDirection: "column",
           alignItems: "center",
           gap: "0.9rem",
-          transform: movingUp
-            ? "translate3d(0, -110vh, 0)"
-            : "translate3d(0, 0, 0)",
+          transform: movingUp ? "translate3d(0, -110vh, 0)" : "translate3d(0, 0, 0)",
           transition: `transform 800ms ${easeInOut}`,
           willChange: "transform",
         }}
