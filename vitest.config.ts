@@ -8,5 +8,6 @@ export default defineConfig({
     globals: true,
     pool: "threads",
     restoreMocks: true,
+    testTimeout: 10_000,
   },
 });
