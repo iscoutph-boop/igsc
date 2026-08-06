@@ -25,7 +25,7 @@ export function isPrimaryNavigationItemActive(
     return currentHash ? currentHash === item.hash : item.hash === "about";
   }
 
-  return pathname === item.to;
+  return pathname === (item as PrimaryNavigationItem).to;
 }
 
 export function getPrimaryNavigationActiveOptions(item: PrimaryNavigationItem) {
