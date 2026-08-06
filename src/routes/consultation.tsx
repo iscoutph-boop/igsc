@@ -1,377 +1,163 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { motion, AnimatePresence } from "framer-motion";
+import { useState } from "react";
 import {
-  Phone,
+  AlertCircle,
+  ArrowRight,
+  CalendarCheck,
+  CheckCircle2,
+  Clock,
+  Loader2,
   Mail,
   MapPin,
-  Clock,
-  ArrowRight,
-  CheckCircle2,
-  CalendarCheck,
-  AlertCircle,
-  Loader2,
+  Phone,
+  ShieldCheck,
 } from "lucide-react";
-import { useState } from "react";
-import { SiteHeader } from "@/components/site-header";
-import { SiteFooter } from "@/components/site-footer";
-import { PageTransition } from "@/components/page-transition";
+import consultationImage from "@/assets/real/turnover-ribbon.webp";
 import { CheckBookingModal, ReferencePill } from "@/components/booking-modals";
+import { PageTransition } from "@/components/page-transition";
 import { SchedulePicker } from "@/components/schedule-picker";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
 import { callCRM } from "@/lib/bookings";
+import { trackEvent } from "@/lib/analytics";
+import { buildCanonicalUrl, DEFAULT_SOCIAL_IMAGE } from "@/lib/seo";
 import {
-  IGS_PHONE_DISPLAY,
-  IGS_EMAIL,
   IGS_ADDRESS,
+  IGS_EMAIL,
   IGS_MAPS_URL,
-  openIgsContact,
+  IGS_PHONE_DISPLAY,
+  IGS_PHONE_TEL,
 } from "@/lib/contact";
 
 export const Route = createFileRoute("/consultation")({
   head: () => ({
     meta: [
-      { title: "Request a Consultation | IG Sabroso Construction" },
+      { title: "Book a Consultation | IG Sabroso Construction" },
       {
         name: "description",
         content:
-          "Let's create something extraordinary. Reach out to IG Sabroso Construction for residential, renovation, and civil works in Dasmariñas, Cavite.",
+          "Tell IG Sabroso Construction about your project location, service needs, area, budget range, and preferred consultation schedule.",
       },
-      { property: "og:title", content: "Consultation | IG Sabroso Construction" },
+      { property: "og:title", content: "Book a Consultation | IG Sabroso Construction" },
+      { property: "og:url", content: buildCanonicalUrl("/consultation") },
       {
         property: "og:description",
-        content: "Tell us about your project. We'll get back to you shortly.",
+        content: "Start a clear project conversation with the IG Sabroso team.",
       },
+      { property: "og:image", content: DEFAULT_SOCIAL_IMAGE },
+      { name: "twitter:card", content: "summary_large_image" },
     ],
+    links: [{ rel: "canonical", href: buildCanonicalUrl("/consultation") }],
   }),
   component: ConsultationPage,
 });
 
-function ConsultationPage() {
+export function ConsultationPage() {
   const [bookingReference, setBookingReference] = useState<string | null>(null);
   const [manageOpen, setManageOpen] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [errorMsg, setErrorMsg] = useState<string | null>(null);
-  const [preferredDate, setPreferredDate] = useState<Date | undefined>(undefined);
-  const [preferredTime, setPreferredTime] = useState<string>("");
-
-  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    if (loading) return;
-    const form = e.currentTarget;
-    const fd = new FormData(form);
-
-    const payload = {
-      fullName: String(fd.get("fullName") ?? "").trim(),
-      phoneNumber: String(fd.get("phoneNumber") ?? "").trim(),
-      emailAddress: String(fd.get("emailAddress") ?? "").trim(),
-      projectType: String(fd.get("projectType") ?? "").trim(),
-      projectLocation: String(fd.get("projectLocation") ?? "").trim(),
-      preferredDate: String(fd.get("preferredDate") ?? "").trim(),
-      preferredTime: String(fd.get("preferredTime") ?? "").trim(),
-      budgetRange: String(fd.get("budgetRange") ?? "").trim(),
-      projectDetails: String(fd.get("projectDetails") ?? "").trim(),
-      leadSource: "Website",
-    };
-
-    setErrorMsg(null);
-    setLoading(true);
-    try {
-      // PII intentionally not logged.
-      const data = await callCRM("createBooking", payload);
-      if ((data as { warnings?: unknown }).warnings) {
-        console.warn("CRM warnings:", (data as { warnings?: unknown }).warnings);
-      }
-      const ref = data.bookingReference || data.booking?.bookingReference;
-      if (!ref) throw new Error("We couldn't generate your booking reference. Please try again.");
-      setBookingReference(ref);
-      form.reset();
-      setPreferredDate(undefined);
-      setPreferredTime("");
-      // Scroll the confirmation card into view
-      setTimeout(() => {
-        const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-        document.getElementById("consultation-confirmation")?.scrollIntoView({
-          behavior: prefersReducedMotion ? "auto" : "smooth",
-          block: "start",
-        });
-      }, 50);
-    } catch (err) {
-      setErrorMsg(
-        err instanceof Error && err.message
-          ? err.message
-          : "We couldn't submit your request right now. Please try again in a moment.",
-      );
-    } finally {
-      setLoading(false);
-    }
-  };
 
   return (
     <PageTransition>
       <SiteHeader />
-      <main className="w-full">
-        <section className="relative py-20 md:py-28">
-          <div className="absolute inset-0 -z-10 overflow-hidden">
-            <div className="absolute -top-40 -right-40 h-96 w-96 rounded-full gradient-brand opacity-20 blur-3xl" />
-            <div className="absolute -bottom-40 -left-40 h-96 w-96 rounded-full gradient-brand opacity-15 blur-3xl" />
-          </div>
-
-          <div className="max-w-[1400px] mx-auto px-6 md:px-10">
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.7 }}
-              className="text-center max-w-3xl mx-auto"
-            >
-              <div className="inline-flex items-center gap-3 text-[11px] uppercase tracking-[0.22em] text-primary font-semibold justify-center">
-                <span className="h-px w-8 bg-primary" /> Get In Touch
-              </div>
-              <h1 className="mt-4 text-4xl md:text-6xl lg:text-7xl font-display font-bold leading-[1.05]">
-                Let's create something <span className="text-gradient-brand">extraordinary.</span>
-              </h1>
-              <p className="mt-6 text-muted-foreground text-base md:text-lg">
-                Have a project in mind? Tell us a bit about it and our team will be in touch
-                shortly.
+      <main className="bg-[#f7f8fa]">
+        <section className="py-14 sm:py-18 lg:py-22">
+          <div className="mx-auto w-full max-w-[1500px] px-6 sm:px-8 lg:px-14">
+            <div className="max-w-4xl">
+              <p className="text-xs font-extrabold uppercase tracking-[0.2em] text-primary">
+                Project consultation
               </p>
-            </motion.div>
+              <h1 className="mt-3 font-display text-5xl font-black uppercase leading-[0.9] tracking-[-0.045em] text-[#152238] sm:text-6xl lg:text-7xl">
+                Let’s build something great together.
+              </h1>
+              <p className="mt-6 max-w-2xl text-base leading-8 text-[#667085] sm:text-lg">
+                Share the essential project details. The IG Sabroso team will review your inquiry
+                and contact you to confirm the next step or preferred appointment schedule.
+              </p>
+            </div>
 
-            {/* Mobile: form first, contact details below. Desktop: side-by-side. */}
-            <div className="mt-12 grid lg:grid-cols-5 gap-8">
-              <motion.aside
-                initial={{ opacity: 0, x: -20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className="order-2 lg:order-1 lg:col-span-2 glass rounded-3xl p-8 shadow-card h-fit"
-              >
-                <h2 className="font-display font-bold text-2xl">Contact Details</h2>
-                <p className="text-sm text-muted-foreground mt-2">We're here Monday to Saturday.</p>
-
-                <div className="mt-8 space-y-5">
-                  <InfoButton
-                    icon={Phone}
-                    label="Phone"
-                    value={IGS_PHONE_DISPLAY}
-                    onClick={openIgsContact}
-                  />
-                  <InfoLink
-                    icon={Mail}
-                    label="Email"
-                    value={IGS_EMAIL}
-                    href={`mailto:${IGS_EMAIL}`}
-                  />
-                  <InfoLink
-                    icon={MapPin}
-                    label="Address"
-                    value={IGS_ADDRESS}
-                    href={IGS_MAPS_URL}
-                    external
-                  />
-                  <Info icon={Clock} label="Business Hours" value="Mon - Sat, 8:00 AM - 5:00 PM" />
-                </div>
-
-                <div className="mt-8 p-5 rounded-2xl gradient-brand text-primary-foreground">
-                  <div className="text-xs uppercase tracking-wider opacity-80">Built to Last</div>
-                  <div className="mt-1 font-display font-bold text-lg leading-tight">
-                    Build with confidence,
-                    <br />
-                    build with Sabroso.
-                  </div>
-                </div>
-              </motion.aside>
-
-              <motion.div
-                initial={{ opacity: 0, x: 20 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6, delay: 0.1 }}
-                className="order-1 lg:order-2 lg:col-span-3 glass rounded-3xl p-8 md:p-10 shadow-card relative overflow-hidden"
-              >
-                <h2 className="font-display font-bold text-2xl">Request a Consultation</h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  Tell us about your project and our team will contact you to confirm your site
-                  visit.
-                </p>
-
-                <form onSubmit={onSubmit} className="mt-8 grid sm:grid-cols-2 gap-5">
-                  <Field label="Full Name" name="fullName" placeholder="Juan Dela Cruz" required />
-                  <Field
-                    label="Phone Number"
-                    name="phoneNumber"
-                    type="tel"
-                    placeholder="+63 ..."
-                    required
-                  />
-                  <Field
-                    label="Email Address"
-                    name="emailAddress"
-                    type="email"
-                    placeholder="you@example.com"
-                    className="sm:col-span-2"
-                  />
-
-                  <Field
-                    label="Project Type"
-                    name="projectType"
-                    placeholder="e.g. Residential, Renovation, Commercial..."
-                    required
-                    list="projectTypeList"
-                  />
-                  <datalist id="projectTypeList">
-                    <option value="Residential Construction" />
-                    <option value="Renovation & Remodeling" />
-                    <option value="Civil Works" />
-                    <option value="Design-Build" />
-                    <option value="Architectural Drawings" />
-                    <option value="3D Rendering & Visualization" />
-                    <option value="Construction Management" />
-                  </datalist>
-
-                  <Field
-                    label="Project Location"
-                    name="projectLocation"
-                    placeholder="Barangay, City, Province"
-                  />
-
-                  <div className="sm:col-span-2">
-                    <SchedulePicker
-                      date={preferredDate}
-                      time={preferredTime}
-                      onDateChange={setPreferredDate}
-                      onTimeChange={setPreferredTime}
-                      dateName="preferredDate"
-                      timeName="preferredTime"
-                    />
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <Label htmlFor="consultation-budget-range">Budget Range</Label>
-                    <select
-                      id="consultation-budget-range"
-                      name="budgetRange"
-                      defaultValue=""
-                      className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
+            <div className="mt-10 grid gap-7 lg:grid-cols-[0.82fr_1.18fr] lg:items-start">
+              <aside className="overflow-hidden rounded-[1.75rem] border border-border bg-white shadow-[0_18px_54px_rgba(21,34,56,0.08)] lg:sticky lg:top-28">
+                <img
+                  src={consultationImage}
+                  alt="IG Sabroso team and client at a real completed-project turnover"
+                  className="aspect-[16/10] w-full object-cover"
+                />
+                <div className="p-7 sm:p-8">
+                  <h2 className="text-2xl font-extrabold tracking-[-0.025em] text-[#152238]">
+                    Contact details
+                  </h2>
+                  <p className="mt-2 text-sm leading-7 text-[#667085]">
+                    Office hours are Monday to Saturday, 8:00 AM to 5:00 PM.
+                  </p>
+                  <div className="mt-7 space-y-5 text-sm text-[#53606e]">
+                    <a
+                      href={`tel:${IGS_PHONE_TEL}`}
+                      className="flex items-start gap-3 hover:text-primary"
                     >
-                      <option value="">Prefer not to say</option>
-                      <option>Below ₱500,000</option>
-                      <option>₱500,000 - ₱1,000,000</option>
-                      <option>₱1,000,000 - ₱3,000,000</option>
-                      <option>₱3,000,000 - ₱5,000,000</option>
-                      <option>Above ₱5,000,000</option>
-                    </select>
-                  </div>
-
-                  <div className="sm:col-span-2">
-                    <Label htmlFor="consultation-project-details">
-                      Project Details <span className="text-destructive">*</span>
-                    </Label>
-                    <textarea
-                      id="consultation-project-details"
-                      name="projectDetails"
-                      required
-                      aria-required="true"
-                      rows={5}
-                      placeholder="Tell us about your project, location, timeline, and preferred consultation schedule."
-                      className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition resize-none"
-                    />
-                  </div>
-
-                  {errorMsg && (
-                    <div
-                      role="alert"
-                      className="sm:col-span-2 rounded-2xl border border-destructive/30 bg-destructive/10 p-4 flex items-start gap-3"
+                      <Phone
+                        aria-hidden="true"
+                        size={19}
+                        className="mt-0.5 shrink-0 text-primary"
+                      />
+                      <span>{IGS_PHONE_DISPLAY}</span>
+                    </a>
+                    <a
+                      href={`mailto:${IGS_EMAIL}`}
+                      className="flex items-start gap-3 hover:text-primary"
                     >
-                      <AlertCircle size={18} className="text-destructive shrink-0 mt-0.5" />
-                      <div>
-                        <div className="text-sm font-bold text-destructive">
-                          We couldn't submit your request
-                        </div>
-                        <div className="text-xs text-muted-foreground mt-0.5">{errorMsg}</div>
-                      </div>
+                      <Mail aria-hidden="true" size={19} className="mt-0.5 shrink-0 text-primary" />
+                      <span className="break-all">{IGS_EMAIL}</span>
+                    </a>
+                    <a
+                      href={IGS_MAPS_URL}
+                      target="_blank"
+                      rel="noreferrer"
+                      className="flex items-start gap-3 hover:text-primary"
+                    >
+                      <MapPin
+                        aria-hidden="true"
+                        size={19}
+                        className="mt-0.5 shrink-0 text-primary"
+                      />
+                      <span>{IGS_ADDRESS}</span>
+                    </a>
+                    <div className="flex items-start gap-3">
+                      <Clock
+                        aria-hidden="true"
+                        size={19}
+                        className="mt-0.5 shrink-0 text-primary"
+                      />
+                      <span>Monday to Saturday, 8:00 AM - 5:00 PM</span>
                     </div>
-                  )}
-
-                  <div className="sm:col-span-2 flex justify-end">
-                    <button
-                      type="submit"
-                      disabled={loading}
-                      className="group inline-flex items-center gap-3 gradient-brand text-primary-foreground rounded-full pl-7 pr-2 py-3 font-semibold shadow-glow hover:scale-[1.02] transition disabled:opacity-70 disabled:hover:scale-100"
-                    >
-                      {loading ? "Submitting..." : "Request Consultation"}
-                      <span className="bg-background/25 rounded-full p-2 group-hover:translate-x-1 transition-transform">
-                        {loading ? (
-                          <Loader2 size={16} className="animate-spin" />
-                        ) : (
-                          <ArrowRight size={16} />
-                        )}
-                      </span>
-                    </button>
                   </div>
-                </form>
+                  <div className="mt-7 rounded-2xl bg-[#fff1eb] p-5">
+                    <div className="flex items-center gap-3 text-sm font-extrabold text-[#152238]">
+                      <ShieldCheck aria-hidden="true" size={20} className="text-primary" />
+                      Your project information stays private.
+                    </div>
+                    <p className="mt-2 text-xs leading-6 text-[#667085]">
+                      Details are used only to review and respond to your consultation request.
+                    </p>
+                  </div>
+                </div>
+              </aside>
 
-                <AnimatePresence>
-                  {bookingReference && (
-                    <motion.div
-                      id="consultation-confirmation"
-                      initial={{ opacity: 0, y: 12 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0 }}
-                      className="mt-8 rounded-3xl border border-primary/30 bg-[oklch(0.985_0.012_70)] dark:bg-surface/40 p-6 md:p-8 shadow-card"
-                    >
-                      <div className="flex items-start gap-4">
-                        <div className="inline-flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-emerald-500/15 text-emerald-600">
-                          <CheckCircle2 size={22} />
-                        </div>
-                        <div className="min-w-0">
-                          <h3 className="font-display font-bold text-xl">
-                            Appointment Request Submitted
-                          </h3>
-                          <p className="mt-1.5 text-sm text-muted-foreground">
-                            Your consultation request has been received. Our team will contact you
-                            to confirm your appointment schedule.
-                          </p>
-                        </div>
-                      </div>
-
-                      <div className="mt-6">
-                        <div className="text-[11px] uppercase tracking-[0.22em] text-muted-foreground font-bold">
-                          Booking Reference
-                        </div>
-                        <div className="mt-2.5">
-                          <ReferencePill reference={bookingReference} />
-                        </div>
-                        <p className="mt-3 text-xs text-muted-foreground">
-                          Please save this reference. You'll need it to manage, reschedule, or
-                          cancel your appointment.
-                        </p>
-                      </div>
-
-                      <div className="mt-6 flex flex-wrap items-center gap-3">
-                        <button
-                          type="button"
-                          onClick={() => setManageOpen(true)}
-                          className="inline-flex items-center gap-2 gradient-brand text-primary-foreground rounded-full px-5 py-3 text-sm font-semibold shadow-glow hover:scale-[1.02] transition"
-                        >
-                          <CalendarCheck size={16} /> Manage My Booking
-                        </button>
-                        <button
-                          type="button"
-                          onClick={() => setBookingReference(null)}
-                          className="inline-flex items-center gap-2 rounded-full bg-surface border border-border px-5 py-3 text-sm font-semibold hover:bg-muted transition"
-                        >
-                          Submit another request
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
+              <div className="rounded-[1.75rem] border border-border bg-white p-6 shadow-[0_18px_54px_rgba(21,34,56,0.08)] sm:p-8 lg:p-10">
+                {bookingReference ? (
+                  <SuccessPanel
+                    bookingReference={bookingReference}
+                    onManage={() => setManageOpen(true)}
+                    onReset={() => setBookingReference(null)}
+                  />
+                ) : (
+                  <ConsultationForm onSuccess={setBookingReference} />
+                )}
+              </div>
             </div>
           </div>
         </section>
-
-        <SiteFooter />
       </main>
-
+      <SiteFooter />
       <CheckBookingModal
         open={manageOpen}
         onClose={() => setManageOpen(false)}
@@ -381,148 +167,315 @@ function ConsultationPage() {
   );
 }
 
-function Info({
-  icon: Icon,
-  label,
-  value,
-}: {
-  icon: React.ComponentType<{ size?: number; className?: string }>;
-  label: string;
-  value: string;
-}) {
-  return (
-    <div className="flex items-start gap-4">
-      <div className="h-11 w-11 shrink-0 rounded-2xl gradient-brand text-primary-foreground flex items-center justify-center shadow-soft">
-        <Icon size={18} />
-      </div>
-      <div>
-        <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>
-        <div className="text-sm font-semibold mt-0.5">{value}</div>
-      </div>
-    </div>
-  );
-}
+export function ConsultationForm({ onSuccess }: { onSuccess: (reference: string) => void }) {
+  const [loading, setLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [preferredDate, setPreferredDate] = useState<Date | undefined>();
+  const [preferredTime, setPreferredTime] = useState("");
 
-function InfoButton({
-  icon: Icon,
-  label,
-  value,
-  onClick,
-}: {
-  icon: React.ComponentType<{ size?: number; className?: string }>;
-  label: string;
-  value: string;
-  onClick: () => void;
-}) {
+  const submit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (loading) return;
+
+    const form = event.currentTarget;
+    const formData = new FormData(form);
+    const honeypot = String(formData.get("companyWebsite") ?? "").trim();
+    if (honeypot) {
+      setErrorMessage("We could not submit this request.");
+      return;
+    }
+
+    const payload = {
+      fullName: String(formData.get("fullName") ?? "").trim(),
+      phoneNumber: String(formData.get("phoneNumber") ?? "").trim(),
+      emailAddress: String(formData.get("emailAddress") ?? "").trim(),
+      projectType: String(formData.get("projectType") ?? "").trim(),
+      projectLocation: String(formData.get("projectLocation") ?? "").trim(),
+      preferredService: String(formData.get("preferredService") ?? "").trim(),
+      approximateArea: String(formData.get("approximateArea") ?? "").trim(),
+      preferredDate: String(formData.get("preferredDate") ?? "").trim(),
+      preferredTime: String(formData.get("preferredTime") ?? "").trim(),
+      budgetRange: String(formData.get("budgetRange") ?? "").trim(),
+      projectDetails: String(formData.get("projectDetails") ?? "").trim(),
+      privacyConsent: formData.get("privacyConsent") === "accepted" ? "accepted" : "",
+      leadSource: "Website",
+    };
+
+    if (!payload.preferredDate || !payload.preferredTime) {
+      setErrorMessage("Select a preferred consultation date and time.");
+      return;
+    }
+
+    setErrorMessage(null);
+    setLoading(true);
+    trackEvent("consultation_form_start", { projectType: payload.projectType });
+    try {
+      const response = await callCRM("createBooking", payload);
+      const reference = response.bookingReference || response.booking?.bookingReference;
+      if (!reference) throw new Error("A booking reference was not returned.");
+      form.reset();
+      setPreferredDate(undefined);
+      setPreferredTime("");
+      trackEvent("consultation_form_success", { projectType: payload.projectType });
+      onSuccess(reference);
+    } catch (error) {
+      trackEvent("consultation_form_error", { projectType: payload.projectType });
+      setErrorMessage(
+        error instanceof Error && error.message
+          ? error.message
+          : "We could not submit your request. Please try again or contact the team directly.",
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className="w-full text-left flex items-start gap-4 group"
-    >
-      <div className="h-11 w-11 shrink-0 rounded-2xl gradient-brand text-primary-foreground flex items-center justify-center shadow-soft group-hover:scale-105 transition">
-        <Icon size={18} />
+    <form onSubmit={submit} className="grid gap-5 sm:grid-cols-2">
+      <div className="sm:col-span-2">
+        <h2 className="text-3xl font-extrabold tracking-[-0.03em] text-[#152238]">
+          Request a consultation
+        </h2>
+        <p className="mt-2 text-sm leading-7 text-[#667085]">
+          Required fields are marked. Use verified information so the team can respond accurately.
+        </p>
       </div>
-      <div className="min-w-0">
-        <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>
-        <div className="text-sm font-semibold mt-0.5 group-hover:text-primary transition">
-          {value}
+
+      <TextField label="Full name" name="fullName" autoComplete="name" required />
+      <TextField label="Mobile number" name="phoneNumber" type="tel" autoComplete="tel" required />
+      <TextField
+        label="Email address"
+        name="emailAddress"
+        type="email"
+        autoComplete="email"
+        className="sm:col-span-2"
+      />
+
+      <SelectField label="Project type" name="projectType" required>
+        <option value="">Select project type</option>
+        <option>Residential</option>
+        <option>Commercial</option>
+        <option>Renovation</option>
+        <option>Multi-unit / Apartment</option>
+        <option>Other</option>
+      </SelectField>
+
+      <SelectField label="Preferred service" name="preferredService" required>
+        <option value="">Select service</option>
+        <option>General Contracting</option>
+        <option>Design-Build Services</option>
+        <option>Construction Management</option>
+        <option>Renovation and Remodeling</option>
+        <option>Project Consultation</option>
+      </SelectField>
+
+      <TextField
+        label="Project location"
+        name="projectLocation"
+        placeholder="Barangay, city, province"
+        required
+      />
+      <TextField
+        label="Approximate lot or floor area"
+        name="approximateArea"
+        placeholder="Example: 180 sqm"
+      />
+
+      <div className="sm:col-span-2">
+        <SchedulePicker
+          date={preferredDate}
+          time={preferredTime}
+          onDateChange={setPreferredDate}
+          onTimeChange={setPreferredTime}
+          dateName="preferredDate"
+          timeName="preferredTime"
+          required
+        />
+      </div>
+
+      <SelectField label="Budget range" name="budgetRange" className="sm:col-span-2">
+        <option value="">Prefer not to say</option>
+        <option>Below PHP 1,000,000</option>
+        <option>PHP 1,000,000 - PHP 3,000,000</option>
+        <option>PHP 3,000,000 - PHP 5,000,000</option>
+        <option>PHP 5,000,000 - PHP 10,000,000</option>
+        <option>Above PHP 10,000,000</option>
+      </SelectField>
+
+      <label className="sm:col-span-2">
+        <span className="text-sm font-bold text-[#344054]">
+          Project description <span className="text-primary">*</span>
+        </span>
+        <textarea
+          name="projectDetails"
+          required
+          rows={6}
+          placeholder="Describe the project, priorities, current site condition, target timeline, and important requirements."
+          className="mt-2 w-full resize-y rounded-xl border border-[#dce1e6] bg-white px-4 py-3 text-sm leading-7 text-foreground outline-none transition placeholder:text-[#98a2b3] focus:border-primary focus:ring-2 focus:ring-primary/15"
+        />
+      </label>
+
+      <div className="absolute left-[-9999px]" aria-hidden="true">
+        <label>
+          Company website
+          <input name="companyWebsite" type="text" tabIndex={-1} autoComplete="off" />
+        </label>
+      </div>
+
+      <label className="sm:col-span-2 flex items-start gap-3 rounded-xl bg-[#f7f8fa] p-4 text-sm leading-6 text-[#53606e]">
+        <input
+          type="checkbox"
+          name="privacyConsent"
+          value="accepted"
+          required
+          className="mt-1 size-4 shrink-0 accent-[#f4511e]"
+        />
+        <span>
+          I have read the privacy notice and consent to IG Sabroso Construction using these details
+          to review and respond to my project inquiry.
+        </span>
+      </label>
+
+      {errorMessage ? (
+        <div
+          role="alert"
+          className="sm:col-span-2 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50 p-4 text-sm text-red-800"
+        >
+          <AlertCircle aria-hidden="true" size={19} className="mt-0.5 shrink-0" />
+          <span>{errorMessage}</span>
         </div>
+      ) : null}
+
+      <div className="sm:col-span-2">
+        <button
+          type="submit"
+          disabled={loading}
+          className="inline-flex min-h-14 w-full items-center justify-center gap-3 rounded-xl bg-primary px-6 text-sm font-extrabold uppercase tracking-[0.06em] text-white shadow-[0_14px_38px_rgba(244,81,30,0.2)] transition hover:bg-[#dc3f13] disabled:cursor-wait disabled:opacity-65"
+        >
+          {loading ? (
+            <>
+              <Loader2 aria-hidden="true" size={19} className="animate-spin" />
+              Submitting request
+            </>
+          ) : (
+            <>
+              Submit consultation request
+              <ArrowRight aria-hidden="true" size={19} />
+            </>
+          )}
+        </button>
       </div>
-    </button>
+    </form>
   );
 }
 
-function InfoLink({
-  icon: Icon,
+function TextField({
   label,
-  value,
-  href,
-  external,
-}: {
-  icon: React.ComponentType<{ size?: number; className?: string }>;
+  name,
+  type = "text",
+  required,
+  className = "",
+  ...props
+}: React.InputHTMLAttributes<HTMLInputElement> & {
   label: string;
-  value: string;
-  href: string;
-  external?: boolean;
+  name: string;
+  className?: string;
 }) {
   return (
-    <a
-      href={href}
-      target={external ? "_blank" : undefined}
-      rel={external ? "noopener noreferrer" : undefined}
-      className="flex items-start gap-4 group"
-    >
-      <div className="h-11 w-11 shrink-0 rounded-2xl gradient-brand text-primary-foreground flex items-center justify-center shadow-soft group-hover:scale-105 transition">
-        <Icon size={18} />
-      </div>
-      <div className="min-w-0">
-        <div className="text-[11px] uppercase tracking-wider text-muted-foreground">{label}</div>
-        <div className="text-sm font-semibold mt-0.5 break-words group-hover:text-primary transition">
-          {value}
-        </div>
-      </div>
-    </a>
-  );
-}
-
-function Label({ children, htmlFor }: { children: React.ReactNode; htmlFor: string }) {
-  return (
-    <label
-      htmlFor={htmlFor}
-      className="text-xs uppercase tracking-wider text-muted-foreground font-semibold"
-    >
-      {children}
+    <label className={className}>
+      <span className="text-sm font-bold text-[#344054]">
+        {label} {required ? <span className="text-primary">*</span> : null}
+      </span>
+      <input
+        name={name}
+        type={type}
+        required={required}
+        {...props}
+        className="mt-2 h-12 w-full rounded-xl border border-[#dce1e6] bg-white px-4 text-sm text-foreground outline-none transition placeholder:text-[#98a2b3] focus:border-primary focus:ring-2 focus:ring-primary/15"
+      />
     </label>
   );
 }
 
-function Field({
+function SelectField({
   label,
   name,
-  type = "text",
-  placeholder,
   required,
   className = "",
-  list,
+  children,
 }: {
   label: string;
   name: string;
-  type?: string;
-  placeholder?: string;
   required?: boolean;
   className?: string;
-  list?: string;
+  children: React.ReactNode;
 }) {
-  const id = `consultation-${name}`;
-  const autoComplete =
-    name === "fullName"
-      ? "name"
-      : name === "phoneNumber"
-        ? "tel"
-        : name === "emailAddress"
-          ? "email"
-          : name === "projectLocation"
-            ? "street-address"
-            : undefined;
-
   return (
-    <div className={className}>
-      <Label htmlFor={id}>
-        {label}
-        {required && <span className="text-destructive"> *</span>}
-      </Label>
-      <input
-        id={id}
+    <label className={className}>
+      <span className="text-sm font-bold text-[#344054]">
+        {label} {required ? <span className="text-primary">*</span> : null}
+      </span>
+      <select
         name={name}
-        type={type}
         required={required}
-        aria-required={required || undefined}
-        autoComplete={autoComplete}
-        placeholder={placeholder}
-        list={list}
-        className="mt-2 w-full rounded-xl bg-background/60 border border-border px-4 py-3 text-sm outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition"
-      />
-    </div>
+        defaultValue=""
+        className="mt-2 h-12 w-full rounded-xl border border-[#dce1e6] bg-white px-4 text-sm text-foreground outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/15"
+      >
+        {children}
+      </select>
+    </label>
+  );
+}
+
+function SuccessPanel({
+  bookingReference,
+  onManage,
+  onReset,
+}: {
+  bookingReference: string;
+  onManage: () => void;
+  onReset: () => void;
+}) {
+  return (
+    <section id="consultation-confirmation" aria-live="polite">
+      <span className="grid size-14 place-items-center rounded-2xl bg-emerald-50 text-emerald-700">
+        <CheckCircle2 aria-hidden="true" size={27} />
+      </span>
+      <h2 className="mt-6 text-3xl font-extrabold tracking-[-0.03em] text-[#152238]">
+        Consultation request received.
+      </h2>
+      <p className="mt-3 text-sm leading-7 text-[#667085]">
+        The IG Sabroso team will review your project details and contact you to confirm your
+        preferred appointment schedule.
+      </p>
+      <div className="mt-7 rounded-2xl border border-border bg-[#f7f8fa] p-5">
+        <p className="text-xs font-extrabold uppercase tracking-[0.14em] text-muted-foreground">
+          Booking reference
+        </p>
+        <div className="mt-3">
+          <ReferencePill reference={bookingReference} />
+        </div>
+        <p className="mt-3 text-xs leading-6 text-muted-foreground">
+          Save this reference to review, reschedule, or cancel the appointment request.
+        </p>
+      </div>
+      <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+        <button
+          type="button"
+          onClick={onManage}
+          className="inline-flex min-h-12 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-sm font-extrabold text-white"
+        >
+          <CalendarCheck aria-hidden="true" size={18} />
+          Manage booking
+        </button>
+        <button
+          type="button"
+          onClick={onReset}
+          className="min-h-12 rounded-xl border border-border bg-white px-5 text-sm font-extrabold text-[#152238]"
+        >
+          Submit another request
+        </button>
+      </div>
+    </section>
   );
 }

@@ -1,191 +1,136 @@
-import { Link } from "@tanstack/react-router";
-import { Facebook, Phone, Mail, MapPin } from "lucide-react";
-import logoAsset from "@/assets/logo.png.asset.json";
+import { Link, useRouterState } from "@tanstack/react-router";
+import { ArrowRight, ArrowUpRight, Mail, MapPin, Phone } from "lucide-react";
+import { BrandLockup } from "@/components/brand/brand-lockup";
 import {
-  IGS_PHONE_DISPLAY,
-  IGS_EMAIL,
+  getPrimaryNavigationActiveOptions,
+  isPrimaryNavigationItemActive,
+  PRIMARY_NAVIGATION,
+} from "@/content/navigation";
+import {
   IGS_ADDRESS,
+  IGS_EMAIL,
   IGS_MAPS_URL,
-  openIgsContact,
+  IGS_PHONE_DISPLAY,
+  IGS_PHONE_TEL,
 } from "@/lib/contact";
 
-function TikTokIcon({ size = 16 }: { size?: number }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      width={size}
-      height={size}
-      fill="currentColor"
-      aria-hidden="true"
-    >
-      <path d="M19.6 6.32a5.4 5.4 0 0 1-3.16-1.02 5.4 5.4 0 0 1-2.17-3.55h-3.36v13.13a2.86 2.86 0 1 1-2.86-2.86c.29 0 .57.04.83.13V8.7a6.2 6.2 0 1 0 5.39 6.18V9.4a8.78 8.78 0 0 0 5.33 1.8V7.85a5.4 5.4 0 0 1 0-1.53z" />
-    </svg>
-  );
-}
-
-const FACEBOOK_URL = "https://www.facebook.com/search/top?q=ig%20sabroso%20construction";
-const TIKTOK_URL = "https://www.tiktok.com/@igs.construction";
+const routeTargets = ["/", "/details", "/projects", "/consultation"] as const;
+type RouteTarget = (typeof routeTargets)[number];
 
 export function SiteFooter() {
+  const location = useRouterState({ select: (state) => state.location });
+
   return (
-    <footer className="border-t border-border bg-surface/60 mt-16">
-      <div className="max-w-[1500px] mx-auto px-6 md:px-10 py-14 grid gap-10 md:grid-cols-4">
-        <div className="md:col-span-1">
-          <Link to="/" className="flex items-center gap-3 group">
-            <img
-              src={logoAsset.url}
-              alt="IG Sabroso"
-              className="h-12 w-12 object-contain transition-transform group-hover:scale-105"
-            />
-            <div className="leading-tight">
-              <div className="font-display font-bold text-sm">IG SABROSO</div>
-              <div className="text-[11px] text-muted-foreground">CONSTRUCTION</div>
-            </div>
+    <footer className="border-t border-[#e6e9ed] bg-[#f7f8fa]">
+      <div className="mx-auto grid w-full max-w-[1500px] gap-10 px-6 py-14 md:grid-cols-[1.3fr_0.7fr_1fr] md:px-10 lg:px-14 lg:py-18">
+        <div className="max-w-md">
+          <Link
+            to="/"
+            activeOptions={{ exact: true }}
+            aria-label="IG Sabroso Construction home"
+            className="inline-flex rounded-xl"
+          >
+            <BrandLockup />
           </Link>
-          <p className="mt-4 text-sm text-muted-foreground">
-            Elevate Your Lifestyle. Built on trust, driven by excellence.
+          <p className="mt-6 text-sm leading-7 text-[#667085]">
+            Dependable construction, design-build, project management, and renovation services
+            delivered through clear coordination and skilled workmanship.
           </p>
-          <div className="mt-5 flex items-center gap-2 text-muted-foreground">
+          <Link
+            to="/projects"
+            activeOptions={{ exact: false }}
+            className="mt-6 inline-flex min-h-11 items-center gap-2 rounded-xl border border-[#dfe3e8] bg-white px-4 text-sm font-bold text-[#152238] transition hover:border-primary/40 hover:text-primary"
+          >
+            View selected projects
+            <ArrowRight aria-hidden="true" size={17} />
+          </Link>
+        </div>
+
+        <div>
+          <h2 className="text-sm font-extrabold uppercase tracking-[0.16em] text-[#152238]">
+            Explore
+          </h2>
+          <nav aria-label="Footer navigation" className="mt-5 grid gap-3">
+            {PRIMARY_NAVIGATION.map((item) => {
+              const active = isPrimaryNavigationItemActive(item, location.pathname, location.hash);
+
+              const className = [
+                "w-fit text-sm font-semibold transition hover:text-primary",
+                active ? "text-primary" : "text-[#667085]",
+              ].join(" ");
+
+              if ("hash" in item) {
+                return (
+                  <a
+                    key={item.label}
+                    href={`${item.to}#${item.hash}`}
+                    aria-current={active ? "page" : undefined}
+                    className={className}
+                  >
+                    {item.label}
+                  </a>
+                );
+              }
+
+              return (
+                <Link
+                  key={item.label}
+                  to={item.to as RouteTarget}
+                  activeOptions={getPrimaryNavigationActiveOptions(item)}
+                  aria-current={active ? "page" : undefined}
+                  className={className}
+                >
+                  {item.label}
+                </Link>
+              );
+            })}
+          </nav>
+        </div>
+
+        <div>
+          <h2 className="text-sm font-extrabold uppercase tracking-[0.16em] text-[#152238]">
+            Contact
+          </h2>
+          <div className="mt-5 space-y-4 text-sm text-[#667085]">
             <a
-              href={FACEBOOK_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="Facebook"
-              className="p-2 rounded-full hover:text-primary hover:bg-accent transition"
+              href={`tel:${IGS_PHONE_TEL}`}
+              className="flex items-start gap-3 transition hover:text-primary"
             >
-              <Facebook size={16} />
+              <Phone aria-hidden="true" size={18} className="mt-0.5 shrink-0 text-primary" />
+              <span>{IGS_PHONE_DISPLAY}</span>
             </a>
             <a
-              href={TIKTOK_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              aria-label="TikTok"
-              className="p-2 rounded-full hover:text-primary hover:bg-accent transition"
+              href={`mailto:${IGS_EMAIL}`}
+              className="flex items-start gap-3 transition hover:text-primary"
             >
-              <TikTokIcon size={16} />
+              <Mail aria-hidden="true" size={18} className="mt-0.5 shrink-0 text-primary" />
+              <span className="break-all">{IGS_EMAIL}</span>
+            </a>
+            <a
+              href={IGS_MAPS_URL}
+              target="_blank"
+              rel="noreferrer"
+              className="flex items-start gap-3 transition hover:text-primary"
+            >
+              <MapPin aria-hidden="true" size={18} className="mt-0.5 shrink-0 text-primary" />
+              <span>{IGS_ADDRESS}</span>
             </a>
           </div>
-        </div>
-
-        <div>
-          <h4 className="text-xs uppercase tracking-[0.18em] text-muted-foreground mb-4">
-            Quick Links
-          </h4>
-          <ul className="space-y-2.5 text-sm">
-            <li>
-              <Link to="/" className="hover:text-primary transition">
-                Home
-              </Link>
-            </li>
-            <li>
-              <Link to="/details" hash="about" className="hover:text-primary transition">
-                About
-              </Link>
-            </li>
-            <li>
-              <Link to="/details" hash="portfolio" className="hover:text-primary transition">
-                Projects
-              </Link>
-            </li>
-            <li>
-              <Link to="/details" hash="process" className="hover:text-primary transition">
-                Process
-              </Link>
-            </li>
-            <li>
-              <Link to="/consultation" className="hover:text-primary transition">
-                Consultation
-              </Link>
-            </li>
-          </ul>
-        </div>
-
-        <div>
-          <h4 className="text-xs uppercase tracking-[0.18em] text-muted-foreground mb-4">
-            Services
-          </h4>
-          <ul className="space-y-2.5 text-sm">
-            {[
-              "Residential Construction",
-              "Renovation & Remodeling",
-              "Civil Works",
-              "Design-Build Services",
-              "3D Rendering",
-            ].map((label) => (
-              <li key={label}>
-                <Link
-                  to="/details"
-                  hash="services"
-                  className="hover:text-primary transition"
-                  onClick={() => {
-                    if (typeof window === "undefined") return;
-                    const scroll = () => {
-                      const el = document.getElementById("services");
-                      if (el) {
-                        const prefersReducedMotion = window.matchMedia(
-                          "(prefers-reduced-motion: reduce)",
-                        ).matches;
-                        el.scrollIntoView({
-                          behavior: prefersReducedMotion ? "auto" : "smooth",
-                          block: "start",
-                        });
-                      }
-                    };
-                    // Defer so navigation/hash update completes first.
-                    window.setTimeout(scroll, 60);
-                    window.setTimeout(scroll, 300);
-                  }}
-                >
-                  {label}
-                </Link>
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div>
-          <h4 className="text-xs uppercase tracking-[0.18em] text-muted-foreground mb-4">
-            Contact
-          </h4>
-          <ul className="space-y-3 text-sm">
-            <li>
-              <button
-                type="button"
-                onClick={openIgsContact}
-                className="flex items-start gap-2.5 text-left hover:text-primary transition w-full"
-              >
-                <Phone size={15} className="text-primary mt-0.5 shrink-0" />
-                <span>{IGS_PHONE_DISPLAY}</span>
-              </button>
-            </li>
-            <li>
-              <a
-                href={`mailto:${IGS_EMAIL}`}
-                className="flex items-start gap-2.5 hover:text-primary transition break-all"
-              >
-                <Mail size={15} className="text-primary mt-0.5 shrink-0" />
-                <span>{IGS_EMAIL}</span>
-              </a>
-            </li>
-            <li>
-              <a
-                href={IGS_MAPS_URL}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-start gap-2.5 hover:text-primary transition"
-              >
-                <MapPin size={15} className="text-primary mt-0.5 shrink-0" />
-                <span>{IGS_ADDRESS}</span>
-              </a>
-            </li>
-          </ul>
+          <Link
+            to="/consultation"
+            activeOptions={{ exact: true }}
+            className="mt-7 inline-flex min-h-12 items-center gap-3 rounded-xl bg-primary px-5 text-sm font-extrabold text-white shadow-[0_10px_28px_rgba(244,81,30,0.2)]"
+          >
+            Start a project
+            <ArrowUpRight aria-hidden="true" size={18} />
+          </Link>
         </div>
       </div>
-      <div className="border-t border-border">
-        <div className="max-w-[1500px] mx-auto px-6 md:px-10 py-5 flex flex-col sm:flex-row justify-between gap-2 text-xs text-muted-foreground">
-          <span>© {new Date().getFullYear()} IG Sabroso Construction. All rights reserved.</span>
-          <span>Dasmariñas, Cavite · Built to Last</span>
+
+      <div className="border-t border-[#e1e5ea]">
+        <div className="mx-auto flex w-full max-w-[1500px] flex-col gap-2 px-6 py-5 text-xs text-[#7a8491] sm:flex-row sm:items-center sm:justify-between md:px-10 lg:px-14">
+          <p>© {new Date().getFullYear()} IG Sabroso Construction. All rights reserved.</p>
+          <p>Build with confidence - build with Sabroso.</p>
         </div>
       </div>
     </footer>

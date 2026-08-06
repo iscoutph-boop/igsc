@@ -1,0 +1,324 @@
+import aResidenceAsset from "@/assets/proj-a-residence.jpg.asset.json";
+import fResidenceAsset from "@/assets/proj-f-residence.jpg.asset.json";
+import iResidenceAsset from "@/assets/proj-i-residence.jpg.asset.json";
+import keystoneAsset from "@/assets/proj-keystone.jpg.asset.json";
+import lResidenceAsset from "@/assets/proj-l-residence.jpg.asset.json";
+import bApartmentAsset from "@/assets/proj-b-apartment.jpg.asset.json";
+import homeHero from "@/assets/real/home-hero.webp";
+import gonoDetail from "@/assets/real/gono-detail.webp";
+import turnoverRibbon from "@/assets/real/turnover-ribbon.webp";
+import turnoverHandover from "@/assets/real/turnover-handover.webp";
+import townhouseProject from "@/assets/real/townhouse-project.webp";
+
+export type ProjectStatus = "completed" | "ongoing";
+export type ProjectCategory = "residential" | "commercial" | "renovation" | "multi-unit";
+
+export type ImageAsset = {
+  src: string;
+  alt: string;
+  width: number;
+  height: number;
+  sourceFolder: string;
+  approvedForPublicUse: boolean;
+};
+
+export type ProjectRecord = {
+  slug: string;
+  name: string;
+  status: ProjectStatus;
+  category: ProjectCategory;
+  location: string;
+  summary: string;
+  description: string;
+  specifications: {
+    floorArea?: string;
+    bedrooms?: number;
+    bathrooms?: number;
+    carport?: string;
+  };
+  highlights: readonly string[];
+  cover: ImageAsset;
+  gallery: readonly ImageAsset[];
+  featured: boolean;
+  visualizationOnly?: boolean;
+};
+
+const image = (
+  src: string,
+  alt: string,
+  sourceFolder: string,
+  width = 1600,
+  height = 1067,
+): ImageAsset => ({
+  src,
+  alt,
+  width,
+  height,
+  sourceFolder,
+  approvedForPublicUse: true,
+});
+
+const oResidenceCover = image(
+  homeHero,
+  "Completed modern two-storey IG Sabroso residence with a high roofline, glass balcony, and covered carport",
+  "Selected real projects / O Residence",
+  2400,
+  1600,
+);
+const aResidenceCover = image(
+  aResidenceAsset.url,
+  "Completed A Residence in Imus City with layered modern volumes and warm exterior accents",
+  "Completed Projects / A Residence - Imus",
+);
+const gResidenceCover = image(
+  gonoDetail,
+  "Low-angle architectural detail of the completed G Residence with warm vertical cladding and broad roof overhangs",
+  "Selected real projects / G Residence",
+  2400,
+  1600,
+);
+const gResidenceTurnover = image(
+  turnoverRibbon,
+  "IG Sabroso team and client during the completed residence ribbon-cutting turnover",
+  "Groundbreaking and Turnover / G Residence",
+  2400,
+  1600,
+);
+const gResidenceHandover = image(
+  turnoverHandover,
+  "IG Sabroso project team presenting the ceremonial key during a residential handover",
+  "Groundbreaking and Turnover / G Residence",
+  2400,
+  1600,
+);
+const iResidenceCover = image(
+  iResidenceAsset.url,
+  "Completed three-storey I Residence in Imus City with contemporary detailing",
+  "Completed Projects / I Residence",
+);
+const lResidenceCover = image(
+  lResidenceAsset.url,
+  "Renovated L Residence in Pasig City with a refined contemporary exterior",
+  "Completed Projects / L Residence",
+);
+const bApartmentCover = image(
+  townhouseProject,
+  "Completed multi-unit townhouse development with three coordinated residential façades",
+  "Selected real projects / B Apartment",
+  2400,
+  1800,
+);
+const bApartmentArchive = image(
+  bApartmentAsset.url,
+  "B Apartment completed triplex residential project in San Pedro City",
+  "Completed Projects / B Apartment",
+);
+const keystoneCover = image(
+  keystoneAsset.url,
+  "Keystone Building three-storey commercial development in Dasmarinas City",
+  "Completed Projects / Keystone Building",
+);
+const fResidenceCover = image(
+  fResidenceAsset.url,
+  "Architectural visualization of the ongoing F Residence on a sloping site in Silang, Cavite",
+  "Ongoing Projects / F Residence",
+);
+
+export const PROJECTS: readonly ProjectRecord[] = [
+  {
+    slug: "o-residence",
+    name: "O Residence",
+    status: "completed",
+    category: "residential",
+    location: "Dasmarinas City, Cavite",
+    summary:
+      "A bold two-storey home designed around openness, natural light, and structured modern volumes.",
+    description:
+      "A 174 sqm two-storey residence with a classic space-planning approach. Strong geometric volumes and a high-ceiling living area create a confident architectural presence while keeping everyday family spaces practical and connected.",
+    specifications: { floorArea: "174 sqm", bedrooms: 5, bathrooms: 5, carport: "2 vehicles" },
+    highlights: [
+      "High-ceiling living area",
+      "Kitchen and service kitchen",
+      "Home office",
+      "Completed residence",
+    ],
+    cover: oResidenceCover,
+    gallery: [oResidenceCover],
+    featured: true,
+  },
+  {
+    slug: "a-residence-imus",
+    name: "A Residence",
+    status: "completed",
+    category: "residential",
+    location: "Imus City, Cavite",
+    summary: "Efficient modern living across a compact and distinctive 125 sqm footprint.",
+    description:
+      "A two-storey modern contemporary residence defined by clean lines, layered volumes, and a balanced mix of glass and warm accent materials. The layout maximizes comfort and function despite the compact site geometry.",
+    specifications: { floorArea: "125 sqm", bedrooms: 3, bathrooms: 4, carport: "2 vehicles" },
+    highlights: [
+      "Living and dining areas",
+      "Efficient space planning",
+      "Warm accent materials",
+      "Completed residence",
+    ],
+    cover: aResidenceCover,
+    gallery: [aResidenceCover],
+    featured: true,
+  },
+  {
+    slug: "g-residence",
+    name: "G Residence",
+    status: "completed",
+    category: "residential",
+    location: "Imus City, Cavite",
+    summary:
+      "A warm contemporary home with generous roof lines and a connected open-plan interior.",
+    description:
+      "A two-storey modern contemporary residence featuring an open-plan layout that connects the main living spaces. Warm vertical cladding, wide roof overhangs, and expansive glazing create a balanced and functional design.",
+    specifications: { bedrooms: 3, bathrooms: 3, carport: "1 vehicle" },
+    highlights: [
+      "Open-plan living",
+      "Home office",
+      "Wide roof overhangs",
+      "Client turnover completed",
+    ],
+    cover: gResidenceCover,
+    gallery: [gResidenceCover, gResidenceTurnover, gResidenceHandover],
+    featured: true,
+  },
+  {
+    slug: "i-residence",
+    name: "I Residence",
+    status: "completed",
+    category: "residential",
+    location: "Imus City, Cavite",
+    summary:
+      "A technology-ready three-storey home with premium finishes and a refined material palette.",
+    description:
+      "A 222 sqm three-storey modern contemporary residence distinguished by exposed brick, a predominantly white interior palette, premium materials, and integrated smart-home provisions.",
+    specifications: { floorArea: "222 sqm", bedrooms: 6, bathrooms: 5, carport: "1 vehicle" },
+    highlights: [
+      "Two living areas",
+      "Kitchen and service kitchen",
+      "Smart-home provisions",
+      "Completed residence",
+    ],
+    cover: iResidenceCover,
+    gallery: [iResidenceCover],
+    featured: false,
+  },
+  {
+    slug: "l-residence",
+    name: "L Residence",
+    status: "completed",
+    category: "renovation",
+    location: "Pasig City",
+    summary: "A premium renovation with a dark Japanese-inspired interior direction.",
+    description:
+      "A three-storey renovation transformed into a modern contemporary residence. The project focused on interior design services and selected execution works using premium materials and a calm, Japanese-inspired character.",
+    specifications: { carport: "2 vehicles" },
+    highlights: [
+      "Two living areas",
+      "Office and jacuzzi",
+      "Primary bedroom suite",
+      "Selected execution works",
+    ],
+    cover: lResidenceCover,
+    gallery: [lResidenceCover],
+    featured: false,
+  },
+  {
+    slug: "b-apartment",
+    name: "B Apartment",
+    status: "completed",
+    category: "multi-unit",
+    location: "San Pedro City, Laguna",
+    summary: "A practical two-storey triplex designed for comfortable, durable rental living.",
+    description:
+      "A two-storey, three-unit apartment development. Each 78 sqm unit includes two bedrooms, a carport, toilet and bath, service area, and private balcony within one cohesive contemporary façade.",
+    specifications: {
+      floorArea: "78 sqm per unit",
+      bedrooms: 2,
+      bathrooms: 1,
+      carport: "1 vehicle per unit",
+    },
+    highlights: [
+      "Three residential units",
+      "Private balconies",
+      "Service areas",
+      "Completed multi-unit project",
+    ],
+    cover: bApartmentCover,
+    gallery: [bApartmentCover, bApartmentArchive],
+    featured: true,
+  },
+  {
+    slug: "keystone-building",
+    name: "Keystone Building",
+    status: "completed",
+    category: "commercial",
+    location: "Dasmarinas City, Cavite",
+    summary: "A three-storey commercial building planned for six flexible business units.",
+    description:
+      "A modern contemporary commercial building designed to accommodate six units, including two full-floor spaces and four smaller business units. Clean architectural lines and exposed-brick accents create a professional street presence.",
+    specifications: { bathrooms: 3, carport: "2 vehicles" },
+    highlights: [
+      "Six commercial units",
+      "Two full-floor spaces",
+      "Flexible small-business units",
+      "Completed commercial project",
+    ],
+    cover: keystoneCover,
+    gallery: [keystoneCover],
+    featured: false,
+  },
+  {
+    slug: "f-residence",
+    name: "F Residence",
+    status: "ongoing",
+    category: "residential",
+    location: "Silang, Cavite",
+    summary: "A multi-level Bali-inspired residence designed in response to a steep site.",
+    description:
+      "An ongoing 232 sqm residence that responds to the site's slope through a carefully balanced multi-level plan. The design uses premium materials and orientation strategies to maximize daylight and scenic views.",
+    specifications: { floorArea: "232 sqm", bedrooms: 6, bathrooms: 7, carport: "2 vehicles" },
+    highlights: [
+      "Multi-level planning",
+      "Bali-inspired direction",
+      "Scenic-view orientation",
+      "Ongoing project",
+    ],
+    cover: fResidenceCover,
+    gallery: [fResidenceCover],
+    featured: false,
+    visualizationOnly: true,
+  },
+] as const;
+
+export const PROJECT_CATEGORIES = [
+  { value: "all", label: "All" },
+  { value: "residential", label: "Residential" },
+  { value: "commercial", label: "Commercial" },
+  { value: "renovation", label: "Renovation" },
+  { value: "multi-unit", label: "Multi-unit" },
+  { value: "completed", label: "Completed" },
+  { value: "ongoing", label: "Ongoing" },
+] as const;
+
+export function getProjectBySlug(slug: string) {
+  return PROJECTS.find((project) => project.slug === slug);
+}
+
+export function getRelatedProjects(project: ProjectRecord, limit = 3) {
+  return PROJECTS.filter((candidate) => candidate.slug !== project.slug)
+    .slice()
+    .sort((first, second) => {
+      const firstScore =
+        Number(first.category === project.category) + Number(first.status === project.status);
+      const secondScore =
+        Number(second.category === project.category) + Number(second.status === project.status);
+      return secondScore - firstScore;
+    })
+    .slice(0, limit);
+}

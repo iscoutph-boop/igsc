@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import logoAsset from "@/assets/logo.png.asset.json";
+import officialLogo from "@/assets/igs-official-logo.png";
 
 const INTRO_SESSION_KEY = "igs-intro-seen";
 
@@ -137,7 +137,7 @@ export function IntroLoader() {
         >
           <img
             ref={logoRef}
-            src={logoAsset.url}
+            src={officialLogo}
             alt="IG Sabroso Construction"
             onLoad={() => setLogoReady(true)}
             onError={() => setLogoReady(true)}

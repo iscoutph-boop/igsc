@@ -1,61 +1,57 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { useRouterState } from "@tanstack/react-router";
 import { CheckBookingModal } from "@/components/booking-modals";
-import { Lightbox } from "@/components/lightbox";
 import { PageTransition } from "@/components/page-transition";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { AboutSection } from "./components/about-section";
 import { ConsultationClose } from "./components/consultation-close";
-import { EstimatorSection } from "./components/estimator-section";
-import { MeetingsSection } from "./components/meetings-section";
-import { PackagesSection } from "./components/packages-section";
 import { ProcessSection } from "./components/process-section";
-import { ProjectsSection } from "./components/projects-section";
 import { ReviewsSection } from "./components/reviews-section";
 import { ServicesSection } from "./components/services-section";
 
 export function DetailsPage() {
   const [manageBookingOpen, setManageBookingOpen] = useState(false);
-  const [lightboxImages, setLightboxImages] = useState<string[]>([]);
-  const [lightboxIndex, setLightboxIndex] = useState(-1);
+  const routeHash = useRouterState({ select: (state) => state.location.hash });
+  const hash = routeHash.replace(/^#/, "");
 
-  const openImage = (src: string, images: string[]) => {
-    const group = images.length > 0 ? images : [src];
-    const index = group.indexOf(src);
-    setLightboxImages(group);
-    setLightboxIndex(index >= 0 ? index : 0);
-  };
+  useEffect(() => {
+    if (!hash) return;
+    const scrollToHash = () => {
+      const target = document.getElementById(hash);
+      if (!target) return;
+      const reduceMotion =
+        typeof window.matchMedia === "function"
+          ? window.matchMedia("(prefers-reduced-motion: reduce)").matches
+          : true;
 
-  const closeLightbox = () => {
-    setLightboxIndex(-1);
-    setLightboxImages([]);
-  };
+      if (typeof target.scrollIntoView === "function") {
+        target.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+      }
+    };
+    const frame = window.requestAnimationFrame(scrollToHash);
+    const timer = window.setTimeout(scrollToHash, 120);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      window.clearTimeout(timer);
+    };
+  }, [hash]);
 
   return (
     <PageTransition>
       <SiteHeader />
       <main>
-        <h1 className="sr-only">IG Sabroso Construction services, packages, and projects</h1>
-        <AboutSection onOpenImage={openImage} />
+        <h1 className="sr-only">
+          About, services, process, reviews, and contact - IG Sabroso Construction
+        </h1>
+        <AboutSection />
         <ServicesSection />
-        <PackagesSection />
-        <ProjectsSection onOpenImage={openImage} />
-        <EstimatorSection />
-        <MeetingsSection onOpenImage={openImage} />
-        <ReviewsSection />
         <ProcessSection />
+        <ReviewsSection />
         <ConsultationClose onManageBooking={() => setManageBookingOpen(true)} />
       </main>
       <SiteFooter />
-
       <CheckBookingModal open={manageBookingOpen} onClose={() => setManageBookingOpen(false)} />
-      <Lightbox
-        images={lightboxImages}
-        index={lightboxIndex}
-        onClose={closeLightbox}
-        onIndexChange={setLightboxIndex}
-        alt="IG Sabroso project preview"
-      />
     </PageTransition>
   );
 }

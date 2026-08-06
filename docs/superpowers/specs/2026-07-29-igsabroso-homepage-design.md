@@ -101,4 +101,3 @@ Target reference: iPhone-class viewport, verified at 390 x 844 and 430 x 932.
 6. Tests, lint, and production build pass.
 7. The published custom domain serves the new homepage at both desktop and
    mobile viewports with no app-owned console errors.
-

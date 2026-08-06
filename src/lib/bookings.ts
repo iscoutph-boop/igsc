@@ -21,10 +21,13 @@ export interface BookingRecord {
   emailAddress?: string;
   projectType: string;
   projectLocation?: string;
+  preferredService?: string;
+  approximateArea?: string;
   preferredDate?: string;
   preferredTime?: string;
   budgetRange?: string;
   projectDetails: string;
+  privacyConsent?: string;
   bookingStatus?: string;
   notes?: string;
   leadSource?: string;

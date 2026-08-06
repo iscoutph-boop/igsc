@@ -1,124 +1,37 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Facebook, Moon, Sun, ArrowRight, Menu, X, CalendarCheck } from "lucide-react";
+import { ArrowRight, CalendarSearch, Menu, X } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
-import logoAsset from "@/assets/logo.png.asset.json";
-import { useTheme } from "./theme-provider";
+import { BrandLockup } from "@/components/brand/brand-lockup";
+import {
+  getPrimaryNavigationActiveOptions,
+  isPrimaryNavigationItemActive,
+  PRIMARY_NAVIGATION,
+} from "@/content/navigation";
+import { CheckBookingModal } from "./booking-modals";
 
-const FACEBOOK_URL = "https://www.facebook.com/search/top?q=ig%20sabroso%20construction";
-const TIKTOK_URL = "https://www.tiktok.com/@igs.construction";
-
-function TikTokIcon({ size = 16 }: { size?: number }) {
-  return (
-    <svg
-      xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 24 24"
-      width={size}
-      height={size}
-      fill="currentColor"
-      aria-hidden="true"
-    >
-      <path d="M19.6 6.32a5.4 5.4 0 0 1-3.16-1.02 5.4 5.4 0 0 1-2.17-3.55h-3.36v13.13a2.86 2.86 0 1 1-2.86-2.86c.29 0 .57.04.83.13V8.7a6.2 6.2 0 1 0 5.39 6.18V9.4a8.78 8.78 0 0 0 5.33 1.8V7.85a5.4 5.4 0 0 1 0-1.53z" />
-    </svg>
-  );
-}
-
-const navItems: { to: "/" | "/details" | "/consultation"; label: string; hash?: string }[] = [
-  { to: "/", label: "Home" },
-  { to: "/details", label: "About", hash: "about" },
-  { to: "/details", label: "Services", hash: "services" },
-  { to: "/details", label: "Projects", hash: "portfolio" },
-  { to: "/details", label: "Process", hash: "process" },
-  { to: "/consultation", label: "Contact" },
-];
+const routeTargets = ["/", "/details", "/projects", "/consultation"] as const;
+type RouteTarget = (typeof routeTargets)[number];
 
 export function SiteHeader({ floating = false }: { floating?: boolean }) {
-  const { theme, toggle } = useTheme();
-  const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const routerHash = useRouterState({ select: (s) => s.location.hash });
-  // Hashes only exist in the browser. Start from stable markup so SSR hydration
-  // cannot disagree with a deep-linking client render.
-  const [activeHash, setActiveHash] = useState("");
-  const [open, setOpen] = useState(false);
+  const location = useRouterState({ select: (state) => state.location });
+  const [menuOpen, setMenuOpen] = useState(false);
+  const [manageOpen, setManageOpen] = useState(false);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
-  const mobilePanelRef = useRef<HTMLDivElement>(null);
-
-  // Track section in view on /details for active pill highlighting
-  useEffect(() => {
-    if (pathname !== "/details") return;
-    const ids = ["about", "services", "portfolio", "process"];
-    const observer = new IntersectionObserver(
-      (entries) => {
-        const visible = entries
-          .filter((e) => e.isIntersecting)
-          .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
-        if (visible) setActiveHash(visible.target.id);
-      },
-      { rootMargin: "-40% 0px -50% 0px", threshold: [0, 0.25, 0.5, 1] },
-    );
-    ids.forEach((id) => {
-      const el = document.getElementById(id);
-      if (el) observer.observe(el);
-    });
-    return () => observer.disconnect();
-  }, [pathname]);
+  const menuPanelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!routerHash) return;
-
-    setActiveHash(routerHash);
-    if (pathname !== "/details") return;
-
-    const scrollToSection = () => {
-      const target = document.getElementById(routerHash);
-      if (!target) return;
-      target.scrollIntoView({
-        behavior: "auto",
-        block: "start",
-      });
-    };
-
-    const animationFrame = window.requestAnimationFrame(scrollToSection);
-    const fallbackTimer = window.setTimeout(scrollToSection, 180);
-
-    return () => {
-      window.cancelAnimationFrame(animationFrame);
-      window.clearTimeout(fallbackTimer);
-    };
-  }, [pathname, routerHash]);
-
-  const handleSectionNavigation = (hash?: string) => {
-    setOpen(false);
-    if (!hash) return;
-
-    const scrollToSection = () => {
-      const target = document.getElementById(hash);
-      if (!target) return;
-      target.scrollIntoView({
-        behavior: "auto",
-        block: "start",
-      });
-    };
-
-    window.setTimeout(scrollToSection, 0);
-    window.setTimeout(scrollToSection, 240);
-  };
-
-  useEffect(() => {
-    if (!open) return;
+    if (!menuOpen) return;
 
     const previousOverflow = document.body.style.overflow;
-    const focusableSelector = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
-    const panel = mobilePanelRef.current;
-    const focusable = panel?.querySelectorAll<HTMLElement>(focusableSelector);
-
     document.body.style.overflow = "hidden";
+    const selector = 'a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])';
+    const focusable = menuPanelRef.current?.querySelectorAll<HTMLElement>(selector);
     focusable?.[0]?.focus();
 
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") {
-        setOpen(false);
+        setMenuOpen(false);
         menuButtonRef.current?.focus();
         return;
       }
@@ -126,7 +39,6 @@ export function SiteHeader({ floating = false }: { floating?: boolean }) {
       if (event.key !== "Tab" || !focusable?.length) return;
       const first = focusable[0];
       const last = focusable[focusable.length - 1];
-
       if (event.shiftKey && document.activeElement === first) {
         event.preventDefault();
         last.focus();
@@ -141,244 +53,229 @@ export function SiteHeader({ floating = false }: { floating?: boolean }) {
       document.body.style.overflow = previousOverflow;
       document.removeEventListener("keydown", onKeyDown);
     };
-  }, [open]);
-
-  const isActive = (item: { to: string; hash?: string }) => {
-    if (item.to === "/") return pathname === "/";
-    if (item.to === "/consultation") return pathname.startsWith("/consultation");
-    if (item.to === "/details") {
-      if (pathname !== "/details") return false;
-      return (activeHash || "about") === item.hash;
-    }
-    return false;
-  };
+  }, [menuOpen]);
 
   return (
-    <header
-      className={
-        floating
-          ? "absolute top-0 left-0 right-0 z-50"
-          : "sticky top-0 z-50 backdrop-blur-xl bg-background/80 border-b border-border"
-      }
-    >
-      <div className="max-w-[1500px] mx-auto px-5 md:px-10 py-5 flex items-center gap-4">
-        <Link to="/" className="flex items-center gap-3 shrink-0 group">
-          <img
-            src={logoAsset.url}
-            alt="IG Sabroso Construction"
-            className="h-11 w-11 md:h-12 md:w-12 object-contain transition-transform group-hover:scale-105"
-          />
-          <div className="leading-tight">
-            <div className="font-display font-bold tracking-tight text-[12px] sm:text-[15px] md:text-base">
-              IG SABROSO CONSTRUCTION
-            </div>
-            <div className="text-[10px] sm:text-[11px] md:text-xs text-muted-foreground">
-              Elevate Your Lifestyle
-            </div>
-          </div>
-        </Link>
-
-        {/* Center pill nav */}
-        <nav className="hidden xl:flex mx-auto items-center gap-1 glass rounded-full p-1.5 shadow-soft">
-          {navItems.map((item) => {
-            const active = isActive(item);
-            return (
-              <Link
-                key={item.label}
-                to={item.to}
-                hash={item.hash}
-                onClick={() => handleSectionNavigation(item.hash)}
-                className={`relative px-4 py-2 text-sm font-medium rounded-full transition-colors ${
-                  active ? "text-primary-foreground" : "text-foreground/80 hover:text-foreground"
-                }`}
-              >
-                {active && (
-                  <motion.span
-                    layoutId="nav-pill"
-                    className="absolute inset-0 rounded-full gradient-brand shadow-soft"
-                    transition={{ type: "spring", stiffness: 400, damping: 32 }}
-                  />
-                )}
-                <span className="relative">{item.label}</span>
-              </Link>
-            );
-          })}
-        </nav>
-
-        <div className="ml-auto flex items-center gap-2 md:gap-3">
-          <div className="hidden md:flex items-center gap-1.5 text-muted-foreground">
-            <a
-              aria-label="Facebook"
-              href={FACEBOOK_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 rounded-full hover:text-primary hover:bg-accent transition"
-            >
-              <Facebook size={16} />
-            </a>
-            <a
-              aria-label="TikTok"
-              href={TIKTOK_URL}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="p-2 rounded-full hover:text-primary hover:bg-accent transition"
-            >
-              <TikTokIcon size={16} />
-            </a>
-          </div>
-
-          <button
-            onClick={toggle}
-            aria-label={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-            className="glass rounded-full p-2.5 hover:shadow-soft transition relative overflow-hidden"
-          >
-            <AnimatePresence mode="wait" initial={false}>
-              <motion.span
-                key={theme}
-                initial={{ y: 12, opacity: 0, rotate: -45 }}
-                animate={{ y: 0, opacity: 1, rotate: 0 }}
-                exit={{ y: -12, opacity: 0, rotate: 45 }}
-                transition={{ duration: 0.22 }}
-                className="flex"
-              >
-                {theme === "dark" ? <Sun size={16} className="text-primary" /> : <Moon size={16} />}
-              </motion.span>
-            </AnimatePresence>
-          </button>
-
+    <>
+      <header
+        className={[
+          "z-50 w-full border-b border-black/5 bg-white/95 backdrop-blur-xl",
+          floating ? "absolute inset-x-0 top-0" : "sticky top-0",
+        ].join(" ")}
+      >
+        <div className="mx-auto flex min-h-[78px] w-full max-w-[1760px] items-center gap-5 px-5 sm:px-8 lg:px-12">
           <Link
-            to="/consultation"
-            className="hidden sm:inline-flex items-center gap-2 gradient-brand text-primary-foreground rounded-full pl-5 pr-2 py-2 text-sm font-semibold shadow-soft hover:shadow-glow transition-shadow group"
+            to="/"
+            activeOptions={{ exact: true }}
+            aria-label="IG Sabroso Construction home"
+            className="shrink-0 rounded-xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary"
           >
-            Consultation
-            <span className="bg-background/20 rounded-full p-1.5 group-hover:translate-x-0.5 transition-transform">
-              <ArrowRight size={14} />
-            </span>
+            <BrandLockup />
           </Link>
 
-          {/* Mobile booking icon, visible on small screens only. */}
-          <Link
-            to="/consultation"
-            aria-label="Book a consultation"
-            className="sm:hidden inline-flex items-center justify-center h-9 w-9 rounded-full gradient-brand text-primary-foreground shadow-soft"
+          <nav
+            aria-label="Primary navigation"
+            className="mx-auto hidden items-center gap-8 xl:flex"
           >
-            <CalendarCheck size={16} />
-          </Link>
+            {PRIMARY_NAVIGATION.map((item) => {
+              const active = isPrimaryNavigationItemActive(item, location.pathname, location.hash);
 
-          <button
-            ref={menuButtonRef}
-            className="xl:hidden p-2 rounded-full glass"
-            aria-label={open ? "Close navigation menu" : "Open navigation menu"}
-            aria-controls="site-mobile-navigation"
-            aria-expanded={open}
-            onClick={() => setOpen((v) => !v)}
-          >
-            {open ? <X size={18} /> : <Menu size={18} />}
-          </button>
+              const className = [
+                "relative py-3 text-[0.84rem] font-bold text-[#344054] transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary",
+                active ? "text-primary" : "",
+              ].join(" ");
+
+              const content = (
+                <>
+                  {item.label}
+                  {active ? (
+                    <span
+                      aria-hidden="true"
+                      className="absolute inset-x-0 -bottom-1 h-0.5 rounded-full bg-primary"
+                    />
+                  ) : null}
+                </>
+              );
+
+              if ("hash" in item) {
+                return (
+                  <a
+                    key={item.label}
+                    href={`${item.to}#${item.hash}`}
+                    aria-current={active ? "page" : undefined}
+                    className={className}
+                  >
+                    {content}
+                  </a>
+                );
+              }
+
+              return (
+                <Link
+                  key={item.label}
+                  to={item.to as RouteTarget}
+                  activeOptions={getPrimaryNavigationActiveOptions(item)}
+                  aria-current={active ? "page" : undefined}
+                  className={className}
+                >
+                  {content}
+                </Link>
+              );
+            })}
+          </nav>
+
+          <div className="ml-auto flex items-center gap-2 sm:gap-3">
+            <button
+              type="button"
+              onClick={() => setManageOpen(true)}
+              className="hidden min-h-11 items-center gap-2 rounded-lg px-3 text-[0.82rem] font-bold text-[#152238] transition hover:bg-[#f7f8fa] hover:text-primary lg:inline-flex"
+            >
+              <CalendarSearch aria-hidden="true" size={17} />
+              Manage booking
+            </button>
+            <Link
+              to="/consultation"
+              activeOptions={{ exact: true }}
+              className="inline-flex min-h-11 items-center gap-3 rounded-lg bg-primary px-4 text-[0.78rem] font-extrabold uppercase tracking-[0.045em] text-white shadow-[0_10px_28px_rgba(244,81,30,0.18)] transition hover:-translate-y-0.5 hover:bg-[#dd3e12] sm:px-5"
+            >
+              <span className="hidden sm:inline">Book a consultation</span>
+              <span className="sm:hidden">Get a quote</span>
+              <ArrowRight aria-hidden="true" size={18} />
+            </Link>
+            <button
+              ref={menuButtonRef}
+              type="button"
+              aria-label="Open navigation menu"
+              aria-expanded={menuOpen}
+              aria-controls="mobile-navigation"
+              onClick={() => setMenuOpen(true)}
+              className="grid size-12 place-items-center rounded-xl border border-[#e3e7ec] bg-white text-[#152238] xl:hidden"
+            >
+              <Menu aria-hidden="true" size={25} />
+            </button>
+          </div>
         </div>
-      </div>
+      </header>
 
-      {typeof document !== "undefined" &&
-        createPortal(
-          <AnimatePresence>
-            {open && (
-              <motion.div
-                id="site-mobile-navigation"
-                className="fixed inset-x-0 bottom-0 top-[85px] z-40 xl:hidden"
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-              >
+      <AnimatePresence>
+        {menuOpen ? (
+          <motion.div
+            className="fixed inset-0 z-[80] bg-[#152238]/45 backdrop-blur-sm xl:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onMouseDown={(event) => {
+              if (event.target === event.currentTarget) setMenuOpen(false);
+            }}
+          >
+            <motion.div
+              id="mobile-navigation"
+              ref={menuPanelRef}
+              role="dialog"
+              aria-modal="true"
+              aria-label="Navigation menu"
+              initial={{ x: "100%" }}
+              animate={{ x: 0 }}
+              exit={{ x: "100%" }}
+              transition={{ type: "spring", stiffness: 330, damping: 34 }}
+              className="ml-auto flex h-full w-[min(90vw,430px)] flex-col bg-white p-6 shadow-2xl"
+            >
+              <div className="flex items-center justify-between gap-4">
+                <BrandLockup compact />
                 <button
                   type="button"
-                  aria-label="Close navigation"
-                  className="absolute inset-0 bg-foreground/20 backdrop-blur-sm"
-                  onClick={() => setOpen(false)}
-                />
-                <motion.div
-                  ref={mobilePanelRef}
-                  role="dialog"
-                  aria-modal="true"
-                  aria-label="Site navigation"
-                  initial={{ x: "100%" }}
-                  animate={{ x: 0 }}
-                  exit={{ x: "100%" }}
-                  transition={{ type: "spring", stiffness: 320, damping: 34 }}
-                  className="absolute right-0 top-0 flex h-full w-[min(88vw,420px)] flex-col border-l border-border bg-background p-6 shadow-card"
+                  aria-label="Close navigation menu"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    menuButtonRef.current?.focus();
+                  }}
+                  className="grid size-11 place-items-center rounded-xl border border-[#e3e7ec]"
                 >
-                  <div className="flex items-center justify-between border-b border-border pb-5">
-                    <div>
-                      <p className="font-display text-lg font-bold">Explore</p>
-                      <p className="text-xs text-muted-foreground">IG Sabroso Construction</p>
-                    </div>
-                    <button
-                      type="button"
-                      aria-label="Close navigation menu"
-                      className="rounded-full border border-border p-2.5 hover:bg-accent"
-                      onClick={() => {
-                        setOpen(false);
-                        menuButtonRef.current?.focus();
-                      }}
-                    >
-                      <X size={18} />
-                    </button>
-                  </div>
+                  <X aria-hidden="true" size={23} />
+                </button>
+              </div>
 
-                  <nav aria-label="Mobile navigation" className="mt-5 flex flex-col">
-                    {navItems.map((item, index) => (
-                      <Link
+              <nav aria-label="Mobile navigation" className="mt-10 flex flex-col">
+                {PRIMARY_NAVIGATION.map((item, index) => {
+                  const active = isPrimaryNavigationItemActive(
+                    item,
+                    location.pathname,
+                    location.hash,
+                  );
+
+                  const className = [
+                    "flex min-h-14 items-center justify-between border-b border-[#edf0f3] py-3 text-lg font-bold hover:text-primary",
+                    active ? "text-primary" : "text-[#152238]",
+                  ].join(" ");
+
+                  const content = (
+                    <>
+                      <span>{item.label}</span>
+                      <span aria-hidden="true" className="text-sm font-black text-primary">
+                        0{index + 1}
+                      </span>
+                    </>
+                  );
+
+                  if ("hash" in item) {
+                    return (
+                      <a
                         key={item.label}
-                        to={item.to}
-                        hash={item.hash}
-                        onClick={() => handleSectionNavigation(item.hash)}
-                        className={`flex items-center justify-between border-b border-border px-1 py-4 text-base font-semibold transition hover:text-primary ${
-                          isActive(item) ? "text-primary" : "text-foreground"
-                        }`}
+                        href={`${item.to}#${item.hash}`}
+                        aria-label={item.label}
+                        aria-current={active ? "page" : undefined}
+                        onClick={() => setMenuOpen(false)}
+                        className={className}
                       >
-                        <span>{item.label}</span>
-                        <span className="font-display text-xs text-muted-foreground">
-                          {String(index + 1).padStart(2, "0")}
-                        </span>
-                      </Link>
-                    ))}
-                  </nav>
+                        {content}
+                      </a>
+                    );
+                  }
 
-                  <div className="mt-auto pt-8">
+                  return (
                     <Link
-                      to="/consultation"
-                      onClick={() => setOpen(false)}
-                      className="flex w-full items-center justify-between rounded-2xl gradient-brand px-5 py-4 font-semibold text-primary-foreground shadow-soft"
+                      key={item.label}
+                      to={item.to as RouteTarget}
+                      activeOptions={getPrimaryNavigationActiveOptions(item)}
+                      aria-label={item.label}
+                      aria-current={active ? "page" : undefined}
+                      onClick={() => setMenuOpen(false)}
+                      className={className}
                     >
-                      Request a consultation
-                      <ArrowRight size={18} />
+                      {content}
                     </Link>
-                    <div className="mt-5 flex items-center gap-2 text-muted-foreground">
-                      <a
-                        aria-label="Facebook"
-                        href={FACEBOOK_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="rounded-full border border-border p-3 hover:text-primary"
-                      >
-                        <Facebook size={17} />
-                      </a>
-                      <a
-                        aria-label="TikTok"
-                        href={TIKTOK_URL}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="rounded-full border border-border p-3 hover:text-primary"
-                      >
-                        <TikTokIcon size={17} />
-                      </a>
-                    </div>
-                  </div>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>,
-          document.body,
-        )}
-    </header>
+                  );
+                })}
+              </nav>
+
+              <div className="mt-auto space-y-3 pt-8">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setMenuOpen(false);
+                    setManageOpen(true);
+                  }}
+                  className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-[#dce1e7] bg-white px-5 font-bold text-[#152238]"
+                >
+                  <CalendarSearch aria-hidden="true" size={18} />
+                  Manage booking
+                </button>
+                <Link
+                  to="/consultation"
+                  activeOptions={{ exact: true }}
+                  onClick={() => setMenuOpen(false)}
+                  className="flex min-h-13 w-full items-center justify-center gap-3 rounded-xl bg-primary px-5 font-extrabold text-white"
+                >
+                  Book a consultation
+                  <ArrowRight aria-hidden="true" size={18} />
+                </Link>
+              </div>
+            </motion.div>
+          </motion.div>
+        ) : null}
+      </AnimatePresence>
+
+      <CheckBookingModal open={manageOpen} onClose={() => setManageOpen(false)} />
+    </>
   );
 }

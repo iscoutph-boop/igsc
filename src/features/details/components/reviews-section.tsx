@@ -1,89 +1,57 @@
-import { Building2, MapPin, Star } from "lucide-react";
-import { testimonials, type Testimonial } from "../content";
+import { Quote, Star } from "lucide-react";
+import turnoverHandover from "@/assets/real/turnover-handover.webp";
+import { REVIEWS } from "@/content/reviews";
 import { RefinementSection } from "./refinement-shell";
 import { SectionHeading } from "./section-heading";
 
 export function ReviewsSection() {
-  const [featuredReview, ...supportingReviews] = testimonials;
-
   return (
     <RefinementSection id="reviews" tone="muted">
       <SectionHeading
         eyebrow="Client reviews"
-        title="Trusted by families."
-        accent="Proven by results."
-        description="Real feedback from clients we have built with, from the first consultation to turnover day."
+        title="Trusted by real clients."
+        accent="Proven through real projects."
+        description="Public recommendations from clients who worked directly with the IG Sabroso team."
         align="center"
-        className="max-w-3xl"
+        className="max-w-4xl"
       />
 
-      <div className="mx-auto mt-12 grid max-w-6xl gap-8 lg:grid-cols-[1fr_1.08fr] lg:gap-12">
-        <article className="border-b border-border pb-8 lg:border-b-0 lg:border-r lg:pb-0 lg:pr-12">
-          <span
-            aria-hidden="true"
-            className="font-display text-8xl font-bold leading-none text-primary/18"
-          >
-            “
-          </span>
-          <Rating rating={featuredReview.rating} />
-          <blockquote className="mt-7 text-2xl font-medium leading-[1.55] text-foreground sm:text-3xl">
-            “{featuredReview.quote}”
-          </blockquote>
-          <ReviewAttribution review={featuredReview} className="mt-8" />
-        </article>
-
-        <div>
-          {supportingReviews.map((review) => (
-            <article
+      <div className="mt-12 grid gap-6 lg:grid-cols-[0.85fr_1.15fr] lg:items-stretch">
+        <div className="overflow-hidden rounded-[1.75rem] border border-border bg-card shadow-card">
+          <img
+            src={turnoverHandover}
+            alt="IG Sabroso team presenting a ceremonial project key during a completed residential handover"
+            className="h-full min-h-[420px] w-full object-cover"
+            loading="lazy"
+          />
+        </div>
+        <div className="grid gap-4">
+          {REVIEWS.map((review) => (
+            <figure
               key={review.name}
-              className="border-b border-border py-7 first:pt-0 last:border-b-0 last:pb-0"
+              className="rounded-2xl border border-border bg-white p-6 shadow-[0_12px_36px_rgba(21,34,56,0.055)] sm:p-7"
             >
-              <Rating rating={review.rating} />
-              <blockquote className="mt-4 text-xl font-medium leading-8 text-foreground">
+              <div className="flex items-start justify-between gap-4">
+                <Quote aria-hidden="true" size={29} className="text-primary" />
+                <div className="flex gap-0.5 text-primary" aria-label="5 out of 5 stars">
+                  {Array.from({ length: 5 }, (_, index) => (
+                    <Star key={index} aria-hidden="true" size={16} fill="currentColor" />
+                  ))}
+                </div>
+              </div>
+              <blockquote className="mt-5 text-base leading-8 text-[#344054]">
                 “{review.quote}”
               </blockquote>
-              <ReviewAttribution review={review} className="mt-6" />
-            </article>
+              <figcaption className="mt-5 border-t border-border pt-4">
+                <p className="font-extrabold text-foreground">{review.name}</p>
+                <p className="mt-1 text-xs font-bold uppercase tracking-[0.1em] text-primary">
+                  {review.project}
+                </p>
+              </figcaption>
+            </figure>
           ))}
         </div>
       </div>
-
-      <p className="mt-10 border-t border-border pt-6 text-center text-sm text-muted-foreground">
-        3 verified client stories shown
-      </p>
     </RefinementSection>
-  );
-}
-
-function Rating({ rating }: { rating: number }) {
-  return (
-    <div className="flex gap-1 text-primary" aria-label={`${rating} out of 5 stars`}>
-      {Array.from({ length: rating }, (_, index) => (
-        <Star key={index} aria-hidden="true" size={21} fill="currentColor" />
-      ))}
-    </div>
-  );
-}
-
-function ReviewAttribution({ review, className }: { review: Testimonial; className?: string }) {
-  return (
-    <footer className={`flex items-center gap-4 ${className ?? ""}`}>
-      <span className="grid size-12 shrink-0 place-items-center rounded-full bg-primary text-lg font-bold text-primary-foreground">
-        {review.name.replace(/^The |^Mr\. & Mrs\. /, "").charAt(0)}
-      </span>
-      <span className="min-w-0">
-        <span className="block font-bold text-foreground">{review.name}</span>
-        <span className="mt-1 flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1">
-            <Building2 aria-hidden="true" size={13} />
-            {review.project}
-          </span>
-          <span className="inline-flex items-center gap-1 text-primary">
-            <MapPin aria-hidden="true" size={13} />
-            {review.location}
-          </span>
-        </span>
-      </span>
-    </footer>
   );
 }

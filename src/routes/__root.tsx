@@ -1,74 +1,74 @@
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
-  Outlet,
+  HeadContent,
   Link,
+  Outlet,
+  Scripts,
   createRootRouteWithContext,
   useRouter,
-  HeadContent,
-  Scripts,
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
-
 import appCss from "../styles.css?url";
-import { reportLovableError } from "../lib/lovable-error-reporting";
-import { ThemeProvider } from "../components/theme-provider";
 import { FloatingContact } from "../components/floating-contact";
-import { IntroLoader } from "../components/intro-loader";
+import { ThemeProvider } from "../components/theme-provider";
+import { reportLovableError } from "../lib/lovable-error-reporting";
+import { DEFAULT_SOCIAL_IMAGE, LOCAL_BUSINESS_SCHEMA, SITE_URL } from "../lib/seo";
 
 function NotFoundComponent() {
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-7xl font-bold text-foreground">404</h1>
-        <h2 className="mt-4 text-xl font-semibold text-foreground">Page not found</h2>
-        <p className="mt-2 text-sm text-muted-foreground">
-          The page you're looking for doesn't exist or has been moved.
+    <div className="flex min-h-screen items-center justify-center bg-white px-5">
+      <div className="max-w-lg text-center">
+        <p className="font-display text-8xl font-black text-primary">404</p>
+        <h1 className="mt-4 text-3xl font-extrabold text-foreground">Page not found</h1>
+        <p className="mt-3 text-sm leading-7 text-muted-foreground">
+          The page may have moved, or the project link may no longer be available.
         </p>
-        <div className="mt-6">
-          <Link
-            to="/"
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
-          >
-            Go home
-          </Link>
-        </div>
+        <Link
+          to="/"
+          className="mt-7 inline-flex min-h-12 items-center justify-center rounded-xl bg-primary px-6 text-sm font-extrabold text-white"
+        >
+          Return home
+        </Link>
       </div>
     </div>
   );
 }
 
 function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
-  console.error(error);
   const router = useRouter();
+
   useEffect(() => {
     reportLovableError(error, { boundary: "tanstack_root_error_component" });
   }, [error]);
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-background px-4">
-      <div className="max-w-md text-center">
-        <h1 className="text-xl font-semibold tracking-tight text-foreground">
-          This page didn't load
-        </h1>
-        <p className="mt-2 text-sm text-muted-foreground">
-          Something went wrong on our end. You can try refreshing or head back home.
+    <div className="flex min-h-screen items-center justify-center bg-white px-5">
+      <div className="max-w-lg text-center">
+        <p className="text-xs font-extrabold uppercase tracking-[0.18em] text-primary">
+          Temporary error
         </p>
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
+        <h1 className="mt-4 text-4xl font-extrabold text-foreground">This page did not load.</h1>
+        <p className="mt-4 text-sm leading-7 text-muted-foreground">
+          Try the page again. If the issue continues, return to the homepage and contact the IG
+          Sabroso team.
+        </p>
+        <div className="mt-7 flex flex-wrap justify-center gap-3">
           <button
+            type="button"
             onClick={() => {
               router.invalidate();
               reset();
             }}
-            className="inline-flex items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground transition-colors hover:bg-primary/90"
+            className="min-h-12 rounded-xl bg-primary px-6 text-sm font-extrabold text-white"
           >
             Try again
           </button>
-          <a
-            href="/"
-            className="inline-flex items-center justify-center rounded-md border border-input bg-background px-4 py-2 text-sm font-medium text-foreground transition-colors hover:bg-accent"
+          <Link
+            to="/"
+            className="inline-flex min-h-12 items-center rounded-xl border border-border bg-white px-6 text-sm font-extrabold text-foreground"
           >
-            Go home
-          </a>
+            Return home
+          </Link>
         </div>
       </div>
     </div>
@@ -79,43 +79,30 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
   head: () => ({
     meta: [
       { charSet: "utf-8" },
-      { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "IG Sabroso Construction — Your Dependable Building Partner" },
+      { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
+      { title: "IG Sabroso Construction | Your Dependable Building Partner" },
       {
         name: "description",
         content:
-          "Premium construction, renovation, and civil works in Dasmariñas, Cavite. Build with confidence — build with Sabroso.",
+          "General contracting, design-build, construction management, and renovation services from IG Sabroso Construction in Dasmarinas, Cavite.",
       },
-      {
-        property: "og:title",
-        content: "IG Sabroso Construction — Your Dependable Building Partner",
-      },
+      { property: "og:title", content: "IG Sabroso Construction | Build with Confidence" },
       {
         property: "og:description",
         content:
-          "Premium construction, renovation, and civil works in Dasmariñas, Cavite. Build with confidence — build with Sabroso.",
+          "Explore selected real projects and request a construction consultation with IG Sabroso Construction.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:image", content: DEFAULT_SOCIAL_IMAGE },
       { name: "twitter:card", content: "summary_large_image" },
-      {
-        name: "twitter:title",
-        content: "IG Sabroso Construction — Your Dependable Building Partner",
-      },
+      { name: "twitter:title", content: "IG Sabroso Construction | Build with Confidence" },
       {
         name: "twitter:description",
         content:
-          "Premium construction, renovation, and civil works in Dasmariñas, Cavite. Build with confidence — build with Sabroso.",
+          "Selected real projects, services, and consultation booking from IG Sabroso Construction.",
       },
-      {
-        property: "og:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0b8c9359-9f26-4e93-99cd-28e993103da8/id-preview-6d968062--f41699a7-4291-4b0a-a8c1-7aa9f400e5fd.lovable.app-1781064881122.png",
-      },
-      {
-        name: "twitter:image",
-        content:
-          "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/0b8c9359-9f26-4e93-99cd-28e993103da8/id-preview-6d968062--f41699a7-4291-4b0a-a8c1-7aa9f400e5fd.lovable.app-1781064881122.png",
-      },
+      { name: "twitter:image", content: DEFAULT_SOCIAL_IMAGE },
+      { name: "theme-color", content: "#ffffff" },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
@@ -123,7 +110,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
       {
         rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&family=Montserrat:wght@300;400;500;600;700&display=swap",
+        href: "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700;800;900&family=Manrope:wght@400;500;600;700;800&display=swap",
       },
     ],
   }),
@@ -138,8 +125,18 @@ function RootShell({ children }: { children: ReactNode }) {
     <html lang="en">
       <head>
         <HeadContent />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(LOCAL_BUSINESS_SCHEMA) }}
+        />
       </head>
       <body>
+        <a
+          href="#main-content"
+          className="fixed left-4 top-4 z-[100] -translate-y-24 rounded-lg bg-[#152238] px-4 py-3 text-sm font-bold text-white transition focus:translate-y-0"
+        >
+          Skip to content
+        </a>
         {children}
         <Scripts />
       </body>
@@ -152,9 +149,10 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <Outlet />
+        <div id="main-content">
+          <Outlet />
+        </div>
         <FloatingContact />
-        <IntroLoader />
       </ThemeProvider>
     </QueryClientProvider>
   );

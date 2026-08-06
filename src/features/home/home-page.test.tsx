@@ -1,38 +1,31 @@
-import { useState } from "react";
-import { render, screen } from "@testing-library/react";
-import userEvent from "@testing-library/user-event";
+import { screen, within } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
-import { HomeHeroContent } from "./home-page";
+import { renderRoute } from "@/test/render-route";
 
-function BookingHarness() {
-  const [bookingOpen, setBookingOpen] = useState(false);
-
-  return (
-    <>
-      <HomeHeroContent onOpenBooking={() => setBookingOpen(true)} />
-      {bookingOpen ? <p role="status">Booking manager open</p> : null}
-    </>
-  );
-}
-
-describe("HomeHeroContent", () => {
-  it("renders the approved conversion hierarchy and opens booking management", async () => {
-    const user = userEvent.setup();
-    render(<BookingHarness />);
-
+describe("HomePage", () => {
+  it("renders the approved conversion hierarchy and real featured project", async () => {
+    await renderRoute("/");
     expect(
-      screen.getByRole("heading", {
-        level: 1,
-        name: "Dependable building solutions for homes, renovations, and civil works.",
-      }),
+      await screen.findByRole("heading", { level: 1, name: /build with confidence/i }),
     ).toBeTruthy();
-    expect(screen.getByText("10+")).toBeTruthy();
-    expect(screen.getByText("300+")).toBeTruthy();
+    expect(screen.getByRole("link", { name: /view our projects/i }).getAttribute("href")).toBe(
+      "/projects",
+    );
+    expect(
+      screen.getAllByRole("link", { name: /book a consultation/i })[0].getAttribute("href"),
+    ).toBe("/consultation");
+    expect(screen.getAllByText("O Residence").length).toBeGreaterThan(0);
+  });
 
-    const discover = screen.getByRole("link", { name: "Discover More" });
-    expect(discover.getAttribute("href")).toBe("/details#about");
+  it("renders an automatic testimonial slider without manual controls", async () => {
+    await renderRoute("/");
 
-    await user.click(screen.getByRole("button", { name: "Check Booking" }));
-    expect(screen.getByRole("status").textContent).toBe("Booking manager open");
+    const testimonialRegion = await screen.findByRole("region", {
+      name: "Client testimonials",
+    });
+
+    expect(testimonialRegion.querySelector("blockquote")).not.toBeNull();
+    expect(within(testimonialRegion).queryAllByRole("button")).toHaveLength(0);
+    expect(within(testimonialRegion).queryAllByRole("link")).toHaveLength(0);
   });
 });

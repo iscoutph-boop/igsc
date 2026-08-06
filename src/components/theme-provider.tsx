@@ -1,34 +1,14 @@
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import { createContext, useContext, type ReactNode } from "react";
 
-type Theme = "dark" | "light";
-type Ctx = { theme: Theme; toggle: () => void; setTheme: (t: Theme) => void };
+type Theme = "light";
+type ThemeContextValue = { theme: Theme; toggle: () => void; setTheme: (theme: Theme) => void };
 
-const ThemeContext = createContext<Ctx | null>(null);
+const ThemeContext = createContext<ThemeContextValue | null>(null);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>("light");
-
-  useEffect(() => {
-    const stored = (typeof localStorage !== "undefined" &&
-      localStorage.getItem("sabroso-theme")) as Theme | null;
-    if (stored === "dark" || stored === "light") setTheme(stored);
-    // No saved preference → keep light as default (do not follow system).
-  }, []);
-
-  useEffect(() => {
-    const root = document.documentElement;
-    root.classList.toggle("dark", theme === "dark");
-    root.style.colorScheme = theme;
-    try {
-      localStorage.setItem("sabroso-theme", theme);
-    } catch {
-      // Storage can be unavailable in private or restricted browser contexts.
-    }
-  }, [theme]);
-
   return (
     <ThemeContext.Provider
-      value={{ theme, setTheme, toggle: () => setTheme(theme === "dark" ? "light" : "dark") }}
+      value={{ theme: "light", toggle: () => undefined, setTheme: () => undefined }}
     >
       {children}
     </ThemeContext.Provider>
@@ -36,7 +16,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 }
 
 export function useTheme() {
-  const ctx = useContext(ThemeContext);
-  if (!ctx) throw new Error("useTheme must be used within ThemeProvider");
-  return ctx;
+  const context = useContext(ThemeContext);
+  if (!context) throw new Error("useTheme must be used within ThemeProvider");
+  return context;
 }

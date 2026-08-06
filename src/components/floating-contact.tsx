@@ -2,8 +2,7 @@ import { useEffect, useRef, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, Bot, Headphones, X, Send, ArrowRight } from "lucide-react";
-import logoAsset from "@/assets/logo.png.asset.json";
-import supportIconAsset from "@/assets/support-icon.png.asset.json";
+import officialLogo from "@/assets/igs-official-logo.png";
 import { IGS_PHONE_WA } from "@/lib/contact";
 
 type Mode = null | "menu" | "bot" | "agent";
@@ -185,9 +184,13 @@ export function FloatingContact() {
             style={{ maxHeight: "min(560px, 80vh)" }}
           >
             {/* Header */}
-            <div className="gradient-brand text-primary-foreground p-4 flex items-center gap-3">
-              <div className="h-10 w-10 rounded-full bg-white/95 p-1 shrink-0">
-                <img src={logoAsset.url} alt="IGS" className="h-full w-full object-contain" />
+            <div className="border-b border-border bg-white p-4 text-foreground flex items-center gap-3">
+              <div className="h-10 w-10 shrink-0">
+                <img
+                  src={officialLogo}
+                  alt="IG Sabroso Construction"
+                  className="h-full w-full object-contain"
+                />
               </div>
               <div className="min-w-0 flex-1">
                 <div className="font-display font-bold leading-tight">IG Sabroso</div>
@@ -199,7 +202,7 @@ export function FloatingContact() {
                   setOpen(false);
                   reset();
                 }}
-                className="p-1.5 rounded-full hover:bg-white/15 transition"
+                className="p-1.5 rounded-full hover:bg-muted transition"
               >
                 <X size={18} />
               </button>
@@ -367,16 +370,16 @@ export function FloatingContact() {
               <Headphones className="size-8 md:size-5" aria-hidden="true" />
             </motion.span>
           ) : (
-            <motion.img
+            <motion.span
               key="support"
-              src={supportIconAsset.url}
-              alt="Contact support"
               initial={{ scale: 0.7, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.7, opacity: 0 }}
               transition={{ duration: 0.2 }}
-              className="h-full w-full object-contain"
-            />
+              className="inline-flex size-full items-center justify-center rounded-full bg-primary text-white"
+            >
+              <MessageCircle className="size-6" aria-hidden="true" />
+            </motion.span>
           )}
         </AnimatePresence>
         {!open && isHome ? (

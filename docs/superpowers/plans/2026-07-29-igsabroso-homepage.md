@@ -146,4 +146,3 @@ deployment, and wait until its publisher reports "Up to date".
 Open `https://www.igsabroso.com/` at desktop and mobile viewports. Confirm the
 approved homepage content and crop, exercise Check Booking, verify Discover More,
 and confirm zero app-owned console errors.
-
