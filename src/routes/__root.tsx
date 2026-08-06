@@ -9,7 +9,7 @@ import {
 } from "@tanstack/react-router";
 import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
-import { FloatingContact } from "../components/floating-contact";
+
 import { ThemeProvider } from "../components/theme-provider";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { DEFAULT_SOCIAL_IMAGE, LOCAL_BUSINESS_SCHEMA, SITE_URL } from "../lib/seo";
@@ -152,7 +152,7 @@ function RootComponent() {
         <div id="main-content">
           <Outlet />
         </div>
-        <FloatingContact />
+        
       </ThemeProvider>
     </QueryClientProvider>
   );
