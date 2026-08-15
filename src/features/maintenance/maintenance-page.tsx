@@ -40,7 +40,7 @@ export function MaintenancePage() {
       <main className="relative flex-1">
         <div className="mx-auto grid w-full max-w-[1500px] grid-cols-1 items-stretch md:grid-cols-2">
           {/* LEFT */}
-          <div className="order-1 flex flex-col justify-center px-6 py-10 sm:px-10 md:py-16 lg:px-16 lg:py-20">
+          <div className="flex flex-col justify-center px-6 py-10 sm:px-10 md:py-16 lg:px-16 lg:py-20">
             <div className="flex items-center gap-3">
               <img
                 src={igsLogo}
@@ -75,7 +75,7 @@ export function MaintenancePage() {
             </p>
 
             {/* Mobile image + thank you panel */}
-            <div className="order-2 mt-8 md:hidden">
+            <div className="mt-8 md:hidden">
               <MobileVisual />
             </div>
 
