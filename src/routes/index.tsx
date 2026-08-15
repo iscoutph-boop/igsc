@@ -1,21 +1,25 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { HomePage } from "@/features/home/home-page";
+// MAINTENANCE MODE: the original homepage lives in "@/features/home/home-page" (HomePage)
+// and is untouched. To restore it, import HomePage again and set `component: HomePage`,
+// then revert the head() meta below to the original title/description.
+// import { HomePage } from "@/features/home/home-page";
+import { MaintenancePage } from "@/features/maintenance/maintenance-page";
 import { DEFAULT_SOCIAL_IMAGE, SITE_URL } from "@/lib/seo";
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "IG Sabroso Construction | Build with Confidence" },
+      { title: "Website Update | IG Sabroso Construction" },
       {
         name: "description",
         content:
-          "Explore selected real projects and dependable general contracting, design-build, construction management, and renovation services in Cavite and nearby areas.",
+          "IG Sabroso Construction is currently updating its website to provide an improved online experience. Contact us for inquiries and consultations.",
       },
-      { property: "og:title", content: "IG Sabroso Construction | Build with Confidence" },
+      { property: "og:title", content: "Website Update | IG Sabroso Construction" },
       {
         property: "og:description",
         content:
-          "Quality construction, transparent coordination, and a clear path from consultation to turnover.",
+          "IG Sabroso Construction is currently updating its website to provide an improved online experience. Contact us for inquiries and consultations.",
       },
       { property: "og:url", content: SITE_URL },
       { property: "og:image", content: DEFAULT_SOCIAL_IMAGE },
@@ -23,5 +27,5 @@ export const Route = createFileRoute("/")({
     ],
     links: [{ rel: "canonical", href: SITE_URL }],
   }),
-  component: HomePage,
+  component: MaintenancePage,
 });
