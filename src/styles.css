@@ -172,6 +172,37 @@
   }
 }
 
+.maintenance-cds-brand-lockup {
+  position: relative;
+  display: block;
+  width: min(22rem, 82vw);
+  height: 8.75rem;
+  overflow: hidden;
+  isolation: isolate;
+  mix-blend-mode: screen;
+}
+
+.maintenance-cds-brand-image {
+  position: absolute;
+  top: -3.5rem;
+  left: 50%;
+  width: 40rem;
+  max-width: none;
+  transform: translateX(-50%);
+}
+
+@media (max-width: 640px) {
+  .maintenance-cds-brand-lockup {
+    width: min(18rem, 86vw);
+    height: 7.25rem;
+  }
+
+  .maintenance-cds-brand-image {
+    top: -3rem;
+    width: 34rem;
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   html {
     scroll-behavior: auto;

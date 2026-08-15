@@ -11,8 +11,24 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 
 import { ThemeProvider } from "../components/theme-provider";
+import { MaintenancePage } from "../features/maintenance/maintenance-page";
+import {
+  getMaintenanceAwareTitle,
+  isMaintenanceModeEnabled,
+} from "../features/maintenance/maintenance-mode";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { DEFAULT_SOCIAL_IMAGE, LOCAL_BUSINESS_SCHEMA, SITE_URL } from "../lib/seo";
+
+// Vitest loads the project's local env files too, so keep the reversible
+// maintenance switch from masking the normal route/component test surface.
+// `VITEST` is injected by Vitest even when the Vite mode is not `test`.
+const IS_TEST_ENV =
+  import.meta.env.MODE === "test" ||
+  Boolean(import.meta.env.VITEST) ||
+  (typeof process !== "undefined" && process.env.NODE_ENV === "test");
+const MAINTENANCE_MODE_ENABLED =
+  !IS_TEST_ENV &&
+  isMaintenanceModeEnabled(import.meta.env.VITE_MAINTENANCE_MODE, import.meta.env.MODE);
 
 function NotFoundComponent() {
   return (
@@ -80,7 +96,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1, viewport-fit=cover" },
-      { title: "IG Sabroso Construction | Your Dependable Building Partner" },
+      {
+        title: getMaintenanceAwareTitle(
+          "IG Sabroso Construction | Your Dependable Building Partner",
+          import.meta.env.VITE_MAINTENANCE_MODE,
+          IS_TEST_ENV ? "test" : import.meta.env.MODE,
+        ),
+      },
       {
         name: "description",
         content:
@@ -149,10 +171,13 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
-        <div id="main-content">
-          <Outlet />
-        </div>
-        
+        {MAINTENANCE_MODE_ENABLED ? (
+          <MaintenancePage />
+        ) : (
+          <div id="main-content">
+            <Outlet />
+          </div>
+        )}
       </ThemeProvider>
     </QueryClientProvider>
   );

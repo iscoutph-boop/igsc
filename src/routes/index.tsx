@@ -1,25 +1,28 @@
 import { createFileRoute } from "@tanstack/react-router";
-// MAINTENANCE MODE: the original homepage lives in "@/features/home/home-page" (HomePage)
-// and is untouched. To restore it, import HomePage again and set `component: HomePage`,
-// then revert the head() meta below to the original title/description.
-// import { HomePage } from "@/features/home/home-page";
-import { MaintenancePage } from "@/features/maintenance/maintenance-page";
+import { HomePage } from "@/features/home/home-page";
+import { getMaintenanceAwareTitle } from "@/features/maintenance/maintenance-mode";
 import { DEFAULT_SOCIAL_IMAGE, SITE_URL } from "@/lib/seo";
+
+const ROUTE_TITLE = getMaintenanceAwareTitle(
+  "IG Sabroso Construction | Build with Confidence",
+  import.meta.env.VITE_MAINTENANCE_MODE,
+  import.meta.env.MODE,
+);
 
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Website Update | IG Sabroso Construction" },
+      { title: ROUTE_TITLE },
       {
         name: "description",
         content:
-          "IG Sabroso Construction is currently updating its website to provide an improved online experience. Contact us for inquiries and consultations.",
+          "Explore selected real projects and dependable general contracting, design-build, construction management, and renovation services in Cavite and nearby areas.",
       },
-      { property: "og:title", content: "Website Update | IG Sabroso Construction" },
+      { property: "og:title", content: "IG Sabroso Construction | Build with Confidence" },
       {
         property: "og:description",
         content:
-          "IG Sabroso Construction is currently updating its website to provide an improved online experience. Contact us for inquiries and consultations.",
+          "Quality construction, transparent coordination, and a clear path from consultation to turnover.",
       },
       { property: "og:url", content: SITE_URL },
       { property: "og:image", content: DEFAULT_SOCIAL_IMAGE },
@@ -27,5 +30,5 @@ export const Route = createFileRoute("/")({
     ],
     links: [{ rel: "canonical", href: SITE_URL }],
   }),
-  component: MaintenancePage,
+  component: HomePage,
 });
