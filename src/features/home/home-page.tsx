@@ -25,6 +25,7 @@ import { PROJECTS } from "@/content/projects";
 import { REVIEWS } from "@/content/reviews";
 import { SERVICES } from "@/content/services";
 import { PageTransition } from "@/components/page-transition";
+import { CompanyHighlights } from "@/features/home/company-highlights";
 
 const featuredProjects = PROJECTS.filter((project) => project.featured).slice(0, 3);
 const processSteps = [
@@ -174,8 +175,6 @@ function HomeHero() {
 }
 
 function HomeOverviewRail() {
-  const featuredProject = featuredProjects[0];
-
   return (
     <section className="border-y border-[#e5e8ec] bg-white">
       <div className="mx-auto grid w-full max-w-[1760px] divide-y divide-[#e5e8ec] px-6 sm:px-8 lg:grid-cols-[0.9fr_1.25fr_0.9fr] lg:divide-x lg:divide-y-0 lg:px-12">
@@ -205,43 +204,7 @@ function HomeOverviewRail() {
           </div>
         </article>
 
-        <article className="grid min-h-[248px] gap-6 py-8 lg:grid-cols-[0.76fr_1.24fr] lg:px-9">
-          <div>
-            <p className="text-[0.68rem] font-extrabold uppercase tracking-[0.14em] text-primary">
-              Featured project
-            </p>
-            <h2 className="mt-3 font-display text-[1.55rem] font-extrabold uppercase leading-[0.96] tracking-[-0.025em] text-[#152238]">
-              {featuredProject.name}
-            </h2>
-            <p className="mt-1 text-[0.7rem] font-bold uppercase tracking-[0.07em] text-primary">
-              {featuredProject.location}
-            </p>
-            <p className="mt-4 text-[0.78rem] leading-5 text-[#5f6b78]">
-              {featuredProject.summary}
-            </p>
-            <Link
-              to="/projects/$slug"
-              params={{ slug: featuredProject.slug }}
-              className="mt-5 inline-flex items-center gap-2 text-[0.7rem] font-extrabold uppercase tracking-[0.08em] text-[#152238] hover:text-primary"
-            >
-              View project details
-              <ArrowRight aria-hidden="true" size={15} className="text-primary" />
-            </Link>
-          </div>
-          <Link
-            to="/projects/$slug"
-            params={{ slug: featuredProject.slug }}
-            aria-label={`View ${featuredProject.name}`}
-            className="overflow-hidden rounded-xl border border-[#e3e7eb] bg-[#f2f4f6] shadow-[0_12px_30px_rgba(21,34,56,0.09)]"
-          >
-            <img
-              src={featuredProject.cover.src}
-              alt={featuredProject.cover.alt}
-              className="aspect-[16/10] h-full w-full object-cover transition duration-500 hover:scale-[1.02]"
-              loading="lazy"
-            />
-          </Link>
-        </article>
+        <CompanyHighlights />
 
         <TestimonialCarousel />
       </div>

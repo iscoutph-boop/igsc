@@ -7,7 +7,8 @@ export type LightboxProps = {
   index: number;
   onClose: () => void;
   onIndexChange?: (i: number) => void;
-  alt?: string;
+  alt?: string | string[];
+  label?: string;
 };
 
 /**
@@ -24,9 +25,13 @@ export function Lightbox({
   onClose,
   onIndexChange,
   alt = "Preview",
+  label = "Image viewer",
 }: LightboxProps) {
   const open = index >= 0 && index < images.length;
   const touchStart = useRef<number | null>(null);
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  const closeButtonRef = useRef<HTMLButtonElement | null>(null);
+  const previouslyFocusedElement = useRef<HTMLElement | null>(null);
   const [i, setI] = useState(index);
 
   useEffect(() => setI(index), [index]);
@@ -47,6 +52,22 @@ export function Lightbox({
       if (e.key === "Escape") onClose();
       else if (e.key === "ArrowLeft") go(i - 1);
       else if (e.key === "ArrowRight") go(i + 1);
+      else if (e.key === "Tab") {
+        const focusable = dialogRef.current?.querySelectorAll<HTMLElement>(
+          'button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+        );
+        if (!focusable?.length) return;
+
+        const first = focusable[0];
+        const last = focusable[focusable.length - 1];
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
     };
     window.addEventListener("keydown", onKey);
     const prev = document.body.style.overflow;
@@ -57,13 +78,28 @@ export function Lightbox({
     };
   }, [go, i, onClose, open]);
 
+  useEffect(() => {
+    if (!open) return;
+    previouslyFocusedElement.current =
+      document.activeElement instanceof HTMLElement ? document.activeElement : null;
+    const focusFrame = window.requestAnimationFrame(() => closeButtonRef.current?.focus());
+
+    return () => {
+      window.cancelAnimationFrame(focusFrame);
+      previouslyFocusedElement.current?.focus();
+      previouslyFocusedElement.current = null;
+    };
+  }, [open]);
+
   if (!open) return null;
   const src = images[i];
   const multi = images.length > 1;
+  const altText = Array.isArray(alt) ? (alt[i] ?? alt[0] ?? "Preview") : alt;
 
   return (
     <AnimatePresence>
       <motion.div
+        ref={dialogRef}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
@@ -71,10 +107,12 @@ export function Lightbox({
         onClick={onClose}
         role="dialog"
         aria-modal="true"
+        aria-label={label}
       >
         {/* Close */}
         <button
           type="button"
+          ref={closeButtonRef}
           aria-label="Close"
           onClick={(e) => {
             e.stopPropagation();
@@ -114,7 +152,7 @@ export function Lightbox({
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 0.25 }}
           src={src}
-          alt={alt}
+          alt={altText}
           onClick={(e) => e.stopPropagation()}
           onTouchStart={(e) => {
             touchStart.current = e.touches[0].clientX;

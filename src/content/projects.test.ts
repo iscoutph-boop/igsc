@@ -23,4 +23,20 @@ describe("PROJECTS", () => {
     expect(getProjectBySlug("o-residence")?.name).toBe("O Residence");
     expect(getProjectBySlug("missing-project")).toBeUndefined();
   });
+
+  it("uses the supplied project folders and thumbnail files for selected real projects", () => {
+    const selectedProjects = PROJECTS.filter((project) => project.featured);
+
+    expect(selectedProjects.map((project) => project.name)).toEqual([
+      "O Residence",
+      "A Residence",
+      "Townhouse Project",
+    ]);
+    expect(selectedProjects.map((project) => project.cover.src)).toEqual([
+      "/assets/projects/o-residence/thumbnail.jpg",
+      "/assets/projects/a-residence/thumbnail.jpg",
+      "/assets/projects/townhouse-project/thumbnail.png",
+    ]);
+    expect(getProjectBySlug("townhouse-project")?.gallery.length).toBe(7);
+  });
 });

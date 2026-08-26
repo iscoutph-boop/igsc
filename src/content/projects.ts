@@ -1,14 +1,10 @@
-import aResidenceAsset from "@/assets/proj-a-residence.jpg.asset.json";
 import fResidenceAsset from "@/assets/proj-f-residence.jpg.asset.json";
 import iResidenceAsset from "@/assets/proj-i-residence.jpg.asset.json";
 import keystoneAsset from "@/assets/proj-keystone.jpg.asset.json";
 import lResidenceAsset from "@/assets/proj-l-residence.jpg.asset.json";
-import bApartmentAsset from "@/assets/proj-b-apartment.jpg.asset.json";
-import homeHero from "@/assets/real/home-hero.webp";
 import gonoDetail from "@/assets/real/gono-detail.webp";
 import turnoverRibbon from "@/assets/real/turnover-ribbon.webp";
 import turnoverHandover from "@/assets/real/turnover-handover.webp";
-import townhouseProject from "@/assets/real/townhouse-project.webp";
 
 export type ProjectStatus = "completed" | "ongoing";
 export type ProjectCategory = "residential" | "commercial" | "renovation" | "multi-unit";
@@ -59,17 +55,66 @@ const image = (
 });
 
 const oResidenceCover = image(
-  homeHero,
-  "Completed modern two-storey IG Sabroso residence with a high roofline, glass balcony, and covered carport",
-  "Selected real projects / O Residence",
-  2400,
-  1600,
+  "/assets/projects/o-residence/thumbnail.jpg",
+  "O Residence exterior photographed from the front gate",
+  "Projects.zip / O Residence / Thumbnail.jpg",
 );
+const oResidenceGallery = [
+  oResidenceCover,
+  image(
+    "/assets/projects/o-residence/exterior/ckr-2199-2-1.jpg",
+    "O Residence exterior photographed from the front gate",
+    "Projects.zip / O Residence / EXTERIOR / CKR_2199-2 (1).jpg",
+  ),
+  image(
+    "/assets/projects/o-residence/interior/ckr-14.jpg",
+    "O Residence interior photograph",
+    "Projects.zip / O Residence / INTERIOR / CKR_-14.jpg",
+  ),
+  image(
+    "/assets/projects/o-residence/interior/ckr-33.jpg",
+    "O Residence interior photograph",
+    "Projects.zip / O Residence / INTERIOR / CKR_-33.jpg",
+  ),
+  image(
+    "/assets/projects/o-residence/interior/img-9373.jpg",
+    "O Residence interior photograph",
+    "Projects.zip / O Residence / INTERIOR / IMG_9373.JPG",
+  ),
+] as const;
 const aResidenceCover = image(
-  aResidenceAsset.url,
-  "Completed A Residence in Imus City with layered modern volumes and warm exterior accents",
-  "Completed Projects / A Residence - Imus",
+  "/assets/projects/a-residence/thumbnail.jpg",
+  "A Residence exterior photograph",
+  "Projects.zip / A Residence / Thumbnail.jpg",
 );
+const aResidenceGallery = [
+  aResidenceCover,
+  image(
+    "/assets/projects/a-residence/exterior/img-3902-dng-1.jpg",
+    "A Residence exterior photograph",
+    "Projects.zip / A Residence / EXTERIOR / IMG_3902.DNG (1).jpg",
+  ),
+  image(
+    "/assets/projects/a-residence/exterior/img-3906-dng.jpg",
+    "A Residence exterior photograph",
+    "Projects.zip / A Residence / EXTERIOR / IMG_3906.DNG.jpg",
+  ),
+  image(
+    "/assets/projects/a-residence/interior/20241127-142432.jpg",
+    "A Residence interior photograph",
+    "Projects.zip / A Residence / INTERIOR / 20241127_142432.jpg",
+  ),
+  image(
+    "/assets/projects/a-residence/interior/6186221592237949530.jpg",
+    "A Residence interior photograph",
+    "Projects.zip / A Residence / INTERIOR / 6186221592237949530.jpg",
+  ),
+  image(
+    "/assets/projects/a-residence/interior/img-1320.jpg",
+    "A Residence interior photograph",
+    "Projects.zip / A Residence / INTERIOR / IMG_1320.JPG",
+  ),
+] as const;
 const gResidenceCover = image(
   gonoDetail,
   "Low-angle architectural detail of the completed G Residence with warm vertical cladding and broad roof overhangs",
@@ -101,18 +146,44 @@ const lResidenceCover = image(
   "Renovated L Residence in Pasig City with a refined contemporary exterior",
   "Completed Projects / L Residence",
 );
-const bApartmentCover = image(
-  townhouseProject,
-  "Completed multi-unit townhouse development with three coordinated residential façades",
-  "Selected real projects / B Apartment",
-  2400,
-  1800,
+const townhouseProjectCover = image(
+  "/assets/projects/townhouse-project/thumbnail.png",
+  "Townhouse Project exterior photograph",
+  "Projects.zip / Townhouse Project / Thumbnail.png",
 );
-const bApartmentArchive = image(
-  bApartmentAsset.url,
-  "B Apartment completed triplex residential project in San Pedro City",
-  "Completed Projects / B Apartment",
-);
+const townhouseProjectGallery = [
+  townhouseProjectCover,
+  image(
+    "/assets/projects/townhouse-project/exterior/img-5661.jpg",
+    "Townhouse Project exterior photograph",
+    "Projects.zip / Townhouse Project / Exterior / IMG_5661.JPG",
+  ),
+  image(
+    "/assets/projects/townhouse-project/exterior/img-5686.jpg",
+    "Townhouse Project exterior photograph",
+    "Projects.zip / Townhouse Project / Exterior / IMG_5686.JPG",
+  ),
+  image(
+    "/assets/projects/townhouse-project/exterior/img-5691-1.jpg",
+    "Townhouse Project exterior photograph",
+    "Projects.zip / Townhouse Project / Exterior / IMG_5691 (1).JPG",
+  ),
+  image(
+    "/assets/projects/townhouse-project/interior/img-5673.jpg",
+    "Townhouse Project interior photograph",
+    "Projects.zip / Townhouse Project / Interior / IMG_5673.JPG",
+  ),
+  image(
+    "/assets/projects/townhouse-project/interior/img-5778.jpg",
+    "Townhouse Project interior photograph",
+    "Projects.zip / Townhouse Project / Interior / IMG_5778.JPG",
+  ),
+  image(
+    "/assets/projects/townhouse-project/interior/img-5786.jpg",
+    "Townhouse Project interior photograph",
+    "Projects.zip / Townhouse Project / Interior / IMG_5786.JPG",
+  ),
+] as const;
 const keystoneCover = image(
   keystoneAsset.url,
   "Keystone Building three-storey commercial development in Dasmarinas City",
@@ -143,7 +214,7 @@ export const PROJECTS: readonly ProjectRecord[] = [
       "Completed residence",
     ],
     cover: oResidenceCover,
-    gallery: [oResidenceCover],
+    gallery: oResidenceGallery,
     featured: true,
   },
   {
@@ -163,7 +234,7 @@ export const PROJECTS: readonly ProjectRecord[] = [
       "Completed residence",
     ],
     cover: aResidenceCover,
-    gallery: [aResidenceCover],
+    gallery: aResidenceGallery,
     featured: true,
   },
   {
@@ -185,7 +256,7 @@ export const PROJECTS: readonly ProjectRecord[] = [
     ],
     cover: gResidenceCover,
     gallery: [gResidenceCover, gResidenceTurnover, gResidenceHandover],
-    featured: true,
+    featured: false,
   },
   {
     slug: "i-residence",
@@ -229,28 +300,19 @@ export const PROJECTS: readonly ProjectRecord[] = [
     featured: false,
   },
   {
-    slug: "b-apartment",
-    name: "B Apartment",
+    slug: "townhouse-project",
+    name: "Townhouse Project",
     status: "completed",
     category: "multi-unit",
-    location: "San Pedro City, Laguna",
-    summary: "A practical two-storey triplex designed for comfortable, durable rental living.",
+    location: "Selected real project",
+    summary:
+      "A completed IG Sabroso project documented with supplied exterior and interior photography.",
     description:
-      "A two-storey, three-unit apartment development. Each 78 sqm unit includes two bedrooms, a carport, toilet and bath, service area, and private balcony within one cohesive contemporary façade.",
-    specifications: {
-      floorArea: "78 sqm per unit",
-      bedrooms: 2,
-      bathrooms: 1,
-      carport: "1 vehicle per unit",
-    },
-    highlights: [
-      "Three residential units",
-      "Private balconies",
-      "Service areas",
-      "Completed multi-unit project",
-    ],
-    cover: bApartmentCover,
-    gallery: [bApartmentCover, bApartmentArchive],
+      "Townhouse Project is presented through the supplied exterior and interior project photography.",
+    specifications: {},
+    highlights: ["Exterior photography", "Interior photography", "Completed project"],
+    cover: townhouseProjectCover,
+    gallery: townhouseProjectGallery,
     featured: true,
   },
   {
