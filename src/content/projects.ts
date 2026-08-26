@@ -1,7 +1,7 @@
-import fResidenceAsset from "@/assets/proj-f-residence.jpg.asset.json";
-import iResidenceAsset from "@/assets/proj-i-residence.jpg.asset.json";
-import keystoneAsset from "@/assets/proj-keystone.jpg.asset.json";
-import lResidenceAsset from "@/assets/proj-l-residence.jpg.asset.json";
+import fResidenceAsset from "@/assets/proj-f-residence.jpg";
+import iResidenceAsset from "@/assets/proj-i-residence.jpg";
+import keystoneAsset from "@/assets/proj-keystone.jpg";
+import lResidenceAsset from "@/assets/proj-l-residence.jpg";
 import gonoDetail from "@/assets/real/gono-detail.webp";
 import turnoverRibbon from "@/assets/real/turnover-ribbon.webp";
 import turnoverHandover from "@/assets/real/turnover-handover.webp";
@@ -137,12 +137,12 @@ const gResidenceHandover = image(
   1600,
 );
 const iResidenceCover = image(
-  iResidenceAsset.url,
+  iResidenceAsset,
   "Completed three-storey I Residence in Imus City with contemporary detailing",
   "Completed Projects / I Residence",
 );
 const lResidenceCover = image(
-  lResidenceAsset.url,
+  lResidenceAsset,
   "Renovated L Residence in Pasig City with a refined contemporary exterior",
   "Completed Projects / L Residence",
 );
@@ -185,12 +185,12 @@ const townhouseProjectGallery = [
   ),
 ] as const;
 const keystoneCover = image(
-  keystoneAsset.url,
+  keystoneAsset,
   "Keystone Building three-storey commercial development in Dasmarinas City",
   "Completed Projects / Keystone Building",
 );
 const fResidenceCover = image(
-  fResidenceAsset.url,
+  fResidenceAsset,
   "Architectural visualization of the ongoing F Residence on a sloping site in Silang, Cavite",
   "Ongoing Projects / F Residence",
 );

@@ -10,37 +10,37 @@ import {
   Ruler,
   Wrench,
 } from "lucide-react";
-import aResidenceAsset from "@/assets/proj-a-residence.jpg.asset.json";
-import oResidenceAsset from "@/assets/proj-o-residence.jpg.asset.json";
-import iResidenceAsset from "@/assets/proj-i-residence.jpg.asset.json";
-import lResidenceAsset from "@/assets/proj-l-residence.jpg.asset.json";
-import bApartmentAsset from "@/assets/proj-b-apartment.jpg.asset.json";
-import keystoneAsset from "@/assets/proj-keystone.jpg.asset.json";
-import fResidenceAsset from "@/assets/proj-f-residence.jpg.asset.json";
-import igs1Asset from "@/assets/igs-1.jpg.asset.json";
-import igs2Asset from "@/assets/igs-2.jpg.asset.json";
-import igs3Asset from "@/assets/igs-3.jpg.asset.json";
-import igs4Asset from "@/assets/igs-4.jpg.asset.json";
-import igs6Asset from "@/assets/igs-6.jpg.asset.json";
-import igs7Asset from "@/assets/igs-7.jpg.asset.json";
-import igs8Asset from "@/assets/igs-8.jpg.asset.json";
-import igs9Asset from "@/assets/igs-9.jpg.asset.json";
-import meeting1Asset from "@/assets/meeting-472871.jpg.asset.json";
-import meeting2Asset from "@/assets/meeting-615890.jpg.asset.json";
-import meeting3Asset from "@/assets/meeting-616099.jpg.asset.json";
-import meeting4Asset from "@/assets/meeting-619956.jpg.asset.json";
-import meeting5Asset from "@/assets/meeting-622434.jpg.asset.json";
-import meeting6Asset from "@/assets/meeting-626269.jpg.asset.json";
-import meeting7Asset from "@/assets/meeting-628710.jpg.asset.json";
-import carousel1Asset from "@/assets/carousel-1.jpg.asset.json";
-import carousel2Asset from "@/assets/carousel-2.jpg.asset.json";
-import carousel3Asset from "@/assets/carousel-3.jpg.asset.json";
-import carousel4Asset from "@/assets/carousel-4.jpg.asset.json";
-import carousel5Asset from "@/assets/carousel-5.jpg.asset.json";
-import miniPreview1Asset from "@/assets/mini-preview-1.png.asset.json";
-import miniPreview2Asset from "@/assets/mini-preview-2.png.asset.json";
-import miniPreview3Asset from "@/assets/mini-preview-3.png.asset.json";
-import miniPreview4Asset from "@/assets/mini-preview-4.png.asset.json";
+import aResidenceAsset from "@/assets/proj-a-residence.jpg";
+import oResidenceAsset from "@/assets/proj-o-residence.jpg";
+import iResidenceAsset from "@/assets/proj-i-residence.jpg";
+import lResidenceAsset from "@/assets/proj-l-residence.jpg";
+import bApartmentAsset from "@/assets/proj-b-apartment.jpg";
+import keystoneAsset from "@/assets/proj-keystone.jpg";
+import fResidenceAsset from "@/assets/proj-f-residence.jpg";
+import igs1Asset from "@/assets/igs-1.jpg";
+import igs2Asset from "@/assets/igs-2.jpg";
+import igs3Asset from "@/assets/igs-3.jpg";
+import igs4Asset from "@/assets/igs-4.jpg";
+import igs6Asset from "@/assets/igs-6.jpg";
+import igs7Asset from "@/assets/igs-7.jpg";
+import igs8Asset from "@/assets/igs-8.jpg";
+import igs9Asset from "@/assets/igs-9.jpg";
+import meeting1Asset from "@/assets/meeting-472871.jpg";
+import meeting2Asset from "@/assets/meeting-615890.jpg";
+import meeting3Asset from "@/assets/meeting-616099.jpg";
+import meeting4Asset from "@/assets/meeting-619956.jpg";
+import meeting5Asset from "@/assets/meeting-622434.jpg";
+import meeting6Asset from "@/assets/meeting-626269.jpg";
+import meeting7Asset from "@/assets/meeting-628710.jpg";
+import carousel1Asset from "@/assets/carousel-1.jpg";
+import carousel2Asset from "@/assets/carousel-2.jpg";
+import carousel3Asset from "@/assets/carousel-3.jpg";
+import carousel4Asset from "@/assets/carousel-4.jpg";
+import carousel5Asset from "@/assets/carousel-5.jpg";
+import miniPreview1Asset from "@/assets/mini-preview-1.png";
+import miniPreview2Asset from "@/assets/mini-preview-2.png";
+import miniPreview3Asset from "@/assets/mini-preview-3.png";
+import miniPreview4Asset from "@/assets/mini-preview-4.png";
 import type { PackageType, Project, ProjectFilter } from "./types";
 
 export type Service = {
@@ -88,64 +88,64 @@ const slugify = (value: string) =>
     .replace(/\s+/g, "-")}`;
 
 export const aboutSlides = [
-  carousel1Asset.url,
-  carousel2Asset.url,
-  carousel3Asset.url,
-  carousel4Asset.url,
-  carousel5Asset.url,
+  carousel1Asset,
+  carousel2Asset,
+  carousel3Asset,
+  carousel4Asset,
+  carousel5Asset,
 ];
 
 export const aboutPreviewImages = [
-  miniPreview1Asset.url,
-  miniPreview2Asset.url,
-  miniPreview3Asset.url,
-  miniPreview4Asset.url,
+  miniPreview1Asset,
+  miniPreview2Asset,
+  miniPreview3Asset,
+  miniPreview4Asset,
 ];
 
 export const projectGalleryPool = [
-  igs1Asset.url,
-  igs2Asset.url,
-  igs3Asset.url,
-  igs4Asset.url,
-  igs6Asset.url,
-  igs7Asset.url,
-  igs8Asset.url,
-  igs9Asset.url,
+  igs1Asset,
+  igs2Asset,
+  igs3Asset,
+  igs4Asset,
+  igs6Asset,
+  igs7Asset,
+  igs8Asset,
+  igs9Asset,
 ];
 
 export const meetingImages = [
   {
-    src: meeting1Asset.url,
+    src: meeting1Asset,
     alt: "IG Sabroso team and clients gathered for a design review",
     caption: "Design review with the client team",
   },
   {
-    src: meeting5Asset.url,
+    src: meeting5Asset,
     alt: "Project consultation around a meeting table",
     caption: "Project consultation",
   },
   {
-    src: meeting3Asset.url,
+    src: meeting3Asset,
     alt: "IG Sabroso team reviewing materials with clients",
     caption: "Materials review",
   },
   {
-    src: meeting4Asset.url,
+    src: meeting4Asset,
     alt: "Client and IG Sabroso team at a turnover planning meeting",
     caption: "Turnover planning",
   },
   {
-    src: meeting2Asset.url,
+    src: meeting2Asset,
     alt: "IG Sabroso team meeting with a client",
     caption: "Client alignment",
   },
   {
-    src: meeting6Asset.url,
+    src: meeting6Asset,
     alt: "Construction planning session with the IG Sabroso team",
     caption: "Construction planning",
   },
   {
-    src: meeting7Asset.url,
+    src: meeting7Asset,
     alt: "Project presentation with clients and the IG Sabroso team",
     caption: "Project presentation",
   },
@@ -371,7 +371,7 @@ export const projects: Project[] = [
     type: "Residential",
     location: "Imus City, Cavite",
     number: "01",
-    img: aResidenceAsset.url,
+    img: aResidenceAsset,
     description:
       "A two-storey modern contemporary residence with clean lines, layered volumes, and efficient planning across a compact 125 sqm footprint.",
     highlights: [
@@ -390,7 +390,7 @@ export const projects: Project[] = [
     type: "Residential",
     location: "Dasmarinas City, Cavite",
     number: "02",
-    img: oResidenceAsset.url,
+    img: oResidenceAsset,
     description:
       "A two-storey, 174 sqm residence with strong geometric volumes and a high-ceiling living area that creates openness.",
     highlights: [
@@ -410,7 +410,7 @@ export const projects: Project[] = [
     type: "Residential",
     location: "Imus City, Cavite",
     number: "03",
-    img: aResidenceAsset.url,
+    img: aResidenceAsset,
     description:
       "A refined residential build with premium materials and a contemporary palette tailored to family living.",
     highlights: [
@@ -429,7 +429,7 @@ export const projects: Project[] = [
     type: "Residential",
     location: "Imus City, Cavite",
     number: "04",
-    img: iResidenceAsset.url,
+    img: iResidenceAsset,
     description:
       "A three-storey modern residence that integrates exposed brick, premium materials, and smart-home features across 222 sqm.",
     highlights: [
@@ -448,7 +448,7 @@ export const projects: Project[] = [
     type: "Renovation",
     location: "Pasig City",
     number: "05",
-    img: lResidenceAsset.url,
+    img: lResidenceAsset,
     description:
       "A three-storey renovation transformed with dark Japanese-inspired interiors, premium materials, and selected execution works.",
     highlights: [
@@ -467,7 +467,7 @@ export const projects: Project[] = [
     type: "Apartment",
     location: "San Pedro City, Laguna",
     number: "06",
-    img: bApartmentAsset.url,
+    img: bApartmentAsset,
     description:
       "A two-storey, three-unit apartment building with durable rentable units and clean modern detailing.",
     highlights: [
@@ -486,7 +486,7 @@ export const projects: Project[] = [
     type: "Commercial",
     location: "Dasmarinas City, Cavite",
     number: "07",
-    img: keystoneAsset.url,
+    img: keystoneAsset,
     description:
       "A three-storey commercial building designed for flexible tenancy and strong street-level visibility.",
     highlights: ["2-vehicle carport", "6 commercial units", "3 restrooms"],
@@ -498,7 +498,7 @@ export const projects: Project[] = [
     type: "Residential",
     location: "Silang, Cavite",
     number: "08",
-    img: fResidenceAsset.url,
+    img: fResidenceAsset,
     description:
       "A 232 sqm multi-level home that responds to a steep site slope with a Bali-inspired contemporary design.",
     highlights: [
@@ -517,7 +517,7 @@ export const projects: Project[] = [
     type: "Residential",
     location: "Dasmarinas City, Cavite",
     number: "09",
-    img: oResidenceAsset.url,
+    img: oResidenceAsset,
     description:
       "A contemporary family residence focused on natural light and tropical-modern detailing.",
     highlights: [
@@ -536,7 +536,7 @@ export const projects: Project[] = [
     type: "Residential",
     location: "Imus City, Cavite",
     number: "10",
-    img: aResidenceAsset.url,
+    img: aResidenceAsset,
     description: "A modern residential build with efficient planning for an expanding family.",
     highlights: [
       "1-vehicle carport",
@@ -554,7 +554,7 @@ export const projects: Project[] = [
     type: "Residential",
     location: "Dasmarinas City, Cavite",
     number: "11",
-    img: iResidenceAsset.url,
+    img: iResidenceAsset,
     description:
       "A bold modern residence in development with structured massing and warm material accents.",
     highlights: [
@@ -573,7 +573,7 @@ export const projects: Project[] = [
     type: "Residential",
     location: "Imus City, Cavite",
     number: "13",
-    img: fResidenceAsset.url,
+    img: fResidenceAsset,
     description:
       "An ongoing residential project that combines contemporary architecture with careful construction.",
     highlights: [

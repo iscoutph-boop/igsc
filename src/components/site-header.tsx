@@ -136,10 +136,9 @@ export function SiteHeader({ floating = false }: { floating?: boolean }) {
             <Link
               to="/consultation"
               activeOptions={{ exact: true }}
-              className="inline-flex min-h-11 items-center gap-3 rounded-lg bg-primary px-4 text-[0.78rem] font-extrabold uppercase tracking-[0.045em] text-white shadow-[0_10px_28px_rgba(244,81,30,0.18)] transition hover:-translate-y-0.5 hover:bg-[#dd3e12] sm:px-5"
+              className="hidden min-h-11 items-center gap-3 rounded-lg bg-primary px-4 text-[0.78rem] font-extrabold uppercase tracking-[0.045em] text-white shadow-[0_10px_28px_rgba(244,81,30,0.18)] transition hover:-translate-y-0.5 hover:bg-[#dd3e12] md:inline-flex md:px-5"
             >
-              <span className="hidden sm:inline">Book a consultation</span>
-              <span className="sm:hidden">Get a quote</span>
+              <span>Book a consultation</span>
               <ArrowRight aria-hidden="true" size={18} />
             </Link>
             <button

@@ -16,7 +16,6 @@ import {
   getMaintenanceAwareTitle,
   isMaintenanceModeEnabled,
 } from "../features/maintenance/maintenance-mode";
-import { reportLovableError } from "../lib/lovable-error-reporting";
 import { DEFAULT_SOCIAL_IMAGE, LOCAL_BUSINESS_SCHEMA, SITE_URL } from "../lib/seo";
 
 // Vitest loads the project's local env files too, so keep the reversible
@@ -54,7 +53,7 @@ function ErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();
 
   useEffect(() => {
-    reportLovableError(error, { boundary: "tanstack_root_error_component" });
+    console.error("Unhandled IG Sabroso route error", error);
   }, [error]);
 
   return (

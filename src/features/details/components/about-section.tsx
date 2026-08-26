@@ -1,7 +1,7 @@
 import { Link } from "@tanstack/react-router";
 import { ArrowRight, Award, Eye, Target, UsersRound } from "lucide-react";
-import homeHero from "@/assets/real/home-hero.webp";
-import teamEvent from "@/assets/real/team-event.webp";
+import aboutValuesClientMeeting from "@/assets/real/about-values-client-meeting.webp";
+import aboutCollaborationBuild from "@/assets/real/about-collaboration-build.jpg";
 import { COMPANY } from "@/content/company";
 import { RefinementSection } from "./refinement-shell";
 import { SectionHeading } from "./section-heading";
@@ -42,8 +42,8 @@ export function AboutSection() {
         <div>
           <div className="overflow-hidden rounded-[1.75rem] border border-border bg-card shadow-card">
             <img
-              src={homeHero}
-              alt="Completed modern IG Sabroso residence in Dasmarinas City"
+              src={aboutValuesClientMeeting}
+              alt="IG Sabroso team and clients gathered for a project presentation with material samples"
               className="aspect-[16/10] w-full object-cover"
               loading="eager"
             />
@@ -69,8 +69,8 @@ export function AboutSection() {
       <div className="mt-16 grid gap-6 overflow-hidden rounded-[1.75rem] border border-border bg-[#f7f8fa] p-6 sm:p-8 lg:grid-cols-[0.9fr_1.1fr] lg:items-center lg:p-10">
         <div className="overflow-hidden rounded-2xl">
           <img
-            src={teamEvent}
-            alt="IG Sabroso team and clients gathered during a real project event"
+            src={aboutCollaborationBuild}
+            alt="IG Sabroso team and clients reviewing a project plan together"
             className="aspect-[16/10] w-full object-cover"
             loading="lazy"
           />
