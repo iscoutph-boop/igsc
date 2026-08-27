@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
-import homeHero from "@/assets/real/home-hero.webp";
+import homeHero from "@/assets/real/home-hero-sketch-house.png";
 import teamEvent from "@/assets/real/team-event.webp";
 import turnoverTeam from "@/assets/real/turnover-team.webp";
 import { SiteHeader } from "@/components/site-header";
@@ -97,7 +97,7 @@ function HomeHero() {
           src={homeHero}
           alt=""
           aria-hidden="true"
-          className="aspect-[4/3] w-full object-cover object-[58%_center]"
+          className="aspect-[3/2] w-full object-cover object-[58%_center]"
           fetchPriority="high"
         />
         <div
