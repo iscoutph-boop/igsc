@@ -13,7 +13,6 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
-import homeHero from "@/assets/real/home-hero-sketch-house.png";
 import teamEvent from "@/assets/real/team-event.webp";
 import turnoverTeam from "@/assets/real/turnover-team.webp";
 import { SiteHeader } from "@/components/site-header";
@@ -26,6 +25,10 @@ import { REVIEWS } from "@/content/reviews";
 import { SERVICES } from "@/content/services";
 import { PageTransition } from "@/components/page-transition";
 import { CompanyHighlights } from "@/features/home/company-highlights";
+import {
+  Concept03DesktopHeroMedia,
+  Concept03MobileHeroMedia,
+} from "@/features/home/concept03-hero-media";
 
 const featuredProjects = PROJECTS.filter((project) => project.featured).slice(0, 3);
 const processSteps = [
@@ -79,45 +82,29 @@ function HomeHero() {
 
   return (
     <section className="relative isolate overflow-hidden bg-white lg:min-h-[650px]">
-      <div className="absolute inset-y-0 right-0 -z-20 hidden w-[58%] lg:block">
-        <img
-          src={homeHero}
-          alt="Completed modern IG Sabroso residence with glass balcony and covered carport"
-          className="h-full w-full object-cover object-[56%_center]"
-          fetchPriority="high"
-        />
-      </div>
+      <Concept03DesktopHeroMedia />
       <div
         aria-hidden="true"
-        className="absolute inset-0 -z-10 hidden bg-[linear-gradient(90deg,#fff_0%,#fff_38%,rgba(255,255,255,0.96)_43%,rgba(255,255,255,0.46)_51%,rgba(255,255,255,0)_61%)] lg:block"
+        className="pointer-events-none absolute inset-0 z-10 hidden bg-[linear-gradient(90deg,#fff_0%,#fff_38%,rgba(255,255,255,0.96)_43%,rgba(255,255,255,0.46)_51%,rgba(255,255,255,0)_61%)] lg:block"
       />
 
-      <div className="relative lg:hidden">
-        <img
-          src={homeHero}
-          alt=""
-          aria-hidden="true"
-          className="aspect-[3/2] w-full object-cover object-[58%_center]"
-          fetchPriority="high"
-        />
-        <div
-          aria-hidden="true"
-          className="absolute inset-x-0 bottom-0 h-28 bg-gradient-to-t from-white to-transparent"
-        />
-      </div>
+      <Concept03MobileHeroMedia />
 
-      <div className="mx-auto flex w-full max-w-[1760px] items-center px-6 pb-12 pt-5 sm:px-8 lg:min-h-[650px] lg:px-12 lg:py-16">
+      <div className="relative z-20 mx-auto flex w-full max-w-[1760px] items-center px-8 pb-12 pt-0 lg:min-h-[650px] lg:px-12 lg:py-16">
         <motion.div
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
           className="w-full max-w-[650px]"
         >
-          <h1 className="max-w-[640px] font-display text-[clamp(3.25rem,4.35vw,5.2rem)] font-extrabold uppercase leading-[0.91] tracking-[-0.032em] text-[#152238]">
-            Build with confidence.
-            <span className="mt-1.5 block">Build with Sabroso.</span>
+          <h1 className="w-full max-w-full font-display text-[clamp(1.7rem,8.6vw,3.1rem)] font-extrabold uppercase leading-[0.9] tracking-[-0.035em] text-[#152238] lg:max-w-[640px] lg:text-[clamp(3.25rem,4.35vw,5.2rem)] lg:leading-[0.91] lg:tracking-[-0.032em]">
+            <span className="block lg:inline">Build with</span>{" "}
+            <span className="block lg:inline">confidence.</span>
+            <span className="mt-1 block whitespace-nowrap text-[#FF4B16] lg:mt-1.5">
+              Build with Sabroso.
+            </span>
           </h1>
-          <p className="mt-6 max-w-[520px] text-[0.98rem] leading-7 text-[#4f5b69] sm:text-[1.02rem]">
+          <p className="mt-4 max-w-[520px] text-[0.98rem] leading-7 text-[#4f5b69] sm:text-[1.02rem] lg:mt-6">
             We deliver quality construction and real estate solutions with honesty, precision, and a
             commitment to excellence—from concept to completion.
           </p>
