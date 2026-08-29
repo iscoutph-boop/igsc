@@ -46,6 +46,7 @@ describe("Concept03 hero media", () => {
 
   afterEach(() => {
     vi.useRealTimers();
+    vi.restoreAllMocks();
     vi.unstubAllGlobals();
     sessionStorage.clear();
   });
@@ -111,6 +112,22 @@ describe("Concept03 hero media", () => {
     expect(screen.getByTestId("concept03-desktop-hero-media").getAttribute("data-preview")).toBe(
       "rest",
     );
+  });
+
+  it("preloads overlays when the base image completed before hydration", async () => {
+    installMatchMedia();
+    sessionStorage.setItem("igs-concept03-intro-played", "true");
+    vi.spyOn(HTMLImageElement.prototype, "complete", "get").mockReturnValue(true);
+    vi.spyOn(HTMLImageElement.prototype, "naturalWidth", "get").mockReturnValue(1536);
+
+    render(<Concept03DesktopHeroMedia />);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(180);
+    });
+
+    expect(
+      screen.getByTestId("concept03-desktop-hero-media").getAttribute("data-interaction-ready"),
+    ).toBe("true");
   });
 
   it("keeps the mobile hero static and free of video controls", () => {

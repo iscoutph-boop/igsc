@@ -41,6 +41,7 @@ function preloadImage(src: string) {
 
 export function Concept03DesktopHeroMedia() {
   const rootRef = useRef<HTMLDivElement>(null);
+  const baseImageRef = useRef<HTMLImageElement>(null);
   const finishedRef = useRef<HTMLImageElement>(null);
   const lightsRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -111,6 +112,13 @@ export function Concept03DesktopHeroMedia() {
       reducedMotion.removeEventListener("change", configureExperience);
     };
   }, [setPreview]);
+
+  useEffect(() => {
+    const baseImage = baseImageRef.current;
+    if (baseImage?.complete && baseImage.naturalWidth > 0) {
+      setBaseLoaded(true);
+    }
+  }, []);
 
   useEffect(() => {
     if (!baseLoaded || !window.matchMedia(DESKTOP_POINTER_QUERY).matches) return;
@@ -195,6 +203,7 @@ export function Concept03DesktopHeroMedia() {
       onPointerLeave={handlePointerLeave}
     >
       <img
+        ref={baseImageRef}
         src={approvedHero}
         alt={HERO_ALT}
         className="absolute inset-0 h-full w-full object-cover object-[56%_center]"
