@@ -1,4 +1,4 @@
-import type { PointerEvent as ReactPointerEvent } from "react";
+import type { CSSProperties, PointerEvent as ReactPointerEvent } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import approvedHero from "@/assets/real/concept03/hero-base-approved.png";
 import finishedHero from "@/assets/real/concept03/hero-finished-full.webp";
@@ -11,8 +11,38 @@ const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 const INTRO_SESSION_KEY = "igs-concept03-intro-played";
 const HERO_ALT =
   "IG Sabroso residence transitioning from architectural sketch to completed construction";
+const MIN_REVEAL_PERCENT = 44;
+const MAX_REVEAL_PERCENT = 82;
+const RESTING_REVEAL_PERCENT = 58;
+const FOLLOW_DAMPING_MS = 120;
+const RETURN_DAMPING_MS = 180;
+const LIGHTS_FADE_IN_DAMPING_MS = 80;
+const LIGHTS_FADE_OUT_DAMPING_MS = 140;
+const HOUSE_INTERACTION_START = 0.58;
+const REVEAL_FEATHER_PX = 60;
+const REVEAL_MASK =
+  "linear-gradient(90deg, transparent 0%, transparent calc(var(--hero-reveal-position) - var(--hero-reveal-feather)), #000 var(--hero-reveal-position), #000 100%)";
+const REVEAL_LAYER_STYLE = {
+  "--hero-reveal-position": `${RESTING_REVEAL_PERCENT}%`,
+  "--hero-reveal-feather": `${REVEAL_FEATHER_PX}px`,
+  maskImage: REVEAL_MASK,
+  WebkitMaskImage: REVEAL_MASK,
+} as CSSProperties;
 
 type PreviewMode = "rest" | "finished" | "lights";
+
+type HeroBounds = {
+  left: number;
+  width: number;
+};
+
+function clamp(value: number, min: number, max: number) {
+  return Math.min(Math.max(value, min), max);
+}
+
+function damp(current: number, target: number, deltaTime: number, damping: number) {
+  return current + (target - current) * (1 - Math.exp(-deltaTime / damping));
+}
 
 function markIntroPlayed() {
   try {
@@ -45,11 +75,18 @@ export function Concept03DesktopHeroMedia() {
   const finishedRef = useRef<HTMLImageElement>(null);
   const lightsRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-  const pointerXRef = useRef(0);
   const frameRef = useRef<number | null>(null);
+  const lastFrameTimeRef = useRef<number | null>(null);
   const introTimerRef = useRef<number | null>(null);
   const previewRef = useRef<PreviewMode>("rest");
   const interactionEnabledRef = useRef(false);
+  const reducedMotionRef = useRef(false);
+  const targetRevealRef = useRef(RESTING_REVEAL_PERCENT);
+  const currentRevealRef = useRef(RESTING_REVEAL_PERCENT);
+  const targetLightsRef = useRef(0);
+  const currentLightsRef = useRef(0);
+  const returningToRestRef = useRef(false);
+  const boundsRef = useRef<HeroBounds | null>(null);
   const [baseLoaded, setBaseLoaded] = useState(false);
   const [overlaysReady, setOverlaysReady] = useState(false);
   const [introComplete, setIntroComplete] = useState(false);
@@ -61,14 +98,78 @@ export function Concept03DesktopHeroMedia() {
 
     previewRef.current = mode;
     rootRef.current?.setAttribute("data-preview", mode);
+  }, []);
 
-    if (finishedRef.current) {
-      finishedRef.current.style.opacity = mode === "finished" ? "1" : "0";
-    }
-
+  const writeVisualState = useCallback((revealPercent: number, lightsOpacity: number) => {
+    const revealPosition = `${revealPercent}%`;
+    finishedRef.current?.style.setProperty("--hero-reveal-position", revealPosition);
+    lightsRef.current?.style.setProperty("--hero-reveal-position", revealPosition);
     if (lightsRef.current) {
-      lightsRef.current.style.opacity = mode === "lights" ? "1" : "0";
+      lightsRef.current.style.opacity = `${lightsOpacity}`;
     }
+  }, []);
+
+  const animateVisualState = useCallback(
+    (timestamp: number) => {
+      frameRef.current = null;
+      const previousTimestamp = lastFrameTimeRef.current;
+      const deltaTime =
+        previousTimestamp === null ? 16.67 : Math.max(timestamp - previousTimestamp, 0);
+      lastFrameTimeRef.current = timestamp;
+
+      const revealDamping = returningToRestRef.current ? RETURN_DAMPING_MS : FOLLOW_DAMPING_MS;
+      const lightsDamping =
+        targetLightsRef.current > currentLightsRef.current
+          ? LIGHTS_FADE_IN_DAMPING_MS
+          : LIGHTS_FADE_OUT_DAMPING_MS;
+
+      const nextReveal = damp(
+        currentRevealRef.current,
+        targetRevealRef.current,
+        deltaTime,
+        revealDamping,
+      );
+      const nextLights = damp(
+        currentLightsRef.current,
+        targetLightsRef.current,
+        deltaTime,
+        lightsDamping,
+      );
+
+      currentRevealRef.current = nextReveal;
+      currentLightsRef.current = nextLights;
+      writeVisualState(nextReveal, nextLights);
+
+      const revealSettled = Math.abs(targetRevealRef.current - nextReveal) < 0.01;
+      const lightsSettled = Math.abs(targetLightsRef.current - nextLights) < 0.01;
+      if (revealSettled && lightsSettled) {
+        currentRevealRef.current = targetRevealRef.current;
+        currentLightsRef.current = targetLightsRef.current;
+        writeVisualState(currentRevealRef.current, currentLightsRef.current);
+        lastFrameTimeRef.current = null;
+        return;
+      }
+
+      frameRef.current = window.requestAnimationFrame(animateVisualState);
+    },
+    [writeVisualState],
+  );
+
+  const scheduleAnimation = useCallback(() => {
+    if (frameRef.current !== null) return;
+    lastFrameTimeRef.current = null;
+    frameRef.current = window.requestAnimationFrame(animateVisualState);
+  }, [animateVisualState]);
+
+  const updateBounds = useCallback(() => {
+    const root = rootRef.current;
+    if (!root) return;
+
+    const bounds = root.getBoundingClientRect();
+    boundsRef.current = {
+      left: bounds.left,
+      width: Math.max(bounds.width, 1),
+    };
   }, []);
 
   const finishIntro = useCallback(() => {
@@ -93,12 +194,18 @@ export function Concept03DesktopHeroMedia() {
     const configureExperience = () => {
       const eligible = desktopPointer.matches;
       const skipIntro = !eligible || reducedMotion.matches || hasPlayedIntro();
+      reducedMotionRef.current = reducedMotion.matches;
 
       setShowIntro(!skipIntro);
       setIntroComplete(skipIntro);
 
-      if (!eligible) {
+      if (!eligible || reducedMotion.matches) {
         interactionEnabledRef.current = false;
+        targetRevealRef.current = RESTING_REVEAL_PERCENT;
+        currentRevealRef.current = RESTING_REVEAL_PERCENT;
+        targetLightsRef.current = 0;
+        currentLightsRef.current = 0;
+        writeVisualState(RESTING_REVEAL_PERCENT, 0);
         setPreview("rest");
       }
     };
@@ -111,7 +218,24 @@ export function Concept03DesktopHeroMedia() {
       desktopPointer.removeEventListener("change", configureExperience);
       reducedMotion.removeEventListener("change", configureExperience);
     };
-  }, [setPreview]);
+  }, [setPreview, writeVisualState]);
+
+  useEffect(() => {
+    updateBounds();
+    const handleResize = () => updateBounds();
+    window.addEventListener("resize", handleResize, { passive: true });
+
+    let resizeObserver: ResizeObserver | null = null;
+    if (typeof ResizeObserver !== "undefined" && rootRef.current) {
+      resizeObserver = new ResizeObserver(handleResize);
+      resizeObserver.observe(rootRef.current);
+    }
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      resizeObserver?.disconnect();
+    };
+  }, [updateBounds]);
 
   useEffect(() => {
     const baseImage = baseImageRef.current;
@@ -150,14 +274,21 @@ export function Concept03DesktopHeroMedia() {
   }, [baseLoaded]);
 
   useEffect(() => {
-    interactionEnabledRef.current = overlaysReady && introComplete;
+    interactionEnabledRef.current = overlaysReady && introComplete && !reducedMotionRef.current;
     rootRef.current?.setAttribute(
       "data-interaction-ready",
       interactionEnabledRef.current ? "true" : "false",
     );
 
-    if (!interactionEnabledRef.current) setPreview("rest");
-  }, [introComplete, overlaysReady, setPreview]);
+    if (!interactionEnabledRef.current) {
+      targetRevealRef.current = RESTING_REVEAL_PERCENT;
+      currentRevealRef.current = RESTING_REVEAL_PERCENT;
+      targetLightsRef.current = 0;
+      currentLightsRef.current = 0;
+      writeVisualState(RESTING_REVEAL_PERCENT, 0);
+      setPreview("rest");
+    }
+  }, [introComplete, overlaysReady, setPreview, writeVisualState]);
 
   useEffect(
     () => () => {
@@ -170,26 +301,27 @@ export function Concept03DesktopHeroMedia() {
   const handlePointerMove = (event: ReactPointerEvent<HTMLDivElement>) => {
     if (!interactionEnabledRef.current) return;
 
-    pointerXRef.current = event.clientX;
-    if (frameRef.current !== null) return;
+    if (boundsRef.current === null) updateBounds();
+    const bounds = boundsRef.current ?? { left: 0, width: 1 };
+    const pointerRatio = clamp((event.clientX - bounds.left) / bounds.width, 0, 1);
 
-    frameRef.current = window.requestAnimationFrame(() => {
-      frameRef.current = null;
-      const root = rootRef.current;
-      if (!root) return;
-
-      const bounds = root.getBoundingClientRect();
-      const pointerRatio = (pointerXRef.current - bounds.left) / bounds.width;
-      setPreview(pointerRatio < 0.52 ? "finished" : "lights");
-    });
+    targetRevealRef.current = clamp(
+      MIN_REVEAL_PERCENT + pointerRatio * (MAX_REVEAL_PERCENT - MIN_REVEAL_PERCENT),
+      MIN_REVEAL_PERCENT,
+      MAX_REVEAL_PERCENT,
+    );
+    targetLightsRef.current = pointerRatio >= HOUSE_INTERACTION_START ? 1 : 0;
+    returningToRestRef.current = false;
+    setPreview(targetLightsRef.current === 1 ? "lights" : "finished");
+    scheduleAnimation();
   };
 
   const handlePointerLeave = () => {
-    if (frameRef.current !== null) {
-      window.cancelAnimationFrame(frameRef.current);
-      frameRef.current = null;
-    }
+    targetRevealRef.current = RESTING_REVEAL_PERCENT;
+    targetLightsRef.current = 0;
+    returningToRestRef.current = true;
     setPreview("rest");
+    if (interactionEnabledRef.current) scheduleAnimation();
   };
 
   return (
@@ -222,14 +354,16 @@ export function Concept03DesktopHeroMedia() {
           src={finishedHero}
           alt=""
           aria-hidden="true"
-          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-[56%_center] opacity-0 transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+          className="pointer-events-none absolute inset-0 h-full w-full object-cover object-[56%_center]"
+          style={REVEAL_LAYER_STYLE}
         />
       ) : null}
 
       <div
         ref={lightsRef}
         aria-hidden="true"
-        className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-500 ease-[cubic-bezier(0.22,1,0.36,1)] motion-reduce:transition-none"
+        className="pointer-events-none absolute inset-0 opacity-0"
+        style={REVEAL_LAYER_STYLE}
       >
         <img
           src={approvedHero}
