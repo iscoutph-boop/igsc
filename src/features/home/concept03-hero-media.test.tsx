@@ -8,24 +8,58 @@ import {
 const DESKTOP_POINTER_QUERY = "(min-width: 1024px) and (hover: hover) and (pointer: fine)";
 
 function installMatchMedia({ desktop = true, reducedMotion = false } = {}) {
+  const queryStates = new Map<
+    string,
+    Set<{
+      matches: boolean;
+      listeners: Set<(event: Event) => void>;
+    }>
+  >();
+
   Object.defineProperty(window, "matchMedia", {
     configurable: true,
-    value: vi.fn().mockImplementation((query: string) => ({
-      matches:
-        query === DESKTOP_POINTER_QUERY
-          ? desktop
-          : query === "(prefers-reduced-motion: reduce)"
-            ? reducedMotion
-            : false,
-      media: query,
-      onchange: null,
-      addListener: vi.fn(),
-      removeListener: vi.fn(),
-      addEventListener: vi.fn(),
-      removeEventListener: vi.fn(),
-      dispatchEvent: vi.fn(),
-    })),
+    value: vi.fn().mockImplementation((query: string) => {
+      const state = {
+        matches:
+          query === DESKTOP_POINTER_QUERY
+            ? desktop
+            : query === "(prefers-reduced-motion: reduce)"
+              ? reducedMotion
+              : false,
+        listeners: new Set<(event: Event) => void>(),
+      };
+      const states = queryStates.get(query) ?? new Set();
+      states.add(state);
+      queryStates.set(query, states);
+
+      return {
+        get matches() {
+          return state.matches;
+        },
+        media: query,
+        onchange: null,
+        addListener: (listener: (event: Event) => void) => state.listeners.add(listener),
+        removeListener: (listener: (event: Event) => void) => state.listeners.delete(listener),
+        addEventListener: (_event: string, listener: (event: Event) => void) =>
+          state.listeners.add(listener),
+        removeEventListener: (_event: string, listener: (event: Event) => void) =>
+          state.listeners.delete(listener),
+        dispatchEvent: (event: Event) => {
+          state.listeners.forEach((listener) => listener(event));
+          return true;
+        },
+      };
+    }),
   });
+
+  return {
+    setMatches(query: string, matches: boolean) {
+      queryStates.get(query)?.forEach((state) => {
+        state.matches = matches;
+        state.listeners.forEach((listener) => listener(new Event("change")));
+      });
+    },
+  };
 }
 
 class LoadedImage {
@@ -222,6 +256,68 @@ describe("Concept03 hero media", () => {
     fireEvent.pointerMove(root, { clientX: 80 });
     expect(root.getAttribute("data-preview")).toBe("rest");
     expect(animationFrames).toHaveLength(0);
+  });
+
+  it("re-enables the desktop interaction after a mobile breakpoint round trip", async () => {
+    const media = installMatchMedia({ desktop: false });
+    sessionStorage.setItem("igs-concept03-intro-played", "true");
+    const animationFrames: FrameRequestCallback[] = [];
+    vi.spyOn(window, "requestAnimationFrame").mockImplementation((callback) => {
+      animationFrames.push(callback);
+      return animationFrames.length;
+    });
+
+    render(<Concept03DesktopHeroMedia />);
+
+    const root = screen.getByTestId("concept03-desktop-hero-media");
+    const baseImage = screen.getByAltText(/architectural sketch to completed construction/i);
+    fireEvent.load(baseImage);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(180);
+    });
+    expect(root.getAttribute("data-interaction-ready")).toBe("false");
+
+    await act(async () => {
+      media.setMatches(DESKTOP_POINTER_QUERY, true);
+    });
+    await act(async () => {
+      await vi.runAllTimersAsync();
+    });
+    expect(root.getAttribute("data-interaction-ready")).toBe("true");
+
+    vi.spyOn(root, "getBoundingClientRect").mockReturnValue({
+      bottom: 650,
+      height: 650,
+      left: 0,
+      right: 100,
+      top: 0,
+      width: 100,
+      x: 0,
+      y: 0,
+      toJSON: () => undefined,
+    });
+    window.dispatchEvent(new Event("resize"));
+    fireEvent.pointerMove(root, { clientX: 80 });
+    act(() => animationFrames.shift()?.(0));
+    expect(root.getAttribute("data-preview")).toBe("lights");
+
+    await act(async () => {
+      media.setMatches(DESKTOP_POINTER_QUERY, false);
+      await Promise.resolve();
+    });
+    expect(root.getAttribute("data-interaction-ready")).toBe("false");
+    expect(root.getAttribute("data-preview")).toBe("rest");
+
+    await act(async () => {
+      media.setMatches(DESKTOP_POINTER_QUERY, true);
+    });
+    await act(async () => {
+      await vi.runAllTimersAsync();
+    });
+    expect(root.getAttribute("data-interaction-ready")).toBe("true");
+
+    fireEvent.pointerMove(root, { clientX: 80 });
+    expect(root.getAttribute("data-preview")).toBe("lights");
   });
 
   it("cancels a pending visual animation when unmounted", async () => {

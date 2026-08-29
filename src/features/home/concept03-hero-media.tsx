@@ -80,7 +80,6 @@ export function Concept03DesktopHeroMedia() {
   const introTimerRef = useRef<number | null>(null);
   const previewRef = useRef<PreviewMode>("rest");
   const interactionEnabledRef = useRef(false);
-  const reducedMotionRef = useRef(false);
   const targetRevealRef = useRef(RESTING_REVEAL_PERCENT);
   const currentRevealRef = useRef(RESTING_REVEAL_PERCENT);
   const targetLightsRef = useRef(0);
@@ -92,6 +91,8 @@ export function Concept03DesktopHeroMedia() {
   const [introComplete, setIntroComplete] = useState(false);
   const [introLeaving, setIntroLeaving] = useState(false);
   const [showIntro, setShowIntro] = useState(false);
+  const [desktopPointerEligible, setDesktopPointerEligible] = useState(false);
+  const [reducedMotionPreferred, setReducedMotionPreferred] = useState(false);
 
   const setPreview = useCallback((mode: PreviewMode) => {
     if (previewRef.current === mode) return;
@@ -193,13 +194,15 @@ export function Concept03DesktopHeroMedia() {
 
     const configureExperience = () => {
       const eligible = desktopPointer.matches;
-      const skipIntro = !eligible || reducedMotion.matches || hasPlayedIntro();
-      reducedMotionRef.current = reducedMotion.matches;
+      const prefersReducedMotion = reducedMotion.matches;
+      const skipIntro = !eligible || prefersReducedMotion || hasPlayedIntro();
 
+      setDesktopPointerEligible(eligible);
+      setReducedMotionPreferred(prefersReducedMotion);
       setShowIntro(!skipIntro);
       setIntroComplete(skipIntro);
 
-      if (!eligible || reducedMotion.matches) {
+      if (!eligible || prefersReducedMotion) {
         interactionEnabledRef.current = false;
         targetRevealRef.current = RESTING_REVEAL_PERCENT;
         currentRevealRef.current = RESTING_REVEAL_PERCENT;
@@ -245,7 +248,7 @@ export function Concept03DesktopHeroMedia() {
   }, []);
 
   useEffect(() => {
-    if (!baseLoaded || !window.matchMedia(DESKTOP_POINTER_QUERY).matches) return;
+    if (!baseLoaded || !desktopPointerEligible) return;
 
     let cancelled = false;
     const loadOverlay = () => {
@@ -271,10 +274,11 @@ export function Concept03DesktopHeroMedia() {
       if (idleId !== undefined) idleWindow.cancelIdleCallback?.(idleId);
       if (timeoutId !== undefined) window.clearTimeout(timeoutId);
     };
-  }, [baseLoaded]);
+  }, [baseLoaded, desktopPointerEligible]);
 
   useEffect(() => {
-    interactionEnabledRef.current = overlaysReady && introComplete && !reducedMotionRef.current;
+    interactionEnabledRef.current =
+      desktopPointerEligible && overlaysReady && introComplete && !reducedMotionPreferred;
     rootRef.current?.setAttribute(
       "data-interaction-ready",
       interactionEnabledRef.current ? "true" : "false",
@@ -288,7 +292,14 @@ export function Concept03DesktopHeroMedia() {
       writeVisualState(RESTING_REVEAL_PERCENT, 0);
       setPreview("rest");
     }
-  }, [introComplete, overlaysReady, setPreview, writeVisualState]);
+  }, [
+    desktopPointerEligible,
+    introComplete,
+    overlaysReady,
+    reducedMotionPreferred,
+    setPreview,
+    writeVisualState,
+  ]);
 
   useEffect(
     () => () => {
