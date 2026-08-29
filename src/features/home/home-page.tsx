@@ -90,12 +90,12 @@ function HomeHero() {
 
       <Concept03MobileHeroMedia />
 
-      <div className="relative z-20 mx-auto flex w-full max-w-[1760px] items-center px-8 pb-12 pt-0 lg:min-h-[650px] lg:px-12 lg:py-16">
+      <div className="relative z-20 mx-auto flex w-full max-w-[1760px] items-center px-8 pb-12 pt-0 lg:pointer-events-none lg:min-h-[650px] lg:px-12 lg:py-16">
         <motion.div
           initial={{ opacity: 0, y: 14 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.58, ease: [0.22, 1, 0.36, 1] }}
-          className="w-full max-w-[650px]"
+          className="w-full max-w-[650px] lg:pointer-events-auto"
         >
           <h1 className="w-full max-w-full font-display text-[clamp(1.7rem,8.6vw,3.1rem)] font-extrabold uppercase leading-[0.9] tracking-[-0.035em] text-[#152238] lg:max-w-[640px] lg:text-[clamp(3.25rem,4.35vw,5.2rem)] lg:leading-[0.91] lg:tracking-[-0.032em]">
             <span className="block lg:inline">Build with</span>{" "}
