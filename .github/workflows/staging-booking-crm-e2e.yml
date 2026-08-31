@@ -84,7 +84,7 @@ jobs:
             await page.getByRole('heading', { name: 'Consultation request received.' }).waitFor({ timeout: 30000 });
 
             const confirmationText = (await confirmation.textContent()) ?? '';
-            const referenceMatch = confirmationText.match(/IGS-[A-Z0-9-]+/i);
+            const referenceMatch = confirmationText.match(/IGS-\d{4}-\d{4}/i);
             if (!referenceMatch) throw new Error(`Booking reference not found in confirmation: ${confirmationText}`);
             const reference = referenceMatch[0];
             console.log(`BOOKING_REFERENCE=${reference}`);
