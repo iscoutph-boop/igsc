@@ -78,6 +78,18 @@ describe("Concept03 hero media", () => {
     ).toHaveLength(4);
   });
 
+  it("loads interaction layers when the base image completed before hydration", async () => {
+    media();
+    vi.spyOn(HTMLImageElement.prototype, "complete", "get").mockReturnValue(true);
+    vi.spyOn(HTMLImageElement.prototype, "naturalWidth", "get").mockReturnValue(1536);
+    render(<Concept03DesktopHeroMedia />);
+    await act(async () => {
+      await vi.advanceTimersByTimeAsync(180);
+      await Promise.resolve();
+    });
+    expect(screen.queryByTestId("hero-motion-layers")).not.toBeNull();
+  });
+
   it("maps pointer intent to approved states and exit", async () => {
     media();
     vi.spyOn(window, "requestAnimationFrame").mockReturnValue(1);

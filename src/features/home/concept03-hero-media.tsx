@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import approvedHero from "@/assets/real/concept03/hero-base-approved.png";
 import fallbackHero from "@/assets/real/home-hero-sketch-house.png";
 import { HeroMotionLayers } from "@/features/hero-motion/HeroMotionLayers";
@@ -39,6 +39,7 @@ function diagnosticPreview(state: HeroMotionState) {
 }
 
 export function Concept03DesktopHeroMedia() {
+  const baseImageRef = useRef<HTMLImageElement>(null);
   const [baseLoaded, setBaseLoaded] = useState(false);
   const [overlaysReady, setOverlaysReady] = useState(false);
   const [overlaysFailed, setOverlaysFailed] = useState(false);
@@ -65,6 +66,11 @@ export function Concept03DesktopHeroMedia() {
       desktopPointer.removeEventListener("change", configureExperience);
       reducedMotion.removeEventListener("change", configureExperience);
     };
+  }, []);
+
+  useEffect(() => {
+    const baseImage = baseImageRef.current;
+    if (baseImage?.complete && baseImage.naturalWidth > 0) setBaseLoaded(true);
   }, []);
 
   useEffect(() => {
@@ -104,6 +110,7 @@ export function Concept03DesktopHeroMedia() {
       onPointerLeave={motion.onPointerLeave}
     >
       <img
+        ref={baseImageRef}
         src={approvedHero}
         alt={HERO_ALT}
         className="absolute inset-0 h-full w-full object-cover object-[56%_center]"
