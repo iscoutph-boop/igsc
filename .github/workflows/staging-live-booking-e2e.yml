@@ -1,4 +1,4 @@
-name: Staging CRM Contract Test
+name: Staging Cancellation Contract E2E
 
 on:
   push:
@@ -9,9 +9,11 @@ permissions:
   contents: read
 
 jobs:
-  crm-contract:
+  cancellation-contract-e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
+    env:
+      BASE_URL: https://deploy-preview-2--darling-sunburst-da0a5d.netlify.app
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -20,5 +22,82 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm install --no-audit --no-fund
-      - name: Run CRM adapter regression test
-        run: npx vitest run src/lib/bookings.functions.test.ts
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Wait for preview
+        shell: bash
+        run: |
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent --show-error --location "$BASE_URL/consultation" >/dev/null; then exit 0; fi
+            sleep 5
+          done
+          exit 1
+      - name: Create, retrieve, and cancel QA booking
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          node --input-type=module <<'NODE'
+          import { chromium } from '@playwright/test';
+          import fs from 'node:fs';
+
+          const baseUrl = process.env.BASE_URL;
+          const fullName = 'VMM CANCEL CONTRACT QA 20260831';
+          const email = 'vencemichael06@gmail.com';
+          const phone = '09000000004';
+          const reason = 'STAGING QA VERIFIED REASON — compatibility contract test; not a real customer booking.';
+          const browser = await chromium.launch({ headless: true });
+          const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+
+          try {
+            await page.goto(`${baseUrl}/consultation`, { waitUntil: 'networkidle', timeout: 120000 });
+            await page.locator('input[name="fullName"]').fill(fullName);
+            await page.locator('input[name="phoneNumber"]').fill(phone);
+            await page.locator('input[name="emailAddress"]').fill(email);
+            await page.locator('select[name="projectType"]').selectOption({ label: 'Residential' });
+            await page.locator('select[name="preferredService"]').selectOption({ label: 'Project Consultation' });
+            await page.locator('input[name="projectLocation"]').fill('Staging QA - Cagayan de Oro City');
+            await page.locator('input[name="approximateArea"]').fill('100 sqm');
+            await page.locator('textarea[name="projectDetails"]').fill('CANCELLATION CONTRACT STAGING QA ONLY — not a real customer lead.');
+            await page.locator('input[name="preferredDate"]').evaluate((el) => { el.value = '2026-09-04'; });
+            await page.locator('input[name="preferredTime"]').evaluate((el) => { el.value = '10:30'; });
+            await page.locator('input[name="privacyConsent"]').check();
+
+            await page.getByRole('button', { name: /Submit consultation request/i }).click();
+            const confirmation = page.locator('#consultation-confirmation');
+            await confirmation.waitFor({ state: 'visible', timeout: 90000 });
+            const text = (await confirmation.textContent()) ?? '';
+            const match = text.match(/IGS-\d{4}-\d{4}/i);
+            if (!match) throw new Error(`Booking reference missing: ${text}`);
+            const reference = match[0];
+            console.log(`BOOKING_REFERENCE=${reference}`);
+
+            await page.getByRole('button', { name: /Manage booking/i }).click();
+            await page.getByRole('heading', { name: 'Manage Your Booking' }).waitFor({ timeout: 30000 });
+            await page.locator('input[placeholder*="IGS-"]').fill(reference);
+            await page.locator('input[placeholder="Enter your email or phone number"]').fill(email);
+            await page.getByRole('button', { name: /Find My Booking/i }).click();
+            await page.getByRole('heading', { name: 'Appointment Request Found' }).waitFor({ timeout: 60000 });
+            console.log('LOOKUP_STATUS=PASS');
+
+            await page.getByRole('button', { name: /Cancel Request/i }).click();
+            await page.getByRole('heading', { name: 'Cancel Booking?' }).waitFor({ timeout: 30000 });
+            await page.locator('textarea[placeholder*="why you\'re cancelling"]').fill(reason);
+            await page.getByRole('button', { name: /Confirm Cancellation/i }).click();
+            await page.getByRole('heading', { name: 'Cancellation Request Received' }).waitFor({ timeout: 60000 });
+            console.log('CANCEL_STATUS=PASS');
+            console.log(`EXPECTED_REASON=${reason}`);
+
+            await page.screenshot({ path: 'artifacts/cancellation-contract-success.png', fullPage: true });
+            fs.writeFileSync('artifacts/booking-reference.txt', `${reference}\n`, 'utf8');
+            fs.writeFileSync('artifacts/expected-reason.txt', `${reason}\n`, 'utf8');
+          } finally {
+            await browser.close();
+          }
+          NODE
+      - name: Upload QA evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-cancellation-contract-evidence
+          path: artifacts
+          if-no-files-found: warn
