@@ -1,0 +1,44 @@
+name: Staging Booking QA Gate
+
+on:
+  push:
+    branches:
+      - "staging/booking-ui-gmail-qa"
+
+permissions:
+  contents: read
+
+jobs:
+  booking-qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      BASE_URL: https://deploy-preview-3--darling-sunburst-da0a5d.netlify.app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Static redesign audit
+        run: npm run audit:redesign
+      - name: Lint
+        run: npm run lint
+      - name: Unit and regression tests
+        run: npm test
+      - name: Production build
+        run: npm run build
+      - name: Verify staging consultation route
+        shell: bash
+        run: |
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent --show-error --location "$BASE_URL/consultation" >/dev/null; then
+              echo "STAGING_ROUTE_STATUS=PASS"
+              exit 0
+            fi
+            sleep 5
+          done
+          echo "STAGING_ROUTE_STATUS=FAIL"
+          exit 1

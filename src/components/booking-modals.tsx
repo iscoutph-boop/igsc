@@ -806,7 +806,7 @@ function CancelConfirm({
       await callCRM("cancelBooking", {
         bookingReference: booking.bookingReference,
         contact: ctx.contact,
-        cancelReason: reason,
+        cancellationReason: reason,
       });
       onDone({ ...booking, bookingStatus: "Cancellation Requested" });
     } catch (e2) {
