@@ -1,4 +1,4 @@
-name: Staging Cancellation Contract E2E
+name: Staging PM Parser Diagnostic
 
 on:
   push:
@@ -9,7 +9,7 @@ permissions:
   contents: read
 
 jobs:
-  cancellation-contract-e2e:
+  pm-parser-diagnostic:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
@@ -32,7 +32,7 @@ jobs:
             sleep 5
           done
           exit 1
-      - name: Create, retrieve, and cancel QA booking
+      - name: Submit 12-hour PM diagnostic booking
         shell: bash
         run: |
           mkdir -p artifacts
@@ -41,10 +41,10 @@ jobs:
           import fs from 'node:fs';
 
           const baseUrl = process.env.BASE_URL;
-          const fullName = 'VMM CANCEL CONTRACT QA 20260831';
+          const fullName = 'VMM PM PARSER QA 20260831';
           const email = 'vencemichael06@gmail.com';
-          const phone = '09000000004';
-          const reason = 'STAGING QA VERIFIED REASON — compatibility contract test; not a real customer booking.';
+          const phone = '09000000005';
+          const reason = 'STAGING PM PARSER QA CLEANUP — not a real customer booking.';
           const browser = await chromium.launch({ headless: true });
           const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
 
@@ -55,11 +55,10 @@ jobs:
             await page.locator('input[name="emailAddress"]').fill(email);
             await page.locator('select[name="projectType"]').selectOption({ label: 'Residential' });
             await page.locator('select[name="preferredService"]').selectOption({ label: 'Project Consultation' });
-            await page.locator('input[name="projectLocation"]').fill('Staging QA - Cagayan de Oro City');
-            await page.locator('input[name="approximateArea"]').fill('100 sqm');
-            await page.locator('textarea[name="projectDetails"]').fill('CANCELLATION CONTRACT STAGING QA ONLY — not a real customer lead.');
+            await page.locator('input[name="projectLocation"]').fill('Staging PM Parser QA - Cagayan de Oro City');
+            await page.locator('textarea[name="projectDetails"]').fill('PM PARSER DIAGNOSTIC ONLY — submit 1:30 PM text to determine Apps Script parser behavior.');
             await page.locator('input[name="preferredDate"]').evaluate((el) => { el.value = '2026-09-04'; });
-            await page.locator('input[name="preferredTime"]').evaluate((el) => { el.value = '10:30'; });
+            await page.locator('input[name="preferredTime"]').evaluate((el) => { el.value = '1:30 PM'; });
             await page.locator('input[name="privacyConsent"]').check();
 
             await page.getByRole('button', { name: /Submit consultation request/i }).click();
@@ -70,6 +69,7 @@ jobs:
             if (!match) throw new Error(`Booking reference missing: ${text}`);
             const reference = match[0];
             console.log(`BOOKING_REFERENCE=${reference}`);
+            console.log('SUBMITTED_TIME=1:30 PM');
 
             await page.getByRole('button', { name: /Manage booking/i }).click();
             await page.getByRole('heading', { name: 'Manage Your Booking' }).waitFor({ timeout: 30000 });
@@ -85,11 +85,9 @@ jobs:
             await page.getByRole('button', { name: /Confirm Cancellation/i }).click();
             await page.getByRole('heading', { name: 'Cancellation Request Received' }).waitFor({ timeout: 60000 });
             console.log('CANCEL_STATUS=PASS');
-            console.log(`EXPECTED_REASON=${reason}`);
 
-            await page.screenshot({ path: 'artifacts/cancellation-contract-success.png', fullPage: true });
+            await page.screenshot({ path: 'artifacts/pm-parser-diagnostic.png', fullPage: true });
             fs.writeFileSync('artifacts/booking-reference.txt', `${reference}\n`, 'utf8');
-            fs.writeFileSync('artifacts/expected-reason.txt', `${reason}\n`, 'utf8');
           } finally {
             await browser.close();
           }
@@ -98,6 +96,6 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: staging-cancellation-contract-evidence
+          name: staging-pm-parser-diagnostic
           path: artifacts
           if-no-files-found: warn
