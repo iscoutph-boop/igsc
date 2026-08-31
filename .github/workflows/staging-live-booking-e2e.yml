@@ -67,8 +67,8 @@ jobs:
               if (target) await budget.selectOption({ label: target });
             }
             await page.locator('textarea[name="projectDetails"]').fill('FINAL STAGING QA ONLY — verify the actual website flow to Apps Script, Gmail, Google Sheets, Google Calendar, and Manage Booking. Not a real customer lead.');
-            await page.locator('input[name="preferredDate"]').fill('2026-09-04');
-            await page.locator('input[name="preferredTime"]').fill('13:30');
+            await page.locator('input[name="preferredDate"]').evaluate((el) => { el.value = '2026-09-04'; });
+            await page.locator('input[name="preferredTime"]').evaluate((el) => { el.value = '13:30'; });
             await page.locator('input[name="privacyConsent"]').check();
 
             await page.getByRole('button', { name: /Submit consultation request/i }).click();
