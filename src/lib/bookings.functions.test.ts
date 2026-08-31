@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createBookingPayloadSchema } from "./bookings.functions";
+import { buildCRMForwardRequest, createBookingPayloadSchema } from "./bookings.functions";
 
 describe("createBookingPayloadSchema", () => {
   it("requires the production inquiry fields and sanitizes spreadsheet prefixes", () => {
@@ -39,5 +39,46 @@ describe("createBookingPayloadSchema", () => {
         privacyConsent: "",
       }),
     ).toThrow();
+  });
+});
+
+describe("buildCRMForwardRequest", () => {
+  it("preserves cancellationReason and adds the legacy cancelReason alias", () => {
+    const request = buildCRMForwardRequest({
+      action: "cancelBooking",
+      payload: {
+        bookingReference: "IGS-2026-TEST",
+        contact: "client@example.com",
+        cancellationReason: "Schedule changed",
+      },
+    });
+
+    expect(request).toEqual({
+      action: "cancelBooking",
+      payload: {
+        bookingReference: "IGS-2026-TEST",
+        contact: "client@example.com",
+        cancellationReason: "Schedule changed",
+        cancelReason: "Schedule changed",
+      },
+    });
+  });
+
+  it("does not add compatibility fields to other CRM actions", () => {
+    const request = buildCRMForwardRequest({
+      action: "findBooking",
+      payload: {
+        bookingReference: "IGS-2026-TEST",
+        contact: "client@example.com",
+      },
+    });
+
+    expect(request).toEqual({
+      action: "findBooking",
+      payload: {
+        bookingReference: "IGS-2026-TEST",
+        contact: "client@example.com",
+      },
+    });
   });
 });
