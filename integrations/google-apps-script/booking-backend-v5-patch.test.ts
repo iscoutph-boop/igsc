@@ -1,9 +1,14 @@
 import { existsSync, readFileSync } from "node:fs";
-import { fileURLToPath } from "node:url";
+import path from "node:path";
 import vm from "node:vm";
 import { describe, expect, it } from "vitest";
 
-const patchPath = fileURLToPath(new URL("./booking-backend-v5-patch.gs", import.meta.url));
+const patchPath = path.join(
+  process.cwd(),
+  "integrations",
+  "google-apps-script",
+  "booking-backend-v5-patch.gs",
+);
 
 function loadPatch() {
   expect(existsSync(patchPath), "booking-backend-v5-patch.gs must exist").toBe(true);
