@@ -9,7 +9,9 @@ test("desktop hero owns three isolated states", async ({ page }) => {
   const box = await media.boundingBox();
   if (!box) throw new Error("Desktop hero media is not visible");
 
-  await page.mouse.move(box.x + box.width * 0.08, box.y + box.height * 0.45);
+  // This point sits behind the desktop headline layer. It must still reach the
+  // media interaction instead of becoming a dead zone.
+  await page.mouse.move(box.x + box.width * 0.08, box.y + box.height * 0.28);
   await expect(media).toHaveAttribute("data-hero-state", "sketchReveal");
   await page.mouse.move(box.x + box.width * 0.7, box.y + box.height * 0.45);
   await expect(media).toHaveAttribute("data-hero-state", "finishedLights");
