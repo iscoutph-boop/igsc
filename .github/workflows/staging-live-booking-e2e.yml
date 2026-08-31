@@ -1,4 +1,4 @@
-name: Staging Live Booking Cleanup
+name: Staging CRM Contract Test
 
 on:
   push:
@@ -9,11 +9,9 @@ permissions:
   contents: read
 
 jobs:
-  cleanup-staging-booking:
+  crm-contract:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
-    env:
-      BASE_URL: https://deploy-preview-2--darling-sunburst-da0a5d.netlify.app
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -22,64 +20,5 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm install --no-audit --no-fund
-      - name: Install Chromium
-        run: npx playwright install --with-deps chromium
-      - name: Wait for deploy preview
-        shell: bash
-        run: |
-          for attempt in $(seq 1 60); do
-            if curl --fail --silent --show-error --location "$BASE_URL/consultation" >/dev/null; then
-              echo "Deploy preview is reachable."
-              exit 0
-            fi
-            sleep 5
-          done
-          exit 1
-      - name: Cancel QA booking through website
-        shell: bash
-        run: |
-          mkdir -p artifacts
-          node --input-type=module <<'NODE'
-          import { chromium } from '@playwright/test';
-          import fs from 'node:fs';
-
-          const baseUrl = process.env.BASE_URL;
-          const reference = 'IGS-2026-0013';
-          const contact = 'vencemichael06@gmail.com';
-          const reason = 'STAGING QA CLEANUP — actual website integration test complete; not a real customer booking.';
-          const browser = await chromium.launch({ headless: true });
-          const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
-
-          try {
-            await page.goto(`${baseUrl}/consultation`, { waitUntil: 'networkidle', timeout: 120000 });
-            await page.getByRole('button', { name: 'Open navigation menu' }).click();
-            await page.getByRole('dialog', { name: 'Navigation menu' }).waitFor({ timeout: 30000 });
-            await page.getByRole('button', { name: /Manage booking/i }).click();
-            await page.getByRole('heading', { name: 'Manage Your Booking' }).waitFor({ timeout: 30000 });
-            await page.locator('input[placeholder*="IGS-"]').fill(reference);
-            await page.locator('input[placeholder="Enter your email or phone number"]').fill(contact);
-            await page.getByRole('button', { name: /Find My Booking/i }).click();
-            await page.getByRole('heading', { name: 'Appointment Request Found' }).waitFor({ timeout: 60000 });
-            console.log('LOOKUP_STATUS=PASS');
-
-            await page.getByRole('button', { name: /Cancel Request/i }).click();
-            await page.getByRole('heading', { name: 'Cancel Booking?' }).waitFor({ timeout: 30000 });
-            await page.locator('textarea[placeholder*="why you\'re cancelling"]').fill(reason);
-            await page.getByRole('button', { name: /Confirm Cancellation/i }).click();
-            await page.getByRole('heading', { name: 'Cancellation Request Received' }).waitFor({ timeout: 60000 });
-            console.log('CANCEL_STATUS=PASS');
-            console.log(`CANCELLATION_REASON=${reason}`);
-            await page.screenshot({ path: 'artifacts/staging-booking-cancelled.png', fullPage: true });
-            fs.writeFileSync('artifacts/booking-reference.txt', `${reference}\n`, 'utf8');
-            fs.writeFileSync('artifacts/cancellation-reason.txt', `${reason}\n`, 'utf8');
-          } finally {
-            await browser.close();
-          }
-          NODE
-      - name: Upload cleanup evidence
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: staging-live-booking-cleanup-evidence
-          path: artifacts
-          if-no-files-found: warn
+      - name: Run CRM adapter regression test
+        run: npx vitest run src/lib/bookings.functions.test.ts
