@@ -1,4 +1,4 @@
-name: Staging Cancellation Regression
+name: Staging Booking Verification
 
 on:
   push:
@@ -9,9 +9,9 @@ permissions:
   contents: read
 
 jobs:
-  cancellation-regression:
+  verification:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -20,5 +20,11 @@ jobs:
           cache: npm
       - name: Install dependencies
         run: npm install --no-audit --no-fund
-      - name: Run cancellation regression test
-        run: npm test -- src/components/booking-modals.test.tsx
+      - name: Static redesign audit
+        run: npm run audit:redesign
+      - name: Lint
+        run: npm run lint
+      - name: Test
+        run: npm test
+      - name: Production build
+        run: npm run build
