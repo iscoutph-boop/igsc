@@ -1,0 +1,91 @@
+name: Approved UI Staging Booking Creation
+
+on:
+  push:
+    branches:
+      - "staging/booking-crm-integration"
+
+permissions:
+  contents: read
+
+jobs:
+  approved-ui-booking:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      BASE_URL: https://deploy-preview-2--darling-sunburst-da0a5d.netlify.app
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Wait for staging preview
+        shell: bash
+        run: |
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent --show-error --location "$BASE_URL/consultation" >/dev/null; then exit 0; fi
+            sleep 5
+          done
+          exit 1
+      - name: Submit approved UI staging booking
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          node --input-type=module <<'NODE'
+          import { chromium } from '@playwright/test';
+          import fs from 'node:fs';
+
+          const baseUrl = process.env.BASE_URL;
+          const fullName = 'VMM APPROVED UI STAGING QA 20260901';
+          const email = 'vencemichael06@gmail.com';
+          const phone = '09000000006';
+          const browser = await chromium.launch({ headless: true });
+          const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
+
+          try {
+            await page.goto(`${baseUrl}/consultation`, { waitUntil: 'networkidle', timeout: 120000 });
+            await page.locator('input[name="fullName"]').fill(fullName);
+            await page.locator('input[name="phoneNumber"]').fill(phone);
+            await page.locator('input[name="emailAddress"]').fill(email);
+            await page.locator('select[name="projectType"]').selectOption({ label: 'Residential' });
+            await page.locator('select[name="preferredService"]').selectOption({ label: 'Project Consultation' });
+            await page.locator('input[name="projectLocation"]').fill('Staging QA - Cagayan de Oro City');
+            await page.locator('input[name="approximateArea"]').fill('120 sqm');
+            await page.locator('textarea[name="projectDetails"]').fill('APPROVED UI STAGING BOOKING QA ONLY — creation flow verification; not a real customer lead.');
+            await page.locator('input[name="preferredDate"]').evaluate((el) => { el.value = '2026-09-04'; });
+            await page.locator('input[name="preferredTime"]').evaluate((el) => { el.value = '10:30'; });
+            await page.locator('input[name="privacyConsent"]').check();
+
+            await page.screenshot({ path: 'artifacts/approved-ui-filled-form.png', fullPage: true });
+
+            await page.getByRole('button', { name: /Submit consultation request/i }).click();
+            const confirmation = page.locator('#consultation-confirmation');
+            await confirmation.waitFor({ state: 'visible', timeout: 90000 });
+            const text = (await confirmation.textContent()) ?? '';
+            const match = text.match(/IGS-\d{4}-\d{4}/i);
+            if (!match) throw new Error(`Booking reference missing: ${text}`);
+
+            const reference = match[0];
+            console.log(`BOOKING_REFERENCE=${reference}`);
+            console.log('BOOKING_CREATE_STATUS=PASS');
+            console.log('EXPECTED_TIME=10:30 AM');
+            console.log('QA_MODE=CREATE_ONLY');
+
+            await page.screenshot({ path: 'artifacts/approved-ui-booking-confirmation.png', fullPage: true });
+            fs.writeFileSync('artifacts/booking-reference.txt', `${reference}\n`, 'utf8');
+          } finally {
+            await browser.close();
+          }
+          NODE
+      - name: Upload staging evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: approved-ui-staging-booking-evidence
+          path: artifacts
+          if-no-files-found: warn

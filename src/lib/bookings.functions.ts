@@ -71,6 +71,22 @@ const crmInputSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("cancelBooking"), payload: cancelBookingPayloadSchema }),
 ]);
 
+export function buildCRMForwardRequest(data: z.infer<typeof crmInputSchema>) {
+  if (data.action === "cancelBooking") {
+    return {
+      action: data.action,
+      payload: {
+        ...data.payload,
+        // The existing Apps Script CRM historically reads cancelReason.
+        // Keep the validated canonical field too so both contracts remain compatible.
+        cancelReason: data.payload.cancellationReason,
+      },
+    };
+  }
+
+  return { action: data.action, payload: data.payload };
+}
+
 export const callCRMFn = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => crmInputSchema.parse(data))
   .handler(async ({ data }) => {
@@ -82,7 +98,7 @@ export const callCRMFn = createServerFn({ method: "POST" })
     const response = await fetch(url, {
       method: "POST",
       headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ action: data.action, payload: data.payload }),
+      body: JSON.stringify(buildCRMForwardRequest(data)),
     });
 
     if (!response.ok) {
