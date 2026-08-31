@@ -45,9 +45,9 @@ jobs:
           import fs from 'node:fs';
 
           const baseUrl = process.env.BASE_URL;
-          const fullName = 'VMM LIVE STAGING QA 20260831';
-          const email = 'igs-live-staging-qa@example.com';
-          const phone = '09000000002';
+          const fullName = 'VMM FINAL STAGING QA 20260831';
+          const email = 'vencemichael06@gmail.com';
+          const phone = '09000000003';
           const browser = await chromium.launch({ headless: true });
           const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
 
@@ -66,9 +66,9 @@ jobs:
               const target = options.find((x) => x && !/select/i.test(x));
               if (target) await budget.selectOption({ label: target });
             }
-            await page.locator('textarea[name="projectDetails"]').fill('REAL STAGING QA ONLY — verify website form to Apps Script, Gmail, Google Sheets, Calendar, and Manage Booking. Not a real customer lead.');
-            await page.locator('input[name="preferredDate"]').evaluate((el) => { el.value = '2026-09-05'; });
-            await page.locator('input[name="preferredTime"]').evaluate((el) => { el.value = '11:00'; });
+            await page.locator('textarea[name="projectDetails"]').fill('FINAL STAGING QA ONLY — verify the actual website flow to Apps Script, Gmail, Google Sheets, Google Calendar, and Manage Booking. Not a real customer lead.');
+            await page.locator('input[name="preferredDate"]').fill('2026-09-04');
+            await page.locator('input[name="preferredTime"]').fill('13:30');
             await page.locator('input[name="privacyConsent"]').check();
 
             await page.getByRole('button', { name: /Submit consultation request/i }).click();
