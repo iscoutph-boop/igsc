@@ -53,8 +53,8 @@ jobs:
           import fs from 'node:fs';
 
           const baseUrl = process.env.BASE_URL;
-          const fullName = 'VMM Automated Staging QA 20260831';
-          const email = 'igs-staging@example.com';
+          const fullName = 'VMM Gmail Staging QA 20260831';
+          const email = 'vencemichael06@gmail.com';
           const phone = '09000000000';
           const browser = await chromium.launch({ headless: true });
           const page = await browser.newPage({ viewport: { width: 390, height: 844 } });
@@ -68,7 +68,7 @@ jobs:
             await page.locator('select[name="preferredService"]').selectOption({ label: 'Project Consultation' });
             await page.locator('input[name="projectLocation"]').fill('Staging QA - Cagayan de Oro City');
             await page.locator('input[name="approximateArea"]').fill('100 sqm');
-            await page.locator('textarea[name="projectDetails"]').fill('AUTOMATED STAGING QA ONLY — do not treat as a real customer inquiry. This verifies the website to Google Apps Script CRM integration.');
+            await page.locator('textarea[name="projectDetails"]').fill('AUTOMATED STAGING QA ONLY — do not treat as a real customer inquiry. This verifies the website to Google Apps Script CRM and Gmail integration.');
 
             await page.locator('input[name="preferredDate"]').evaluate((el) => {
               el.value = '2026-09-03';
