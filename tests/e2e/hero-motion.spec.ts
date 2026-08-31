@@ -9,12 +9,14 @@ test("desktop hero owns three isolated states", async ({ page }) => {
   const box = await media.boundingBox();
   if (!box) throw new Error("Desktop hero media is not visible");
 
-  await page.mouse.move(box.x + box.width * 0.5, box.y + box.height * 0.45);
+  await page.mouse.move(box.x + box.width * 0.08, box.y + box.height * 0.45);
   await expect(media).toHaveAttribute("data-hero-state", "sketchReveal");
-  await page.mouse.move(box.x + box.width * 0.82, box.y + box.height * 0.45);
+  await page.mouse.move(box.x + box.width * 0.7, box.y + box.height * 0.45);
   await expect(media).toHaveAttribute("data-hero-state", "finishedLights");
+  await expect(media.locator(".heroLightInterior")).toHaveCSS("opacity", "1");
   await page.mouse.move(10, 10);
   await expect(media).toHaveAttribute("data-hero-state", "idle");
+  await expect(media.locator(".heroLightLayer")).toHaveCSS("opacity", "0");
 });
 
 test("touch uses the static mobile fallback", async ({ browser }) => {

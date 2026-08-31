@@ -16,18 +16,22 @@ interface HeroMotionLayersProps {
   onAssetError?: () => void;
 }
 
-const ROOT_STYLE = {
-  "--hero-reveal-diameter": HERO_MOTION.revealDiameter,
-} as CSSProperties;
-
 export function HeroMotionLayers({ state, layerRef, onAssetError }: HeroMotionLayersProps) {
+  const lightsOn = state === "finishedLights";
+  const rootStyle = {
+    "--hero-reveal-diameter": HERO_MOTION.revealDiameter,
+    "--hero-interior-opacity": lightsOn ? 1 : 0,
+    "--hero-exterior-opacity": lightsOn ? 0.88 : 0,
+    "--hero-bounce-opacity": lightsOn ? 0.72 : 0,
+  } as CSSProperties;
+
   return (
     <div
       ref={layerRef}
       data-testid="hero-motion-layers"
       data-hero-state={state}
       className="heroMotionLayers"
-      style={ROOT_STYLE}
+      style={rootStyle}
       aria-hidden="true"
     >
       <img

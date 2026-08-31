@@ -21,7 +21,6 @@ function stateIntentDelay(
   if (reducedMotion) return 0;
   if (next === "finishedLights") return HERO_MOTION.lightsIntentMs;
   if (next === "sketchReveal" && previous === "idle") return HERO_MOTION.sketchIntentMs;
-  if (next === "idle") return HERO_MOTION.sketchExitMs;
   return 0;
 }
 

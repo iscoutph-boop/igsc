@@ -42,14 +42,26 @@ describe("useHeroMotion", () => {
     render(<Harness />);
     const host = screen.getByTestId("host");
     bounds(host);
-    fireEvent.pointerMove(host, { clientX: 50, clientY: 300 });
+    fireEvent.pointerMove(host, { clientX: 12, clientY: 300 });
     act(() => vi.advanceTimersByTime(39));
     expect(host.getAttribute("data-state")).toBe("idle");
     act(() => vi.advanceTimersByTime(1));
     expect(host.getAttribute("data-state")).toBe("sketchReveal");
-    fireEvent.pointerMove(host, { clientX: 82, clientY: 300 });
+    fireEvent.pointerMove(host, { clientX: 70, clientY: 300 });
     act(() => vi.advanceTimersByTime(70));
     expect(host.getAttribute("data-state")).toBe("finishedLights");
+  });
+
+  it("activates the finished reveal at the far-left edge of the hero", () => {
+    vi.spyOn(window, "requestAnimationFrame").mockReturnValue(1);
+    render(<Harness />);
+    const host = screen.getByTestId("host");
+    bounds(host);
+
+    fireEvent.pointerMove(host, { clientX: 1, clientY: 300 });
+    act(() => vi.advanceTimersByTime(40));
+
+    expect(host.getAttribute("data-state")).toBe("sketchReveal");
   });
 
   it("uses one rAF and resets immediately on exit", () => {

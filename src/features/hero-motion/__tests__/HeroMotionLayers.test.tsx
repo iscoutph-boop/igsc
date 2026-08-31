@@ -19,4 +19,13 @@ describe("HeroMotionLayers", () => {
       "cursor",
     );
   });
+
+  it("publishes zero lighting opacity in the resting state", () => {
+    render(<HeroMotionLayers state="idle" />);
+
+    const style = screen.getByTestId("hero-motion-layers").getAttribute("style") ?? "";
+    expect(style).toContain("--hero-interior-opacity: 0");
+    expect(style).toContain("--hero-exterior-opacity: 0");
+    expect(style).toContain("--hero-bounce-opacity: 0");
+  });
 });

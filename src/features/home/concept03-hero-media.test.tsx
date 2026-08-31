@@ -65,10 +65,12 @@ describe("Concept03 hero media", () => {
     vi.unstubAllGlobals();
   });
 
-  it("keeps the base high priority and loads four decorative layers after it", async () => {
+  it("keeps the approved base high priority and loads overlays after it", async () => {
     media();
     render(<Concept03DesktopHeroMedia />);
-    expect(screen.getByAltText(/architectural sketch/i).getAttribute("fetchpriority")).toBe("high");
+    const base = screen.getByAltText(/architectural sketch/i);
+    expect(base.getAttribute("fetchpriority")).toBe("high");
+    expect(base.getAttribute("src")).toContain("hero-base-approved.png");
     expect(screen.queryByTestId("hero-motion-layers")).toBeNull();
     await load();
     expect(
