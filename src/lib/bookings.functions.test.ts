@@ -1,7 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { createBookingPayloadSchema } from "./bookings.functions";
+import {
+  cancelBookingPayloadSchema,
+  createBookingPayloadSchema,
+  findBookingPayloadSchema,
+  rescheduleBookingPayloadSchema,
+} from "./bookings.functions";
 
-describe("createBookingPayloadSchema", () => {
+describe("booking payload schemas", () => {
   it("requires the production inquiry fields and sanitizes spreadsheet prefixes", () => {
     const result = createBookingPayloadSchema.parse({
       fullName: "=Juan Dela Cruz",
@@ -39,5 +44,48 @@ describe("createBookingPayloadSchema", () => {
         privacyConsent: "",
       }),
     ).toThrow();
+  });
+
+  it("accepts the normalized cancellationReason contract", () => {
+    const parsed = cancelBookingPayloadSchema.parse({
+      bookingReference: "IGS-2026-0018",
+      contact: "qa@example.com",
+      cancellationReason: "Schedule changed",
+    });
+
+    expect(parsed.cancellationReason).toBe("Schedule changed");
+  });
+
+  it("rejects overlong cancellation reasons", () => {
+    expect(() =>
+      cancelBookingPayloadSchema.parse({
+        bookingReference: "IGS-2026-0018",
+        contact: "qa@example.com",
+        cancellationReason: "x".repeat(2501),
+      }),
+    ).toThrow();
+  });
+
+  it("keeps find and reschedule contracts bounded", () => {
+    expect(
+      findBookingPayloadSchema.parse({
+        bookingReference: "IGS-2026-0018",
+        contact: "qa@example.com",
+      }),
+    ).toMatchObject({ bookingReference: "IGS-2026-0018", contact: "qa@example.com" });
+
+    expect(
+      rescheduleBookingPayloadSchema.parse({
+        bookingReference: "IGS-2026-0018",
+        contact: "qa@example.com",
+        newPreferredDate: "2026-09-05",
+        newPreferredTime: "15:00",
+        rescheduleNotes: "Client selected a new date.",
+      }),
+    ).toMatchObject({
+      bookingReference: "IGS-2026-0018",
+      newPreferredDate: "2026-09-05",
+      newPreferredTime: "15:00",
+    });
   });
 });
