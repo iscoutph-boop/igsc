@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build"
+  command = "node scripts/v625-live-staging-qa.mjs && npm run build"
   publish = "dist/client"
 
 [build.environment]
