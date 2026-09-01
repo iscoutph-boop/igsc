@@ -1,0 +1,27 @@
+name: Staging Final Verification
+
+on:
+  push:
+    branches:
+      - feature/booking-email-staging-recovered-2
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Clean install
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Unit tests
+        run: npm test
+      - name: Production build
+        run: npm run build
