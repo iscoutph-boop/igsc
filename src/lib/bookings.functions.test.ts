@@ -1,10 +1,17 @@
-import { describe, expect, it } from "vitest";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import {
+  CRM_UPSTREAM_TIMEOUT_MS,
   cancelBookingPayloadSchema,
   createBookingPayloadSchema,
+  fetchCRMUpstream,
   findBookingPayloadSchema,
   rescheduleBookingPayloadSchema,
 } from "./bookings.functions";
+
+afterEach(() => {
+  vi.useRealTimers();
+  vi.unstubAllGlobals();
+});
 
 describe("booking payload schemas", () => {
   it("requires the production inquiry fields and sanitizes spreadsheet prefixes", () => {
@@ -89,5 +96,28 @@ describe("booking payload schemas", () => {
       newPreferredDate: "2026-09-05",
       newPreferredTime: "15:00",
     });
+  });
+});
+
+describe("CRM upstream reliability", () => {
+  it("aborts a stalled Apps Script request within the explicit upstream budget", async () => {
+    vi.useFakeTimers();
+    vi.stubGlobal(
+      "fetch",
+      vi.fn((_url: string, init?: RequestInit) =>
+        new Promise<Response>((_resolve, reject) => {
+          init?.signal?.addEventListener("abort", () => {
+            const error = new Error("aborted");
+            error.name = "AbortError";
+            reject(error);
+          });
+        }),
+      ),
+    );
+
+    const request = fetchCRMUpstream("https://example.invalid/exec", "{}");
+    await vi.advanceTimersByTimeAsync(CRM_UPSTREAM_TIMEOUT_MS);
+
+    await expect(request).rejects.toThrow("Booking service timed out.");
   });
 });
