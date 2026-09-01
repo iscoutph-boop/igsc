@@ -1,3 +1,4 @@
+// V6.2.3 staging-only admin-recipient + timeout reproduction gate.
 const url = process.env.GOOGLE_APPS_SCRIPT_WEB_APP_URL;
 if (!url) throw new Error('Missing GOOGLE_APPS_SCRIPT_WEB_APP_URL');
 
