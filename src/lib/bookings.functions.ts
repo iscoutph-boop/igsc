@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { sendBookingNotification } from "./booking-notification.server";
 
 function sanitizeText(value: unknown): string {
   if (typeof value !== "string") return "";
@@ -93,6 +94,23 @@ export const callCRMFn = createServerFn({ method: "POST" })
     const json = JSON.parse(text) as { success?: boolean; message?: string };
     if (!json.success) {
       throw new Error(typeof json.message === "string" ? json.message : "CRM request failed.");
+    }
+
+    if (data.action === "createBooking") {
+      await sendBookingNotification({
+        fullName: data.payload.fullName,
+        phoneNumber: data.payload.phoneNumber,
+        emailAddress: data.payload.emailAddress,
+        projectType: data.payload.projectType,
+        projectLocation: data.payload.projectLocation,
+        preferredService: data.payload.preferredService,
+        approximateArea: data.payload.approximateArea,
+        preferredDate: data.payload.preferredDate,
+        preferredTime: data.payload.preferredTime,
+        budgetRange: data.payload.budgetRange,
+        projectDetails: data.payload.projectDetails,
+        leadSource: data.payload.leadSource,
+      });
     }
 
     return text;
