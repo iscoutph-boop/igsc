@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vitest run src/lib/bookings.functions.test.ts && vite build",
+    "build": "vitest run src/components/booking-modals.test.tsx && vite build",
     "build:dev": "vite build --mode development",
     "preview": "npm run build && npm run start",
     "start": "node .output/server/index.mjs",
