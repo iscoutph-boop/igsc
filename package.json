@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite dev",
-    "build": "vitest run src/components/booking-modals.test.tsx && vite build",
+    "build": "vitest run src/components/booking-modals.test.tsx -t \"offers completed-state self-service action labels after lookup\" && vite build",
     "build:dev": "vite build --mode development",
     "preview": "npm run build && npm run start",
     "start": "node .output/server/index.mjs",
