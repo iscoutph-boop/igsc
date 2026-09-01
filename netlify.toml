@@ -1,5 +1,5 @@
 [build]
-  command = "node scripts/v625-r2-post-cds-lifecycle-qa.mjs && npm run build"
+  command = "npm run build"
   publish = "dist/client"
 
 [build.environment]
