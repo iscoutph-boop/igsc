@@ -355,7 +355,7 @@ export function CheckBookingModal({
                 {view.kind === "reschedule-done" ? (
                   <CompletedState
                     title="Booking rescheduled"
-                    message="Your preferred consultation schedule has been updated. Your confirmation email contains the latest schedule."
+                    message="Your preferred consultation schedule has been updated. The latest schedule is shown below."
                     booking={view.booking}
                     onClose={onClose}
                   />

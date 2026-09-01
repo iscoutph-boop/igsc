@@ -9,6 +9,7 @@ import {
 describe("booking payload schemas", () => {
   it("requires the production inquiry fields and sanitizes spreadsheet prefixes", () => {
     const result = createBookingPayloadSchema.parse({
+      submissionId: "7c7f0a90-ec47-4a0d-9f51-a4939d71ea0d",
       fullName: "=Juan Dela Cruz",
       phoneNumber: "+639171234567",
       emailAddress: "juan@example.com",
@@ -25,6 +26,7 @@ describe("booking payload schemas", () => {
     });
 
     expect(result.fullName).toBe("Juan Dela Cruz");
+    expect(result.submissionId).toBe("7c7f0a90-ec47-4a0d-9f51-a4939d71ea0d");
     expect(result.phoneNumber).toBe("+639171234567");
     expect(
       createBookingPayloadSchema.parse({

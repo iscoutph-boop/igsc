@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   AlertCircle,
   ArrowRight,
@@ -172,6 +172,7 @@ export function ConsultationForm({ onSuccess }: { onSuccess: (reference: string)
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [preferredDate, setPreferredDate] = useState<Date | undefined>();
   const [preferredTime, setPreferredTime] = useState("");
+  const submissionIdRef = useRef<string | null>(null);
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -185,7 +186,9 @@ export function ConsultationForm({ onSuccess }: { onSuccess: (reference: string)
       return;
     }
 
+    if (!submissionIdRef.current) submissionIdRef.current = crypto.randomUUID();
     const payload = {
+      submissionId: submissionIdRef.current,
       fullName: String(formData.get("fullName") ?? "").trim(),
       phoneNumber: String(formData.get("phoneNumber") ?? "").trim(),
       emailAddress: String(formData.get("emailAddress") ?? "").trim(),
@@ -214,6 +217,7 @@ export function ConsultationForm({ onSuccess }: { onSuccess: (reference: string)
       const reference = response.bookingReference || response.booking?.bookingReference;
       if (!reference) throw new Error("A booking reference was not returned.");
       form.reset();
+      submissionIdRef.current = null;
       setPreferredDate(undefined);
       setPreferredTime("");
       trackEvent("consultation_form_success", { projectType: payload.projectType });

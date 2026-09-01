@@ -27,8 +27,10 @@ const phoneText = z.string().max(50).transform(sanitizePhone);
 const mediumText = z.string().max(500).transform(sanitizeText);
 const longText = z.string().max(2500).transform(sanitizeText);
 const optionalShortText = shortText.optional().default("");
+const submissionIdText = z.string().trim().uuid("Invalid submission ID");
 
 export const createBookingPayloadSchema = z.object({
+  submissionId: submissionIdText,
   fullName: shortText.refine((value) => value.length > 0, "Name is required"),
   phoneNumber: phoneText.refine((value) => value.length > 0, "Phone number is required"),
   emailAddress: optionalShortText,

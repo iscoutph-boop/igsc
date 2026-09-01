@@ -11,6 +11,26 @@ vi.mock("@/lib/bookings", () => ({
   callCRM: (...args: unknown[]) => callCRMMock(...args),
 }));
 
+vi.mock("@/components/schedule-picker", () => ({
+  SchedulePicker: ({
+    onDateChange,
+    onTimeChange,
+  }: {
+    onDateChange: (date: Date) => void;
+    onTimeChange: (time: string) => void;
+  }) => (
+    <button
+      type="button"
+      onClick={() => {
+        onDateChange(new Date(2026, 8, 15));
+        onTimeChange("10:30");
+      }}
+    >
+      Pick QA schedule
+    </button>
+  ),
+}));
+
 const booking = {
   bookingReference: "IGS-2026-0018",
   fullName: "VMM QA",
@@ -31,9 +51,10 @@ describe("CheckBookingModal immediate self-service", () => {
 
   it("cancels immediately with the normalized reason contract", async () => {
     const user = userEvent.setup();
-    callCRMMock
-      .mockResolvedValueOnce({ success: true, booking })
-      .mockResolvedValueOnce({ success: true, booking: { ...booking, bookingStatus: "Cancelled" } });
+    callCRMMock.mockResolvedValueOnce({ success: true, booking }).mockResolvedValueOnce({
+      success: true,
+      booking: { ...booking, bookingStatus: "Cancelled" },
+    });
 
     render(<CheckBookingModal open onClose={() => {}} />);
 
@@ -72,5 +93,30 @@ describe("CheckBookingModal immediate self-service", () => {
 
     expect(await screen.findByRole("button", { name: /^reschedule booking$/i })).toBeTruthy();
     expect(screen.getByRole("button", { name: /^cancel booking$/i })).toBeTruthy();
+  });
+
+  it("does not promise a customer email after rescheduling", async () => {
+    const user = userEvent.setup();
+    callCRMMock.mockResolvedValueOnce({ success: true, booking }).mockResolvedValueOnce({
+      success: true,
+      booking: {
+        ...booking,
+        preferredDate: "2026-09-15",
+        preferredTime: "10:30",
+        bookingStatus: "Rescheduled",
+      },
+    });
+
+    render(<CheckBookingModal open onClose={() => {}} />);
+    await user.type(screen.getByPlaceholderText(/IGS-2026/i), booking.bookingReference);
+    await user.type(screen.getByPlaceholderText(/email or phone/i), booking.emailAddress);
+    await user.click(screen.getByRole("button", { name: /find my booking/i }));
+    await user.click(await screen.findByRole("button", { name: /^reschedule booking$/i }));
+    await user.click(screen.getByRole("button", { name: /pick qa schedule/i }));
+    await user.click(screen.getByRole("button", { name: /confirm new schedule/i }));
+
+    expect(await screen.findByText(/^booking rescheduled$/i)).toBeTruthy();
+    expect(screen.getByText(/latest schedule is shown below/i)).toBeTruthy();
+    expect(screen.queryByText(/confirmation email/i)).toBeNull();
   });
 });
