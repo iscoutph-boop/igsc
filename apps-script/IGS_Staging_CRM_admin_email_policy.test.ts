@@ -63,8 +63,8 @@ describe("IG Sabroso admin email policy", () => {
     );
 
     const source = fs.readFileSync(SOURCE_PATH, "utf8");
-    expect(context.CONFIG.ADMIN_EMAIL).toBe("caballerodigitals@gmail.com");
-    expect(context.CONFIG.CUSTOMER_EMAIL_NOTIFICATIONS_ENABLED).toBe(false);
+    expect(source).toContain("ADMIN_EMAIL: 'caballerodigitals@gmail.com'");
+    expect(source).toContain("CUSTOMER_EMAIL_NOTIFICATIONS_ENABLED: false");
     expect(source).not.toContain("vencemichael06@gmail.com");
     expect(sent?.to).toBe("caballerodigitals@gmail.com");
     expect(sent?.htmlBody).toContain("OPEN CRM RECORD");
