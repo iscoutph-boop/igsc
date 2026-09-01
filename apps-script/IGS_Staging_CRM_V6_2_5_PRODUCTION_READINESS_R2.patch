@@ -1,0 +1,38 @@
+--- apps-script/IGS_Staging_CRM_V6_2_5_PRODUCTION_READINESS.gs
++++ apps-script/IGS_Staging_CRM_V6_2_5_PRODUCTION_READINESS_R2.gs
+@@
+- * IG Sabroso Construction — V6.2.5 production-readiness release candidate.
++ * IG Sabroso Construction — V6.2.5 production-readiness release candidate R2.
+@@
+-    version: '6.2.5-production-readiness',
++    version: '6.2.5-production-readiness-r2',
+@@
+ function buildAdminOpsLinksV62_(reference, bookingRow) {
+   const serviceUrl = ScriptApp.getService().getUrl();
+   if (!serviceUrl) throw new Error('Apps Script Web App URL is unavailable.');
+   const crmUrl = serviceUrl + '?open=crm&ref=' + encodeURIComponent(reference) + '&row=' + Number(bookingRow);
+-  const calendarUrl = 'https://calendar.google.com/calendar/u/0/r/search?q=' + encodeURIComponent(reference);
+-  return { crmUrl: crmUrl, calendarUrl: calendarUrl };
++  return { crmUrl: crmUrl };
+ }
+@@
+-    calendarUrl: escapeHtmlV4_(links.calendarUrl),
+     crmUrl: escapeHtmlV4_(links.crmUrl),
+   };
+@@
+-  const calendarLabel = isRescheduled ? 'VIEW UPDATED APPOINTMENT' : (isCreated ? 'VIEW APPOINTMENT' : 'OPEN CALENDAR');
+   const body = [
+@@
+-    'Calendar: ' + links.calendarUrl,
+     'CRM: ' + links.crmUrl,
+@@
+-    '<tr><td class="pad ops" style="padding:26px 32px 0;"><a href="' + safe.calendarUrl + '" style="display:inline-block;margin-right:8px;background:#ff4b18;color:#fff;text-decoration:none;font-size:12px;font-weight:800;letter-spacing:.45px;padding:15px 18px;border-radius:11px;">' + calendarLabel + ' →</a><a href="' + safe.crmUrl + '" style="display:inline-block;background:#16263f;color:#fff;text-decoration:none;font-size:12px;font-weight:800;letter-spacing:.45px;padding:15px 18px;border-radius:11px;">OPEN CRM RECORD →</a></td></tr>' +
++    '<tr><td class="pad ops" style="padding:26px 32px 0;"><a href="' + safe.crmUrl + '" style="display:inline-block;background:#16263f;color:#fff;text-decoration:none;font-size:12px;font-weight:800;letter-spacing:.45px;padding:15px 18px;border-radius:11px;">OPEN CRM RECORD →</a></td></tr>' +
+
+Policy invariants verified against the R2 source:
+- ADMIN_EMAIL remains caballerodigitals@gmail.com.
+- CUSTOMER_EMAIL_NOTIFICATIONS_ENABLED remains false.
+- No vencemichael06@gmail.com literal exists in the R2 source.
+- Admin Gmail keeps OPEN CRM RECORD, REPLY TO CLIENT, and CALL CLIENT.
+- Admin Gmail contains no Calendar CTA, calendar.google.com link, or Calendar plain-text link.
+- Backend Google Calendar lifecycle synchronization remains unchanged.
