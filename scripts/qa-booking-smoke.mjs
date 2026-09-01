@@ -1,4 +1,4 @@
-// One-time deploy-preview integration probe (routing correction verification). Remove after QA.
+// One-time deploy-preview integration probe (exact Apps Script deployment ID verification). Remove after QA.
 const url = process.env.GOOGLE_APPS_SCRIPT_WEB_APP_URL;
 const email = process.env.QA_BOOKING_TEST_EMAIL;
 
