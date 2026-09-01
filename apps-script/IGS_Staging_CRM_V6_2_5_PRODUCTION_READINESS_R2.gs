@@ -16,6 +16,7 @@ const CONFIG = {
   BOOKINGS_SHEET: 'Bookings',
   APPOINTMENTS_SHEET: 'Appointments',
   CALENDAR_NAME: 'IGS Website Appointments',
+  CALENDAR_ID: 'cbaff5b7abd586ce7e993fbd1809c7f99eda329da29d053af41192291f6f0bb2@group.calendar.google.com',
   ADMIN_EMAIL: 'caballerodigitals@gmail.com',
   CUSTOMER_EMAIL_NOTIFICATIONS_ENABLED: false,
   TIMEZONE: 'Asia/Manila',
@@ -668,15 +669,13 @@ function getSheetV6_(name) {
 }
 
 function ensureWebsiteCalendarV623_() {
-  const calendars = CalendarApp.getCalendarsByName(CONFIG.CALENDAR_NAME);
-  if (calendars.length) return calendars[0];
-
-  return CalendarApp.createCalendar(CONFIG.CALENDAR_NAME, {
-    description: 'Website consultation appointments from igsabroso.com',
-    timeZone: CONFIG.TIMEZONE,
-    hidden: false,
-    selected: true,
-  });
+  const calendar = CalendarApp.getCalendarById(CONFIG.CALENDAR_ID);
+  if (!calendar) {
+    throw new Error(
+      'IGS Website Appointments calendar is not accessible to this Apps Script execution account.'
+    );
+  }
+  return calendar;
 }
 
 function getCalendarV6_() {
