@@ -1,3 +1,4 @@
+// One-time deploy-preview integration probe. Remove after QA verification.
 const url = process.env.GOOGLE_APPS_SCRIPT_WEB_APP_URL;
 const email = process.env.QA_BOOKING_TEST_EMAIL;
 
