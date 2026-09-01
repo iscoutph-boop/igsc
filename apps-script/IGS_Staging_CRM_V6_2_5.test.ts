@@ -5,8 +5,9 @@ import { describe, expect, it, vi } from "vitest";
 
 const SOURCE_PATH = path.resolve(
   process.cwd(),
-  "apps-script/IGS_Staging_CRM_V6_2_5_PRODUCTION_READINESS.gs",
+  "apps-script/IGS_Staging_CRM_V6_2_5_PRODUCTION_READINESS_R2.gs",
 );
+const SOURCE_TEXT = fs.readFileSync(SOURCE_PATH, "utf8");
 
 // Apps Script functions are discovered dynamically after evaluating the .gs source.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -27,7 +28,7 @@ function loadScript(): ScriptContext {
     decodeURIComponent,
   };
   vm.createContext(context);
-  vm.runInContext(fs.readFileSync(SOURCE_PATH, "utf8"), context);
+  vm.runInContext(SOURCE_TEXT, context);
   return context;
 }
 
@@ -159,6 +160,17 @@ const createPayload = {
 };
 
 describe("Apps Script V6.2.5 production-readiness behavior", () => {
+  it("locks the R2 release identity and notification policy without disabling Calendar sync", () => {
+    expect(SOURCE_TEXT).toContain("version: '6.2.5-production-readiness-r2'");
+    expect(SOURCE_TEXT).toContain("ADMIN_EMAIL: 'caballerodigitals@gmail.com'");
+    expect(SOURCE_TEXT).toContain("CUSTOMER_EMAIL_NOTIFICATIONS_ENABLED: false");
+    expect(SOURCE_TEXT).not.toContain("vencemichael06@gmail.com");
+    expect(SOURCE_TEXT).toContain("CALENDAR_NAME: 'IGS Website Appointments'");
+    expect(SOURCE_TEXT).toContain("function createBookingCalendarEventV6_");
+    expect(SOURCE_TEXT).toContain("function replaceBookingCalendarEventV62_");
+    expect(SOURCE_TEXT).toContain("function deleteBookingCalendarEventsV6_");
+  });
+
   it("returns the original booking without repeating create side effects", () => {
     const { context, rows, adminSend, appointmentWrite, calendarWrite } = bookingHarness();
 
@@ -415,6 +427,11 @@ describe("Apps Script V6.2.5 production-readiness behavior", () => {
     expect(sent?.htmlBody).toContain("REPLY TO CLIENT");
     expect(sent?.htmlBody).toContain("CALL CLIENT");
     expect(sent?.htmlBody).toContain("OPEN CRM RECORD");
+    expect(sent?.htmlBody).not.toContain("VIEW APPOINTMENT");
+    expect(sent?.htmlBody).not.toContain("VIEW UPDATED APPOINTMENT");
+    expect(sent?.htmlBody).not.toContain("OPEN CALENDAR");
+    expect(sent?.htmlBody).not.toContain("calendar.google.com");
+    expect(sent?.body).not.toContain("Calendar:");
     expect(sent?.htmlBody).not.toContain("docs.google.com/spreadsheets");
     expect(sent?.htmlBody).toContain(">Powered by CDS</a>");
     expect(sent?.htmlBody).not.toContain("Powered by CDS →");

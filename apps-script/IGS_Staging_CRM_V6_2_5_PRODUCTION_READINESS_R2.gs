@@ -1,5 +1,5 @@
 /**
- * IG Sabroso Construction — V6.2.5 production-readiness release candidate.
+ * IG Sabroso Construction — V6.2.5 production-readiness release candidate R2.
  * Standalone Apps Script web app for client-demo and production-readiness staging.
  *
  * Safety:
@@ -34,7 +34,7 @@ function doGet(e) {
     success: true,
     message: 'IG Sabroso Website CRM is running.',
     timezone: CONFIG.TIMEZONE,
-    version: '6.2.5-production-readiness',
+    version: '6.2.5-production-readiness-r2',
   });
 }
 
@@ -1027,8 +1027,7 @@ function buildAdminOpsLinksV62_(reference, bookingRow) {
   const serviceUrl = ScriptApp.getService().getUrl();
   if (!serviceUrl) throw new Error('Apps Script Web App URL is unavailable.');
   const crmUrl = serviceUrl + '?open=crm&ref=' + encodeURIComponent(reference) + '&row=' + Number(bookingRow);
-  const calendarUrl = 'https://calendar.google.com/calendar/u/0/r/search?q=' + encodeURIComponent(reference);
-  return { crmUrl: crmUrl, calendarUrl: calendarUrl };
+  return { crmUrl: crmUrl };
 }
 
 function adminInfoRowV62_(label, value) {
@@ -1069,7 +1068,6 @@ function sendAdminLifecycleNotificationV62_(type, reference, booking, bookingRow
     previous: escapeHtmlV4_(cleanTextV6_(context.previousSchedule)),
     notes: escapeHtmlV4_(cleanTextV6_(context.notes)),
     reason: escapeHtmlV4_(cleanTextV6_(context.reason)),
-    calendarUrl: escapeHtmlV4_(links.calendarUrl),
     crmUrl: escapeHtmlV4_(links.crmUrl),
   };
 
@@ -1077,7 +1075,6 @@ function sendAdminLifecycleNotificationV62_(type, reference, booking, bookingRow
     ? adminInfoRowV62_('Previous schedule', safe.previous) + adminInfoRowV62_('New schedule', safe.schedule) + (context.notes && context.notes !== 'None' ? adminInfoRowV62_('Client note', safe.notes) : '')
     : (!isCreated ? adminInfoRowV62_('Cancelled schedule', safe.schedule) + adminInfoRowV62_('Reason', safe.reason) : adminInfoRowV62_('Preferred schedule', safe.schedule));
 
-  const calendarLabel = isRescheduled ? 'VIEW UPDATED APPOINTMENT' : (isCreated ? 'VIEW APPOINTMENT' : 'OPEN CALENDAR');
   const body = [
     'IG SABROSO CONSTRUCTION — INTERNAL',
     title.toUpperCase(),
@@ -1088,7 +1085,6 @@ function sendAdminLifecycleNotificationV62_(type, reference, booking, bookingRow
     'Phone: ' + (booking.phoneNumber || 'Not provided'),
     'Email: ' + (booking.emailAddress || 'Not provided'),
     'Schedule: ' + currentSchedule,
-    'Calendar: ' + links.calendarUrl,
     'CRM: ' + links.crmUrl,
     'Powered by CDS: https://caballerodigitalsolutions.com',
   ].join('\n');
@@ -1110,7 +1106,7 @@ function sendAdminLifecycleNotificationV62_(type, reference, booking, bookingRow
       adminInfoRowV62_('Budget range', safe.budget) +
     '</td></tr></table></td></tr>' +
     '<tr><td class="pad" style="padding:20px 32px 0;"><div style="font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#ff4b18;">Project details</div><div style="margin-top:8px;font-size:13px;line-height:1.65;color:#344054;">' + safe.details + '</div></td></tr>' +
-    '<tr><td class="pad ops" style="padding:26px 32px 0;"><a href="' + safe.calendarUrl + '" style="display:inline-block;margin-right:8px;background:#ff4b18;color:#fff;text-decoration:none;font-size:12px;font-weight:800;letter-spacing:.45px;padding:15px 18px;border-radius:11px;">' + calendarLabel + ' →</a><a href="' + safe.crmUrl + '" style="display:inline-block;background:#16263f;color:#fff;text-decoration:none;font-size:12px;font-weight:800;letter-spacing:.45px;padding:15px 18px;border-radius:11px;">OPEN CRM RECORD →</a></td></tr>' +
+    '<tr><td class="pad ops" style="padding:26px 32px 0;"><a href="' + safe.crmUrl + '" style="display:inline-block;background:#16263f;color:#fff;text-decoration:none;font-size:12px;font-weight:800;letter-spacing:.45px;padding:15px 18px;border-radius:11px;">OPEN CRM RECORD →</a></td></tr>' +
     '<tr><td class="pad reply" style="padding:12px 32px 30px;">' + reply.html + '<div style="margin-top:18px;font-size:9px;line-height:1.6;color:#98a2b3;">Internal links require the recipient\'s existing Google permissions. Do not forward this email outside the team.</div><div style="margin-top:10px;font-size:9px;line-height:1.5;color:#a0a8b4;">Internal appointment notification<br><a href="https://caballerodigitalsolutions.com" target="_blank" style="display:inline-block;margin-top:5px;color:#ff4b18;text-decoration:none;font-weight:800;letter-spacing:.15px;">Powered by CDS</a></div></td></tr>' +
     '</table></td></tr></table></body></html>';
 
