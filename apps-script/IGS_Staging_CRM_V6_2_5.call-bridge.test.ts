@@ -31,7 +31,7 @@ function loadScript(): ScriptContext {
 }
 
 describe("mobile Call Client bridge", () => {
-  it("routes admin Call Client through HTTPS instead of a Gmail tel link", () => {
+  it("routes admin Call Client through an HTTPS CRM-bound link instead of a Gmail tel link", () => {
     const context = loadScript();
     context.ScriptApp = {
       getService: () => ({ getUrl: () => "https://script.google.com/macros/s/staging/exec" }),
@@ -50,16 +50,39 @@ describe("mobile Call Client bridge", () => {
     );
 
     expect(links.callUrl).toBe(
-      "https://script.google.com/macros/s/staging/exec?open=call&phone=%2B639171234567",
+      "https://script.google.com/macros/s/staging/exec?open=call&ref=IGS-2026-0042&row=9",
     );
     expect(actions.html).toContain(
-      'href="https://script.google.com/macros/s/staging/exec?open=call&amp;phone=%2B639171234567"',
+      'href="https://script.google.com/macros/s/staging/exec?open=call&amp;ref=IGS-2026-0042&amp;row=9"',
     );
     expect(actions.html).toContain("CALL CLIENT");
     expect(actions.html).not.toContain('href="tel:');
+    expect(links.callUrl).not.toContain("phone=");
   });
 
-  it("renders a mobile dial handoff with a native tel fallback", () => {
+  it("resolves the phone from the matching CRM row before rendering the native tel fallback", () => {
+    const context = loadScript();
+    let html = "";
+    context.HtmlService = {
+      createHtmlOutput: (value: string) => {
+        html = value;
+        return { setTitle: () => ({ html }) };
+      },
+    };
+    context.readBookingByRowV6_ = () => ({
+      bookingReference: "IGS-2026-0042",
+      phoneNumber: "+63 (917) 123-4567",
+    });
+
+    context.openClientCallBridgeV625_({ parameter: { ref: "IGS-2026-0042", row: "9" } });
+
+    expect(html).toContain("tel:+639171234567");
+    expect(html).toContain("window.location.replace");
+    expect(html).toContain("CALL CLIENT");
+    expect(html).toContain('name="format-detection" content="telephone=no"');
+  });
+
+  it("rejects an arbitrary phone query that is not bound to a matching CRM reference and row", () => {
     const context = loadScript();
     let html = "";
     context.HtmlService = {
@@ -71,13 +94,11 @@ describe("mobile Call Client bridge", () => {
 
     context.openClientCallBridgeV625_({ parameter: { phone: "+639171234567" } });
 
-    expect(html).toContain("tel:+639171234567");
-    expect(html).toContain("window.location.replace");
-    expect(html).toContain("CALL CLIENT");
-    expect(html).toContain('name="format-detection" content="telephone=no"');
+    expect(html).toContain("Phone number unavailable");
+    expect(html).not.toContain("tel:");
   });
 
-  it("does not render a dial URI for an invalid phone value", () => {
+  it("does not render a dial URI when the CRM row does not match the requested booking reference", () => {
     const context = loadScript();
     let html = "";
     context.HtmlService = {
@@ -86,8 +107,12 @@ describe("mobile Call Client bridge", () => {
         return { setTitle: () => ({ html }) };
       },
     };
+    context.readBookingByRowV6_ = () => ({
+      bookingReference: "IGS-2026-9999",
+      phoneNumber: "+639171234567",
+    });
 
-    context.openClientCallBridgeV625_({ parameter: { phone: "extension 123" } });
+    context.openClientCallBridgeV625_({ parameter: { ref: "IGS-2026-0042", row: "9" } });
 
     expect(html).toContain("Phone number unavailable");
     expect(html).not.toContain("tel:");
