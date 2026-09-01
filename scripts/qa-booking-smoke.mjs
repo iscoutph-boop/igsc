@@ -1,10 +1,3 @@
-const enabled = process.env.QA_BOOKING_SMOKE_ENABLED === 'true';
-
-if (!enabled) {
-  console.log('QA booking smoke test disabled.');
-  process.exit(0);
-}
-
 const url = process.env.GOOGLE_APPS_SCRIPT_WEB_APP_URL;
 const email = process.env.QA_BOOKING_TEST_EMAIL;
 
