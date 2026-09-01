@@ -96,7 +96,7 @@ export async function fetchCRMUpstream(url: string, body: string): Promise<Respo
 }
 
 export const callCRMFn = createServerFn({ method: "POST" })
-  .inputValidator((data: unknown) => crmInputSchema.parse(data))
+  .validator((data: unknown) => crmInputSchema.parse(data))
   .handler(async ({ data }) => {
     const url = process.env.GOOGLE_APPS_SCRIPT_WEB_APP_URL;
     if (!url) {
