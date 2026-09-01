@@ -1,3 +1,5 @@
+// @vitest-environment jsdom
+
 import { render, screen, waitFor } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
@@ -52,10 +54,10 @@ describe("CheckBookingModal immediate self-service", () => {
       });
     });
 
-    expect(await screen.findByText(/^booking cancelled$/i)).toBeInTheDocument();
+    expect(await screen.findByText(/^booking cancelled$/i)).toBeTruthy();
     expect(
       screen.getByText(/no appointment remains scheduled for this booking reference/i),
-    ).toBeInTheDocument();
+    ).toBeTruthy();
   });
 
   it("offers completed-state self-service action labels after lookup", async () => {
@@ -68,7 +70,7 @@ describe("CheckBookingModal immediate self-service", () => {
     await user.type(screen.getByPlaceholderText(/email or phone/i), booking.emailAddress);
     await user.click(screen.getByRole("button", { name: /find my booking/i }));
 
-    expect(await screen.findByRole("button", { name: /^reschedule booking$/i })).toBeInTheDocument();
-    expect(screen.getByRole("button", { name: /^cancel booking$/i })).toBeInTheDocument();
+    expect(await screen.findByRole("button", { name: /^reschedule booking$/i })).toBeTruthy();
+    expect(screen.getByRole("button", { name: /^cancel booking$/i })).toBeTruthy();
   });
 });
