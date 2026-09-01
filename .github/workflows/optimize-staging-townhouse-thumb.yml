@@ -1,0 +1,58 @@
+name: Optimize staging Townhouse thumbnail
+
+on:
+  push:
+    branches:
+      - feature/booking-email-staging-recovered-2
+    paths:
+      - .github/workflows/optimize-staging-townhouse-thumb.yml
+
+permissions:
+  contents: write
+
+jobs:
+  optimize:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/booking-email-staging-recovered-2
+          fetch-depth: 0
+      - run: python -m pip install --disable-pip-version-check pillow
+      - name: Convert Townhouse thumbnail to WebP
+        shell: python
+        run: |
+          from pathlib import Path
+          from PIL import Image, ImageOps
+
+          source = Path('public/assets/projects/townhouse-project/thumbnail.png')
+          target = source.with_suffix('.webp')
+          before = source.stat().st_size
+          with Image.open(source) as raw:
+              image = ImageOps.exif_transpose(raw)
+              if max(image.size) > 2200:
+                  image.thumbnail((2200, 2200), Image.Resampling.LANCZOS)
+              image.save(target, 'WEBP', quality=88, method=6)
+          after = target.stat().st_size
+          print(f'TOWNHOUSE_THUMB_BEFORE={before}')
+          print(f'TOWNHOUSE_THUMB_AFTER={after}')
+          if after >= 700_000:
+              raise SystemExit(f'WebP thumbnail still too large: {after} bytes')
+          source.unlink()
+
+          content = Path('src/content/projects.ts')
+          text = content.read_text()
+          old = '/assets/projects/townhouse-project/thumbnail.png'
+          new = '/assets/projects/townhouse-project/thumbnail.webp'
+          if old not in text:
+              raise SystemExit('Townhouse thumbnail reference not found')
+          content.write_text(text.replace(old, new, 1))
+      - name: Remove one-shot workflow
+        run: rm -f .github/workflows/optimize-staging-townhouse-thumb.yml
+      - name: Commit optimized thumbnail
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -A
+          git commit -m "perf(staging): optimize Townhouse project thumbnail"
+          git push origin HEAD:feature/booking-email-staging-recovered-2
