@@ -1,5 +1,5 @@
 [build]
-  command = "node scripts/v623-admin-email-timeout-qa.mjs && npm run build"
+  command = "npm run build"
   publish = "dist/client"
 
 [build.environment]
