@@ -1,5 +1,5 @@
 [build]
-  command = "node scripts/qa-v61-probe.mjs && npm run build"
+  command = "npm run build"
   publish = "dist/client"
 
 [build.environment]
