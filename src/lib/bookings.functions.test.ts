@@ -116,8 +116,9 @@ describe("CRM upstream reliability", () => {
     );
 
     const request = fetchCRMUpstream("https://example.invalid/exec", "{}");
-    await vi.advanceTimersByTimeAsync(CRM_UPSTREAM_TIMEOUT_MS);
+    const rejection = expect(request).rejects.toThrow("Booking service timed out.");
 
-    await expect(request).rejects.toThrow("Booking service timed out.");
+    await vi.advanceTimersByTimeAsync(CRM_UPSTREAM_TIMEOUT_MS);
+    await rejection;
   });
 });
