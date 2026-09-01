@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 
-const endpoint = 'https://script.google.com/macros/s/AKfycbziiFGQQcfY0avo_ozTRIqc1VFueZCwaVoeIXfdkpE5L1X9cancnGk4lmrdYSUvmwgF/exec';
+const endpoint = process.env.GOOGLE_APPS_SCRIPT_WEB_APP_URL;
+if (!endpoint) throw new Error('Missing GOOGLE_APPS_SCRIPT_WEB_APP_URL');
 const expectedVersion = '6.2.5-production-readiness';
 const stamp = Date.now();
 const submissionId = randomUUID();
