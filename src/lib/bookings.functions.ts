@@ -1,6 +1,5 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { sendBookingNotification } from "./booking-notification.server";
 
 function sanitizeText(value: unknown): string {
   if (typeof value !== "string") return "";
@@ -28,7 +27,6 @@ const phoneText = z.string().max(50).transform(sanitizePhone);
 const mediumText = z.string().max(500).transform(sanitizeText);
 const longText = z.string().max(2500).transform(sanitizeText);
 const optionalShortText = shortText.optional().default("");
-const optionalMediumText = mediumText.optional().default("");
 
 export const createBookingPayloadSchema = z.object({
   fullName: shortText.refine((value) => value.length > 0, "Name is required"),
@@ -46,12 +44,12 @@ export const createBookingPayloadSchema = z.object({
   leadSource: optionalShortText,
 });
 
-const findBookingPayloadSchema = z.object({
+export const findBookingPayloadSchema = z.object({
   bookingReference: shortText,
   contact: phoneText.optional().default(""),
 });
 
-const rescheduleBookingPayloadSchema = z.object({
+export const rescheduleBookingPayloadSchema = z.object({
   bookingReference: shortText,
   contact: phoneText.optional().default(""),
   newPreferredDate: optionalShortText,
@@ -59,7 +57,7 @@ const rescheduleBookingPayloadSchema = z.object({
   rescheduleNotes: longText.optional().default(""),
 });
 
-const cancelBookingPayloadSchema = z.object({
+export const cancelBookingPayloadSchema = z.object({
   bookingReference: shortText,
   contact: phoneText.optional().default(""),
   cancellationReason: longText.optional().default(""),
@@ -96,22 +94,7 @@ export const callCRMFn = createServerFn({ method: "POST" })
       throw new Error(typeof json.message === "string" ? json.message : "CRM request failed.");
     }
 
-    if (data.action === "createBooking") {
-      await sendBookingNotification({
-        fullName: data.payload.fullName,
-        phoneNumber: data.payload.phoneNumber,
-        emailAddress: data.payload.emailAddress,
-        projectType: data.payload.projectType,
-        projectLocation: data.payload.projectLocation,
-        preferredService: data.payload.preferredService,
-        approximateArea: data.payload.approximateArea,
-        preferredDate: data.payload.preferredDate,
-        preferredTime: data.payload.preferredTime,
-        budgetRange: data.payload.budgetRange,
-        projectDetails: data.payload.projectDetails,
-        leadSource: data.payload.leadSource,
-      });
-    }
-
+    // Google Apps Script is the sole lifecycle-email authority. Keeping all
+    // lifecycle email side effects there prevents duplicate admin/customer mail.
     return text;
   });
