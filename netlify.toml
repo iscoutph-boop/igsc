@@ -1,5 +1,5 @@
 [build]
-  command = "node scripts/v625-r2-cds-sender-probe.mjs && npm run build"
+  command = "node scripts/v625-r2-cleanup-0006.mjs && npm run build"
   publish = "dist/client"
 
 [build.environment]
