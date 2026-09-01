@@ -1,0 +1,39 @@
+name: Patch Call Client Bridge
+
+on:
+  push:
+    branches:
+      - feature/booking-email-staging-recovered-2
+    paths:
+      - .github/workflows/staging-call-bridge-patch-v2.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/booking-email-staging-recovered-2
+          fetch-depth: 0
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Apply patch
+        run: python scripts/staging-patch-call-bridge.py
+      - name: Clean install
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Verify bridge
+        run: npx vitest run apps-script/IGS_Staging_CRM_V6_2_5.call-bridge.test.ts
+      - name: Commit hardened source and clean helper
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/staging-call-bridge-patch-v2.yml scripts/staging-patch-call-bridge.py
+          git add apps-script/IGS_Staging_CRM_V6_2_5_PRODUCTION_READINESS_R2.gs
+          git commit -m "fix(staging): bind Call Client bridge to CRM record"
+          git push origin HEAD:feature/booking-email-staging-recovered-2
