@@ -72,6 +72,29 @@ const crmInputSchema = z.discriminatedUnion("action", [
   z.object({ action: z.literal("cancelBooking"), payload: cancelBookingPayloadSchema }),
 ]);
 
+export const CRM_UPSTREAM_TIMEOUT_MS = 12_000;
+
+export async function fetchCRMUpstream(url: string, body: string): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), CRM_UPSTREAM_TIMEOUT_MS);
+
+  try {
+    return await fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "text/plain;charset=utf-8" },
+      body,
+      signal: controller.signal,
+    });
+  } catch (error) {
+    if (error instanceof Error && error.name === "AbortError") {
+      throw new Error("Booking service timed out.");
+    }
+    throw error;
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 export const callCRMFn = createServerFn({ method: "POST" })
   .inputValidator((data: unknown) => crmInputSchema.parse(data))
   .handler(async ({ data }) => {
@@ -80,11 +103,10 @@ export const callCRMFn = createServerFn({ method: "POST" })
       throw new Error("Booking service is not configured.");
     }
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers: { "Content-Type": "text/plain;charset=utf-8" },
-      body: JSON.stringify({ action: data.action, payload: data.payload }),
-    });
+    const response = await fetchCRMUpstream(
+      url,
+      JSON.stringify({ action: data.action, payload: data.payload }),
+    );
 
     if (!response.ok) {
       throw new Error(`Booking service returned ${response.status}.`);
