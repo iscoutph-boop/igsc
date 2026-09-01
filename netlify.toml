@@ -1,5 +1,5 @@
 [build]
-  command = "npm run build"
+  command = "node scripts/v62-final-lifecycle-qa.mjs && npm run build"
   publish = "dist/client"
 
 [build.environment]
