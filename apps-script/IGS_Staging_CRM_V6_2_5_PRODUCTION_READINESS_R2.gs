@@ -1032,14 +1032,26 @@ function buildAdminOpsLinksV62_(reference, bookingRow, phoneNumber) {
   const crmUrl = serviceUrl + '?open=crm&ref=' + encodeURIComponent(reference) + '&row=' + Number(bookingRow);
   const tel = buildValidTelV625_(phoneNumber);
   const callUrl = tel
-    ? serviceUrl + '?open=call&phone=' + encodeURIComponent(tel)
+    ? serviceUrl + '?open=call&ref=' + encodeURIComponent(reference) + '&row=' + Number(bookingRow)
     : '';
   return { crmUrl: crmUrl, callUrl: callUrl };
 }
 
 function openClientCallBridgeV625_(e) {
-  const phone = e && e.parameter ? cleanTextV6_(e.parameter.phone) : '';
-  const tel = buildValidTelV625_(phone);
+  const reference = normalizeBookingReferenceV6_(e && e.parameter ? e.parameter.ref : '');
+  const row = Number(e && e.parameter ? e.parameter.row : 0);
+  let booking = null;
+
+  if (reference && Number.isInteger(row) && row > CONFIG.BOOKINGS_HEADER_ROW) {
+    try {
+      const candidate = readBookingByRowV6_(row);
+      if (normalizeBookingReferenceV6_(candidate.bookingReference) === reference) {
+        booking = candidate;
+      }
+    } catch (_) {}
+  }
+
+  const tel = booking ? buildValidTelV625_(booking.phoneNumber) : '';
   if (!tel) {
     return HtmlService.createHtmlOutput(
       '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head>' +
