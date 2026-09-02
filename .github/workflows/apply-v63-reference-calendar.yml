@@ -1,4 +1,4 @@
-name: Apply V6.3 Reference and Calendar Hardening
+name: Apply V6.3 Final Booking Hardening
 
 on:
   push:
@@ -22,14 +22,14 @@ jobs:
         with:
           node-version: 22
           cache: npm
-      - name: Apply isolated Apps Script security patch
+      - name: Apply isolated staging security patch
         shell: bash
         run: |
           python - <<'PY'
           from pathlib import Path
 
-          path = Path('apps-script/IGS_Staging_CRM_V6_2_5_PRODUCTION_READINESS_R2.gs')
-          source = path.read_text(encoding='utf-8')
+          apps_path = Path('apps-script/IGS_Staging_CRM_V6_2_5_PRODUCTION_READINESS_R2.gs')
+          source = apps_path.read_text(encoding='utf-8')
 
           old_calendar = "9a8c649815522b6ac9366068aa0a8e3b930046d1d5e6483a0db709f509156ca5@group.calendar.google.com"
           canonical_calendar = "cbaff5b7abd586ce7e993fbd1809c7f99eda329da29d053af41192291f6f0bb2@group.calendar.google.com"
@@ -185,7 +185,82 @@ jobs:
               raise SystemExit('Expected reference normalization target not found')
           source = source.replace(old_normalize, hardened, 1)
 
-          path.write_text(source, encoding='utf-8')
+          old_time_tail = """  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) throw new Error('Invalid booking time: ' + text);
+            const normalized24 = pad2V6_(hour) + ':' + pad2V6_(minute);
+            const display = (hour % 12 || 12) + ':' + pad2V6_(minute) + ' ' + (hour >= 12 ? 'PM' : 'AM');
+            return { hour24: hour, minute: minute, normalized24: normalized24, display: display };
+          }
+          """
+          new_time_tail = """  if (hour < 0 || hour > 23 || minute < 0 || minute > 59) throw new Error('Invalid booking time: ' + text);
+            if (hour < 8 || hour > 17 || (minute !== 0 && minute !== 30) || (hour === 17 && minute !== 0)) {
+              throw new Error('Invalid booking time: ' + text);
+            }
+            const normalized24 = pad2V6_(hour) + ':' + pad2V6_(minute);
+            const display = (hour % 12 || 12) + ':' + pad2V6_(minute) + ' ' + (hour >= 12 ? 'PM' : 'AM');
+            return { hour24: hour, minute: minute, normalized24: normalized24, display: display };
+          }
+          """
+          if old_time_tail not in source:
+              raise SystemExit('Expected booking time validation target not found')
+          source = source.replace(old_time_tail, new_time_tail, 1)
+
+          old_date = """function parseBookingDateV6_(value) {
+            const text = cleanTextV6_(value);
+            const match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(text);
+            if (!match) throw new Error('Invalid booking date: ' + text);
+            const year = Number(match[1]);
+            const month = Number(match[2]);
+            const day = Number(match[3]);
+            if (month < 1 || month > 12 || day < 1 || day > 31) throw new Error('Invalid booking date: ' + text);
+            return { year: year, month: month, day: day, normalized: match[1] + '-' + match[2] + '-' + match[3] };
+          }
+          """
+          new_date = """function parseBookingDateV6_(value) {
+            const text = cleanTextV6_(value);
+            const match = /^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(text);
+            if (!match) throw new Error('Invalid booking date: ' + text);
+            const year = Number(match[1]);
+            const month = Number(match[2]);
+            const day = Number(match[3]);
+            if (month < 1 || month > 12 || day < 1 || day > 31) throw new Error('Invalid booking date: ' + text);
+            const candidate = new Date(Date.UTC(year, month - 1, day));
+            if (
+              candidate.getUTCFullYear() !== year ||
+              candidate.getUTCMonth() !== month - 1 ||
+              candidate.getUTCDate() !== day
+            ) {
+              throw new Error('Invalid booking date: ' + text);
+            }
+            return { year: year, month: month, day: day, normalized: match[1] + '-' + match[2] + '-' + match[3] };
+          }
+          """
+          if old_date not in source:
+              raise SystemExit('Expected booking date validation target not found')
+          source = source.replace(old_date, new_date, 1)
+
+          apps_path.write_text(source, encoding='utf-8')
+
+          consultation_path = Path('src/routes/consultation.tsx')
+          consultation = consultation_path.read_text(encoding='utf-8')
+          old_ref = "  const submissionIdRef = useRef<string | null>(null);"
+          new_ref = old_ref + "\n  const formOpenedAtRef = useRef(Date.now());"
+          if consultation.count(old_ref) != 1:
+              raise SystemExit('Expected consultation form ref target not found')
+          consultation = consultation.replace(old_ref, new_ref, 1)
+
+          old_payload_tail = """      leadSource: \"Website\",
+                companyWebsite: honeypot,
+              };
+          """
+          new_payload_tail = """      leadSource: \"Website\",
+                companyWebsite: honeypot,
+                formElapsedMs: Date.now() - formOpenedAtRef.current,
+              };
+          """
+          if old_payload_tail not in consultation:
+              raise SystemExit('Expected consultation payload target not found')
+          consultation = consultation.replace(old_payload_tail, new_payload_tail, 1)
+          consultation_path.write_text(consultation, encoding='utf-8')
           PY
       - name: Clean install
         run: npm ci --ignore-scripts --no-audit --no-fund
@@ -195,12 +270,16 @@ jobs:
         run: npm test
       - name: Production build
         run: npm run build
-      - name: Commit verified reference and Calendar hardening
+      - name: Commit only fully verified hardening
         shell: bash
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add apps-script/IGS_Staging_CRM_V6_2_5_PRODUCTION_READINESS_R2.gs
-          git commit -m "feat: harden booking references and canonical Calendar"
+          git add apps-script/IGS_Staging_CRM_V6_2_5_PRODUCTION_READINESS_R2.gs src/routes/consultation.tsx
+          if git diff --cached --quiet; then
+            echo "No source changes to commit."
+            exit 0
+          fi
+          git commit -m "feat: complete V6.3 booking hardening"
           git pull --rebase origin feature/booking-email-staging-recovered-2
           git push origin HEAD:feature/booking-email-staging-recovered-2
