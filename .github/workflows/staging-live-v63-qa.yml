@@ -1,0 +1,92 @@
+name: V6.3 Live Staging QA
+
+on:
+  push:
+    branches:
+      - feature/booking-email-staging-recovered-2
+    paths:
+      - .github/workflows/staging-live-v63-qa.yml
+
+permissions:
+  contents: read
+
+jobs:
+  live-staging:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Install isolated browser runner
+        shell: bash
+        run: |
+          mkdir -p /tmp/igs-v63-pw
+          cd /tmp/igs-v63-pw
+          npm init -y >/dev/null 2>&1
+          npm install --no-audit --no-fund @playwright/test@1.55.0
+          npx playwright install --with-deps chromium
+      - name: Run controlled create-find-cancel smoke test
+        shell: bash
+        run: |
+          cat > /tmp/igs-v63-pw/qa.spec.js <<'EOF'
+          const { test, expect } = require('@playwright/test');
+
+          const BASE = 'https://deploy-preview-4--darling-sunburst-da0a5d.netlify.app';
+          const CONTACT = 'qa-v63@invalid.example';
+
+          test('V6.3 signed staging booking smoke', async ({ page }) => {
+            test.setTimeout(90_000);
+            await page.goto(`${BASE}/consultation`, { waitUntil: 'domcontentloaded', timeout: 30_000 });
+            await expect(page.getByRole('heading', { name: 'Request a consultation' })).toBeVisible();
+
+            await page.getByLabel(/Full name/i).fill('IGS V63 Staging QA');
+            await page.getByLabel(/Mobile number/i).fill('+630000000000');
+            await page.getByLabel(/Email address/i).fill(CONTACT);
+            await page.getByLabel(/Project type/i).selectOption({ label: 'Residential' });
+            await page.getByLabel(/Preferred service/i).selectOption({ label: 'Project Consultation' });
+            await page.getByLabel(/Project location/i).fill('Staging QA - No client');
+            await page.getByLabel(/Project description/i).fill('Controlled V6.3 signed-request staging verification. No client data.');
+            await page.getByRole('checkbox', { name: /privacy notice/i }).check();
+
+            await page.evaluate(() => {
+              const date = document.querySelector('input[name="preferredDate"]');
+              const time = document.querySelector('input[name="preferredTime"]');
+              if (!date || !time) throw new Error('Schedule hidden fields not found');
+              date.value = '2026-09-04';
+              time.value = '15:30';
+            });
+
+            await page.waitForTimeout(1800);
+            await page.getByRole('button', { name: /Submit consultation request/i }).click();
+
+            const success = page.getByRole('heading', { name: 'Consultation request received.' });
+            const alert = page.getByRole('alert');
+            await Promise.race([
+              success.waitFor({ state: 'visible', timeout: 25_000 }),
+              alert.waitFor({ state: 'visible', timeout: 25_000 }).then(async () => {
+                throw new Error(`CREATE_FAILED: ${await alert.innerText()}`);
+              }),
+            ]);
+
+            const reference = (await page.getByRole('button', { name: 'Copy booking reference' }).innerText()).trim();
+            if (!/^IGS-2026-[0-9A-F]{32}$/.test(reference)) {
+              throw new Error(`SECURE_REFERENCE_FAILED: ${reference}`);
+            }
+            console.log(`LIVE_CREATE=PASS ${reference}`);
+
+            await page.getByRole('button', { name: 'Manage booking' }).click();
+            await expect(page.getByRole('heading', { name: 'Manage your booking' })).toBeVisible();
+            await page.getByPlaceholder('Enter your email or phone number').fill(CONTACT);
+            await page.getByRole('button', { name: 'Find my booking' }).click();
+            await expect(page.getByRole('heading', { name: 'Appointment request found' })).toBeVisible({ timeout: 20_000 });
+            await expect(page.getByText('New', { exact: true })).toBeVisible();
+            console.log('LIVE_FIND=PASS');
+
+            await page.getByRole('button', { name: 'Cancel booking' }).click();
+            await expect(page.getByRole('heading', { name: 'Cancel booking?' })).toBeVisible();
+            await page.getByLabel(/Cancellation reason/i).fill('Controlled V6.3 staging QA cleanup');
+            await page.getByRole('button', { name: 'Yes, cancel booking' }).click();
+            await expect(page.getByRole('heading', { name: 'Booking cancelled' })).toBeVisible({ timeout: 20_000 });
+            console.log('LIVE_CANCEL=PASS');
+          });
+          EOF
+          cd /tmp/igs-v63-pw
+          npx playwright test qa.spec.js --reporter=line --workers=1
