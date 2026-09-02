@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - feature/booking-email-staging-recovered-2
+      - security/practical-hardening-staging-20260902
   workflow_dispatch:
 
 permissions:
