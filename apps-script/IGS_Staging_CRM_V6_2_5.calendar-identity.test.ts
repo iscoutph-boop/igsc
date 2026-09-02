@@ -9,7 +9,7 @@ const SOURCE_PATH = path.resolve(
 );
 const SOURCE_TEXT = fs.readFileSync(SOURCE_PATH, "utf8");
 const EXPECTED_CALENDAR_ID =
-  "9a8c649815522b6ac9366068aa0a8e3b930046d1d5e6483a0db709f509156ca5@group.calendar.google.com";
+  "cbaff5b7abd586ce7e993fbd1809c7f99eda329da29d053af41192291f6f0bb2@group.calendar.google.com";
 
 type ScriptContext = Record<string, any>;
 
@@ -33,12 +33,12 @@ function loadScript(): ScriptContext {
 }
 
 describe("staging Calendar identity hardening", () => {
-  it("pins lifecycle sync to the existing dedicated Calendar ID", () => {
+  it("pins lifecycle sync to the verified existing dedicated Calendar ID", () => {
     expect(SOURCE_TEXT).toContain(`CALENDAR_ID: '${EXPECTED_CALENDAR_ID}'`);
     expect(SOURCE_TEXT).toContain("CalendarApp.getCalendarById(CONFIG.CALENDAR_ID)");
   });
 
-  it("returns only the pinned calendar when the CDS execution account can access it", () => {
+  it("returns only the pinned calendar when the execution account can access it", () => {
     const context = loadScript();
     const calendar = { getId: () => EXPECTED_CALENDAR_ID, getName: () => "IGS Website Appointments" };
     const getCalendarById = vi.fn(() => calendar);
@@ -53,7 +53,7 @@ describe("staging Calendar identity hardening", () => {
     expect(getCalendarById).toHaveBeenCalledWith(EXPECTED_CALENDAR_ID);
   });
 
-  it("fails closed when CDS cannot access the original calendar", () => {
+  it("fails closed when the execution account cannot access the original calendar", () => {
     const context = loadScript();
     const createCalendar = vi.fn();
     context.CalendarApp = {
