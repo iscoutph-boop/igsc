@@ -1,0 +1,51 @@
+name: Test V6.3 Patched Netlify Image Tooling
+
+on:
+  push:
+    branches:
+      - feature/booking-email-staging-recovered-2
+    paths:
+      - .github/workflows/test-sharp-override-v63.yml
+
+permissions:
+  contents: write
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/booking-email-staging-recovered-2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Apply isolated patched dev-tool dependency set
+        run: |
+          npm install --save-dev @netlify/vite-plugin-tanstack-start@1.3.19 --ignore-scripts --no-audit --no-fund
+          npm pkg set overrides.sharp=0.35.4
+          npm install --package-lock-only --ignore-scripts --no-audit --no-fund
+          npm audit fix --package-lock-only --ignore-scripts --no-fund || true
+      - name: Clean install candidate tree
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Require complete dependency audit clean
+        run: npm audit --audit-level=moderate
+      - name: Unit tests
+        run: npm test
+      - name: Production build
+        run: npm run build
+      - name: Commit only fully verified dependency hardening
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          if git diff --cached --quiet; then
+            echo "No dependency changes required."
+            exit 0
+          fi
+          git commit -m "chore: harden Netlify development dependencies"
+          git pull --rebase origin feature/booking-email-staging-recovered-2
+          git push origin HEAD:feature/booking-email-staging-recovered-2
