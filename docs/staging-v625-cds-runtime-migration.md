@@ -28,6 +28,11 @@ The prior `cbaff5...@group.calendar.google.com` Calendar must be retained until 
 
 The Apps Script endpoint was updated only in the `deploy-preview` context. Production remains untouched until the fresh lifecycle, Gmail, Call Client, cleanup, and smoke gates pass.
 
-## Release integrity follow-up
+## Release integrity
 
-Before merge, the repository Apps Script source and Calendar identity test must be synchronized to this CDS-owned Calendar ID so the checked-in release source exactly matches the deployed Google runtime.
+Repository source synchronization completed in `d75811c38a52dcb4dedb54ef065ca882a59b86aa`:
+- Apps Script `CONFIG.CALENDAR_ID` now pins the CDS-owned Calendar ID.
+- Calendar identity tests expect the same CDS-owned Calendar ID.
+- name-only Calendar lookup remains forbidden.
+
+A fresh verification run must pass on the post-sync staging head before any production promotion.
