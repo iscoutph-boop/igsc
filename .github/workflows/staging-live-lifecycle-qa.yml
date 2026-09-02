@@ -1,0 +1,123 @@
+name: Staging Live Lifecycle QA
+
+on:
+  push:
+    branches:
+      - feature/booking-email-staging-recovered-2
+
+permissions:
+  contents: read
+
+env:
+  ENDPOINT: https://script.google.com/macros/s/AKfycbxzturj6dLWZklbXQ1Lilkfo4W1REcGyJpLJX9s6l-BEPOl-Atg4CgefRwiQR8Ai0QW/exec
+
+jobs:
+  lifecycle:
+    if: "${{ github.event.head_commit.message == 'test(staging): run CDS live lifecycle QA' }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Health check
+        shell: bash
+        run: |
+          set -euo pipefail
+          HEALTH=$(curl -fsSL --retry 2 --connect-timeout 15 --max-time 45 "$ENDPOINT")
+          echo "Health: $HEALTH"
+          echo "$HEALTH" | jq -e '.success == true and .version == "6.2.5-production-readiness-r2"' >/dev/null
+
+      - name: Full lifecycle
+        shell: bash
+        run: |
+          set -euo pipefail
+          SUBMISSION_ID=$(python - <<'PY'
+          import uuid
+          print(uuid.uuid4())
+          PY
+          )
+          PHONE='+639000000000'
+          EMAIL='qa-final-production-gate@igsabroso.invalid'
+          NAME='IGS FINAL PRODUCTION GATE QA'
+
+          call_api() {
+            curl -fsSL --retry 2 --connect-timeout 15 --max-time 45 \
+              -H 'Content-Type: text/plain;charset=utf-8' \
+              --data "$1" "$ENDPOINT"
+          }
+
+          CREATE_PAYLOAD=$(jq -nc --arg sid "$SUBMISSION_ID" --arg phone "$PHONE" --arg email "$EMAIL" --arg name "$NAME" '{
+            action:"createBooking",
+            payload:{
+              submissionId:$sid,
+              fullName:$name,
+              phoneNumber:$phone,
+              emailAddress:$email,
+              projectType:"Residential",
+              projectLocation:"Cagayan de Oro City",
+              preferredService:"Site Visit / Consultation",
+              approximateArea:"QA",
+              preferredDate:"2026-09-21",
+              preferredTime:"10:30",
+              budgetRange:"PHP 3,000,000 - PHP 5,000,000",
+              projectDetails:("Controlled final staging production-gate QA. Submission " + $sid),
+              privacyConsent:"accepted",
+              leadSource:"Website QA",
+              priority:"Medium",
+              assignedTo:"Sales"
+            }
+          }')
+
+          CREATE=$(call_api "$CREATE_PAYLOAD")
+          echo "CREATE=$CREATE"
+          echo "$CREATE" | jq -e '.success == true and (.bookingReference | type == "string") and .duplicatePrevented == false and ((.warnings // []) | length == 0)' >/dev/null
+          REF=$(echo "$CREATE" | jq -r '.bookingReference')
+
+          DUPLICATE=$(call_api "$CREATE_PAYLOAD")
+          echo "DUPLICATE_CREATE=$DUPLICATE"
+          echo "$DUPLICATE" | jq -e --arg ref "$REF" '.success == true and .bookingReference == $ref and .duplicatePrevented == true and ((.warnings // []) | length == 0)' >/dev/null
+
+          FIND_PAYLOAD=$(jq -nc --arg ref "$REF" --arg contact "$PHONE" '{action:"findBooking",payload:{bookingReference:$ref,contact:$contact}}')
+          FIND_NEW=$(call_api "$FIND_PAYLOAD")
+          echo "FIND_NEW=$FIND_NEW"
+          echo "$FIND_NEW" | jq -e --arg ref "$REF" '.success == true and .booking.bookingReference == $ref and .booking.bookingStatus == "New"' >/dev/null
+
+          RESCHEDULE_PAYLOAD=$(jq -nc --arg ref "$REF" --arg contact "$PHONE" '{action:"rescheduleBooking",payload:{bookingReference:$ref,contact:$contact,newPreferredDate:"2026-09-22",newPreferredTime:"13:30",rescheduleNotes:"Controlled final staging production-gate QA reschedule."}}')
+          RESCHEDULE=$(call_api "$RESCHEDULE_PAYLOAD")
+          echo "RESCHEDULE=$RESCHEDULE"
+          echo "$RESCHEDULE" | jq -e '.success == true and .booking.bookingStatus == "Rescheduled" and .booking.preferredDate == "2026-09-22" and ((.warnings // []) | length == 0)' >/dev/null
+
+          FIND_RESCHEDULED=$(call_api "$FIND_PAYLOAD")
+          echo "FIND_RESCHEDULED=$FIND_RESCHEDULED"
+          echo "$FIND_RESCHEDULED" | jq -e '.success == true and .booking.bookingStatus == "Rescheduled" and .booking.preferredDate == "2026-09-22"' >/dev/null
+
+          CANCEL_PAYLOAD=$(jq -nc --arg ref "$REF" --arg contact "$PHONE" '{action:"cancelBooking",payload:{bookingReference:$ref,contact:$contact,cancellationReason:"Controlled final staging production-gate QA cancellation."}}')
+          CANCEL=$(call_api "$CANCEL_PAYLOAD")
+          echo "CANCEL=$CANCEL"
+          echo "$CANCEL" | jq -e '.success == true and .booking.bookingStatus == "Cancelled" and ((.warnings // []) | length == 0)' >/dev/null
+
+          FIND_CANCELLED=$(call_api "$FIND_PAYLOAD")
+          echo "FIND_CANCELLED=$FIND_CANCELLED"
+          echo "$FIND_CANCELLED" | jq -e '.success == true and .booking.bookingStatus == "Cancelled"' >/dev/null
+
+          {
+            echo "submissionId=$SUBMISSION_ID"
+            echo "bookingReference=$REF"
+            echo "create=$CREATE"
+            echo "duplicateCreate=$DUPLICATE"
+            echo "findNew=$FIND_NEW"
+            echo "reschedule=$RESCHEDULE"
+            echo "findRescheduled=$FIND_RESCHEDULED"
+            echo "cancel=$CANCEL"
+            echo "findCancelled=$FIND_CANCELLED"
+          } > staging-live-lifecycle-evidence.txt
+
+          echo "QA_REFERENCE=$REF"
+          echo "QA_SUBMISSION_ID=$SUBMISSION_ID"
+
+      - name: Upload lifecycle evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-live-lifecycle-evidence
+          path: staging-live-lifecycle-evidence.txt
+          if-no-files-found: ignore
+          retention-days: 7
