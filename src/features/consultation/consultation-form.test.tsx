@@ -32,7 +32,7 @@ describe("ConsultationForm", () => {
     expect(screen.getByRole("button", { name: "Submit consultation request" })).toBeTruthy();
   });
 
-  it("adds one stable submission id to the CRM create payload", async () => {
+  it("adds one stable submission id and the empty honeypot to the CRM create payload", async () => {
     callCRMMock.mockResolvedValue({
       success: true,
       bookingReference: "IGS-2026-0042",
@@ -62,5 +62,6 @@ describe("ConsultationForm", () => {
     expect(payload.submissionId).toMatch(
       /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i,
     );
+    expect(payload.companyWebsite).toBe("");
   });
 });
