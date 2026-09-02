@@ -1,0 +1,203 @@
+name: Staging Integration Diagnostics
+
+on:
+  push:
+    branches:
+      - feature/booking-email-staging-recovered-2
+
+permissions:
+  contents: read
+
+env:
+  ENDPOINT: https://script.google.com/macros/s/AKfycbxzturj6dLWZklbXQ1Lilkfo4W1REcGyJpLJX9s6l-BEPOl-Atg4CgefRwiQR8Ai0QW/exec
+  PREVIEW_URL: https://deploy-preview-4--darling-sunburst-da0a5d.netlify.app
+
+jobs:
+  bridge:
+    if: "${{ github.event.head_commit.message == 'test(staging): diagnose live integration boundaries' }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Probe hardened Apps Script bridges with diagnostics
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          fetch_body() {
+            local label="$1"
+            local url="$2"
+            echo "=== $label ==="
+            curl -fsSL --retry 2 --connect-timeout 15 --max-time 45 "$url" -o "$label.html"
+            echo "bytes=$(wc -c < "$label.html")"
+            head -c 1200 "$label.html" || true
+            echo
+          }
+
+          require_contains() {
+            local label="$1"
+            local file="$2"
+            local needle="$3"
+            if grep -Fq "$needle" "$file"; then
+              echo "PASS $label contains: $needle"
+            else
+              echo "FAIL $label missing: $needle" >&2
+              exit 1
+            fi
+          }
+
+          require_absent() {
+            local label="$1"
+            local file="$2"
+            local needle="$3"
+            if grep -Fq "$needle" "$file"; then
+              echo "FAIL $label unexpectedly contains: $needle" >&2
+              exit 1
+            else
+              echo "PASS $label excludes: $needle"
+            fi
+          }
+
+          fetch_body invalid_phone "$ENDPOINT?open=call&phone=%2B639171234567"
+          require_contains invalid_phone invalid_phone.html 'Phone number unavailable'
+          require_absent invalid_phone invalid_phone.html '+639171234567'
+          require_absent invalid_phone invalid_phone.html 'href="tel:'
+
+          fetch_body mismatched "$ENDPOINT?open=call&ref=IGS-2026-9999&row=18"
+          require_contains mismatched mismatched.html 'Phone number unavailable'
+          require_absent mismatched mismatched.html 'href="tel:'
+
+          fetch_body valid_call "$ENDPOINT?open=call&ref=IGS-2026-0010&row=18"
+          require_contains valid_call valid_call.html 'Opening phone dialer'
+          require_contains valid_call valid_call.html '+639000000000'
+          require_contains valid_call valid_call.html 'CALL CLIENT'
+          require_contains valid_call valid_call.html 'tel:+639000000000'
+
+          fetch_body valid_crm "$ENDPOINT?open=crm&ref=IGS-2026-0010&row=18"
+          require_contains valid_crm valid_crm.html 'Opening CRM record'
+          require_contains valid_crm valid_crm.html 'IGS-2026-0010'
+          require_contains valid_crm valid_crm.html 'A18'
+
+      - name: Upload bridge response evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-bridge-diagnostics
+          path: '*.html'
+          if-no-files-found: ignore
+          retention-days: 7
+
+  preview_e2e:
+    if: "${{ github.event.head_commit.message == 'test(staging): diagnose live integration boundaries' }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Wait for exact Deploy Preview head
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 30); do
+            HTML=$(curl -fsSL --connect-timeout 10 --max-time 25 "$PREVIEW_URL/consultation" || true)
+            if echo "$HTML" | grep -F 'Request a consultation' >/dev/null; then
+              echo 'Deploy Preview consultation page is reachable.'
+              exit 0
+            fi
+            sleep 10
+          done
+          echo 'Deploy Preview consultation page did not become ready.' >&2
+          exit 1
+      - name: Submit through live Deploy Preview and cancel QA booking
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import { chromium } from '@playwright/test';
+
+          const preview = process.env.PREVIEW_URL;
+          const endpoint = process.env.ENDPOINT;
+          const phone = '+639000000001';
+          const email = 'qa-preview-integration@igsabroso.invalid';
+          const browser = await chromium.launch({ headless: true });
+          const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+
+          let reference = null;
+          try {
+            await page.goto(`${preview}/consultation`, { waitUntil: 'networkidle', timeout: 60000 });
+            console.log('URL', page.url());
+            console.log('TITLE', await page.title());
+
+            const dateByLabel = page.getByLabel(/Preferred Date/i);
+            const dateByIdSuffix = page.locator('button[id$="-date"]');
+            console.log('DATE_BY_LABEL_COUNT', await dateByLabel.count());
+            console.log('DATE_BY_ID_COUNT', await dateByIdSuffix.count());
+
+            await page.locator('input[name="fullName"]').fill('IGS PREVIEW SERVER INTEGRATION QA');
+            await page.locator('input[name="phoneNumber"]').fill(phone);
+            await page.locator('input[name="emailAddress"]').fill(email);
+            await page.locator('select[name="projectType"]').selectOption({ label: 'Residential' });
+            await page.locator('select[name="preferredService"]').selectOption({ label: 'Project Consultation' });
+            await page.locator('input[name="projectLocation"]').fill('Cagayan de Oro City');
+            await page.locator('input[name="approximateArea"]').fill('QA');
+            await page.locator('select[name="budgetRange"]').selectOption({ label: 'PHP 3,000,000 - PHP 5,000,000' });
+            await page.locator('textarea[name="projectDetails"]').fill('Controlled live Deploy Preview server-to-Apps-Script integration QA.');
+            await page.locator('input[name="privacyConsent"]').check();
+
+            // Set the hidden schedule fields directly for this network-boundary test.
+            // SchedulePicker interaction itself is covered by the component/unit suite;
+            // this probe isolates Deploy Preview -> server function -> Apps Script.
+            await page.locator('input[name="preferredDate"]').evaluate((el) => { el.value = '2026-09-24'; });
+            await page.locator('input[name="preferredTime"]').evaluate((el) => { el.value = '14:00'; });
+            console.log('HIDDEN_DATE', await page.locator('input[name="preferredDate"]').inputValue());
+            console.log('HIDDEN_TIME', await page.locator('input[name="preferredTime"]').inputValue());
+
+            await page.getByRole('button', { name: /Submit consultation request/i }).click();
+            await page.locator('#consultation-confirmation').waitFor({ state: 'visible', timeout: 60000 });
+            const confirmation = await page.locator('#consultation-confirmation').innerText();
+            console.log('CONFIRMATION', confirmation);
+            const match = confirmation.match(/IGS-\d{4}-\d{4}/);
+            if (!match) throw new Error(`Booking reference missing from success panel: ${confirmation}`);
+            reference = match[0];
+            console.log(`PREVIEW_QA_REFERENCE=${reference}`);
+
+            const findResponse = await fetch(endpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify({ action: 'findBooking', payload: { bookingReference: reference, contact: phone } })
+            });
+            const found = await findResponse.json();
+            console.log('DIRECT_FIND', JSON.stringify(found));
+            if (!found.success || found.booking?.bookingStatus !== 'New') {
+              throw new Error(`Preview-created booking was not persisted as New: ${JSON.stringify(found)}`);
+            }
+          } finally {
+            if (reference) {
+              const cancelResponse = await fetch(endpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+                body: JSON.stringify({
+                  action: 'cancelBooking',
+                  payload: {
+                    bookingReference: reference,
+                    contact: phone,
+                    cancellationReason: 'Controlled Deploy Preview integration QA cleanup.'
+                  }
+                })
+              });
+              const cancel = await cancelResponse.json();
+              console.log('CLEANUP', JSON.stringify(cancel));
+              if (!cancel.success || cancel.booking?.bookingStatus !== 'Cancelled' || (cancel.warnings || []).length) {
+                throw new Error(`Cleanup failed: ${JSON.stringify(cancel)}`);
+              }
+              console.log(`PREVIEW_QA_CANCELLED=${reference}`);
+            }
+            await browser.close();
+          }
+          NODE
