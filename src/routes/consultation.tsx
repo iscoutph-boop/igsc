@@ -105,7 +105,7 @@ export function ConsultationPage() {
                       href={`mailto:${IGS_EMAIL}`}
                       className="flex items-start gap-3 hover:text-primary"
                     >
-                      <Mail aria-hidden="true" size={19} className="mt-0.5 shrink-0 text-primary" />
+                      <Mail aria-hidden="true" size={19} className="text-primary" />
                       <span className="break-all">{IGS_EMAIL}</span>
                     </a>
                     <a
@@ -202,6 +202,7 @@ export function ConsultationForm({ onSuccess }: { onSuccess: (reference: string)
       projectDetails: String(formData.get("projectDetails") ?? "").trim(),
       privacyConsent: formData.get("privacyConsent") === "accepted" ? "accepted" : "",
       leadSource: "Website",
+      companyWebsite: honeypot,
     };
 
     if (!payload.preferredDate || !payload.preferredTime) {
