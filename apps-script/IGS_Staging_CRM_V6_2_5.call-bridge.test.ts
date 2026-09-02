@@ -9,6 +9,7 @@ const SOURCE_PATH = path.resolve(
 );
 const SOURCE_TEXT = fs.readFileSync(SOURCE_PATH, "utf8");
 
+// Regression contract for the approved corporate mobile Call Client bridge.
 type ScriptContext = Record<string, any>;
 
 function loadScript(): ScriptContext {
