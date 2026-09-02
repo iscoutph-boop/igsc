@@ -1,0 +1,79 @@
+name: Generate V6.3 CDS Calendar Script
+
+on:
+  push:
+    branches:
+      - feature/booking-email-staging-recovered-2
+    paths:
+      - .github/workflows/generate-v63-cds-calendar-script.yml
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/booking-email-staging-recovered-2
+          fetch-depth: 0
+
+      - name: Generate exact CDS-calendar copy
+        shell: bash
+        run: |
+          set -euo pipefail
+          SRC='apps-script/IGS_Staging_CRM_V6_2_5_PRODUCTION_READINESS_R2.gs'
+          OUT='apps-script/IGS_Staging_CRM_V6_3_HARDENED_CDS_CALENDAR.gs'
+          cp "$SRC" "$OUT"
+          python - <<'PY'
+          from pathlib import Path
+          p = Path('apps-script/IGS_Staging_CRM_V6_3_HARDENED_CDS_CALENDAR.gs')
+          text = p.read_text()
+          old_id = "CALENDAR_ID: 'cbaff5b7abd586ce7e993fbd1809c7f99eda329da29d053af41192291f6f0bb2@group.calendar.google.com',"
+          new_id = "CALENDAR_ID: 'caballerodigitals@gmail.com',"
+          if old_id not in text:
+              raise SystemExit('Expected original calendar ID not found')
+          text = text.replace(old_id, new_id, 1)
+          text = text.replace("CALENDAR_NAME: 'IGS Website Appointments',", "CALENDAR_NAME: 'Caballero Digital Solutions',", 1)
+          p.write_text(text)
+          PY
+
+      - name: Verify security-preserving output
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT='apps-script/IGS_Staging_CRM_V6_3_HARDENED_CDS_CALENDAR.gs'
+          grep -Fq "CALENDAR_ID: 'caballerodigitals@gmail.com'" "$OUT"
+          grep -Fq "const CRM_AUTH_V63_" "$OUT"
+          grep -Fq "verifyAuthenticatedRequestV63_" "$OUT"
+          grep -Fq "openClientCallBridgeV625_" "$OUT"
+          grep -Fq '>CALL CLIENT</a>' "$OUT"
+          grep -Fq "CUSTOMER_EMAIL_NOTIFICATIONS_ENABLED: false" "$OUT"
+          node --check "$OUT"
+          python - <<'PY'
+          from pathlib import Path
+          import difflib
+          src = Path('apps-script/IGS_Staging_CRM_V6_2_5_PRODUCTION_READINESS_R2.gs').read_text().splitlines()
+          out = Path('apps-script/IGS_Staging_CRM_V6_3_HARDENED_CDS_CALENDAR.gs').read_text().splitlines()
+          changes = [line for line in difflib.ndiff(src, out) if line.startswith('- ') or line.startswith('+ ')]
+          if len(changes) != 4:
+              raise SystemExit(f'Expected exactly 2 replaced lines (4 ndiff entries), got {len(changes)}')
+          print('\n'.join(changes))
+          PY
+
+      - name: Commit generated script
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'iscoutph-boop'
+          git config user.email 'i.scoutph@gmail.com'
+          git add apps-script/IGS_Staging_CRM_V6_3_HARDENED_CDS_CALENDAR.gs
+          if git diff --cached --quiet; then
+            echo 'Generated script already current.'
+            exit 0
+          fi
+          git commit -m 'chore: add V6.3 CDS calendar Apps Script copy'
+          git push origin HEAD:feature/booking-email-staging-recovered-2
