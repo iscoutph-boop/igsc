@@ -27,6 +27,21 @@ const BUDGET_RANGES = [
   "Above PHP 10,000,000",
 ] as const;
 
+export const MIN_FORM_COMPLETION_MS = 1_500;
+export const MAX_FORM_COMPLETION_MS = 4 * 60 * 60 * 1_000;
+
+export function assertPlausibleFormTiming(value: unknown): asserts value is number {
+  if (
+    typeof value !== "number" ||
+    !Number.isFinite(value) ||
+    !Number.isInteger(value) ||
+    value < MIN_FORM_COMPLETION_MS ||
+    value > MAX_FORM_COMPLETION_MS
+  ) {
+    throw new Error("Unable to process this request.");
+  }
+}
+
 function sanitizeText(value: unknown): string {
   if (typeof value !== "string") return "";
   let sanitized = value.trim();
@@ -52,6 +67,30 @@ function isValidPhone(value: string): boolean {
   if (!/^[+()0-9\s.-]+$/.test(value)) return false;
   const digits = value.replace(/\D/g, "");
   return digits.length >= 7 && digits.length <= 15;
+}
+
+function isValidCalendarDate(value: string): boolean {
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!match) return false;
+  const year = Number(match[1]);
+  const month = Number(match[2]);
+  const day = Number(match[3]);
+  const date = new Date(Date.UTC(year, month - 1, day));
+  return (
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day
+  );
+}
+
+function isSupportedBookingTime(value: string): boolean {
+  const match = /^(\d{2}):(\d{2})$/.exec(value);
+  if (!match) return false;
+  const hour = Number(match[1]);
+  const minute = Number(match[2]);
+  if (hour < 8 || hour > 17) return false;
+  if (minute !== 0 && minute !== 30) return false;
+  return !(hour === 17 && minute !== 0);
 }
 
 const shortText = z.string().max(200).transform(sanitizeText);
@@ -86,8 +125,8 @@ const contactText = z
     (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) || isValidPhone(value),
     "Invalid booking contact",
   );
-const dateText = z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid booking date");
-const timeText = z.string().trim().regex(/^\d{2}:\d{2}$/, "Invalid booking time");
+const dateText = z.string().trim().refine(isValidCalendarDate, "Invalid booking date");
+const timeText = z.string().trim().refine(isSupportedBookingTime, "Invalid booking time");
 const honeypotText = z
   .string()
   .trim()
@@ -111,6 +150,7 @@ export const createBookingPayloadSchema = z.object({
   privacyConsent: z.literal("accepted", { errorMap: () => ({ message: "Privacy consent is required" }) }),
   leadSource: z.literal("Website").optional().default("Website"),
   companyWebsite: honeypotText,
+  formElapsedMs: z.number().finite().int().optional(),
 });
 
 export const findBookingPayloadSchema = z.object({
@@ -178,6 +218,9 @@ export const callCRMFn = createServerFn({ method: "POST" })
     const url = process.env.GOOGLE_APPS_SCRIPT_WEB_APP_URL;
     if (!url) {
       throw new Error("Booking service is not configured.");
+    }
+    if (data.action === "createBooking") {
+      assertPlausibleFormTiming(data.payload.formElapsedMs);
     }
     const secret = requireCrmSharedSecret(process.env.CRM_SHARED_SECRET);
     const body = buildCRMRequestBody(data.action, data.payload, secret);
