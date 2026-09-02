@@ -6,11 +6,9 @@ This staging-only record documents the Google-side runtime migration completed a
 
 ## CDS Apps Script Web App
 
-New staging Web App endpoint:
+A new staging Web App deployment was created under `caballerodigitals@gmail.com`. The exact `/exec` endpoint is intentionally not committed to the repository; it is stored only in the Netlify Deploy Preview secret environment.
 
-`https://script.google.com/macros/s/AKfycbxzturj6dLWZklbXQ1Lilkfo4W1REcGyJpLJX9s6l-BEPOl-Atg4CgefRwiQR8Ai0QW/exec`
-
-The Apps Script was authorized under `caballerodigitals@gmail.com` and reported version `6.2.5-production-readiness-r2` in source.
+The Apps Script source reports version `6.2.5-production-readiness-r2`.
 
 ## CDS-owned booking calendar
 
@@ -28,7 +26,7 @@ The prior `cbaff5...@group.calendar.google.com` Calendar must be retained until 
 
 ## Netlify boundary
 
-`GOOGLE_APPS_SCRIPT_WEB_APP_URL` was updated only in the `deploy-preview` context. Production remains untouched until the fresh lifecycle, Gmail, Call Client, cleanup, and smoke gates pass.
+The Apps Script endpoint was updated only in the `deploy-preview` context. Production remains untouched until the fresh lifecycle, Gmail, Call Client, cleanup, and smoke gates pass.
 
 ## Release integrity follow-up
 
