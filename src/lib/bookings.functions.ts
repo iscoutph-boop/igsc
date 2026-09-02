@@ -75,8 +75,8 @@ const submissionIdText = z.string().trim().uuid("Invalid submission ID");
 const bookingReferenceText = z
   .string()
   .trim()
-  .max(32)
-  .regex(/^IGS-\d{4}-\d{4}$/i, "Invalid booking reference")
+  .max(48)
+  .regex(/^IGS-\d{4}-(?:\d{4}|[0-9A-F]{32})$/i, "Invalid booking reference")
   .transform((value) => value.toUpperCase());
 const contactText = z
   .string()
