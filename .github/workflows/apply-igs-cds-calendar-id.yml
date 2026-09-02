@@ -1,0 +1,91 @@
+name: Apply CDS IGS Calendar Identity
+
+on:
+  push:
+    branches:
+      - feature/booking-email-staging-recovered-2
+    paths:
+      - .github/workflows/apply-igs-cds-calendar-id.yml
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/booking-email-staging-recovered-2
+          fetch-depth: 0
+
+      - name: Apply exact dedicated CDS calendar ID
+        shell: bash
+        run: |
+          set -euo pipefail
+          python - <<'PY'
+          from pathlib import Path
+
+          new_id = '9a8c649815522b6ac9366068aa0a8e3b930046d1d5e6483a0db709f509156ca5@group.calendar.google.com'
+
+          main = Path('apps-script/IGS_Staging_CRM_V6_2_5_PRODUCTION_READINESS_R2.gs')
+          text = main.read_text()
+          old = "CALENDAR_ID: 'cbaff5b7abd586ce7e993fbd1809c7f99eda329da29d053af41192291f6f0bb2@group.calendar.google.com',"
+          if old not in text:
+              raise SystemExit('Expected previous canonical Calendar ID not found in main Apps Script source')
+          text = text.replace(old, f"CALENDAR_ID: '{new_id}',", 1)
+          main.write_text(text)
+
+          generated = Path('apps-script/IGS_Staging_CRM_V6_3_HARDENED_CDS_CALENDAR.gs')
+          text = generated.read_text()
+          old_name = "CALENDAR_NAME: 'Caballero Digital Solutions',"
+          old_id = "CALENDAR_ID: 'caballerodigitals@gmail.com',"
+          if old_name not in text or old_id not in text:
+              raise SystemExit('Expected CDS primary-calendar configuration not found in generated V6.3 copy')
+          text = text.replace(old_name, "CALENDAR_NAME: 'IGS Website Appointments',", 1)
+          text = text.replace(old_id, f"CALENDAR_ID: '{new_id}',", 1)
+          generated.write_text(text)
+
+          test = Path('apps-script/IGS_Staging_CRM_V6_2_5.calendar-identity.test.ts')
+          text = test.read_text()
+          old_test_id = 'cbaff5b7abd586ce7e993fbd1809c7f99eda329da29d053af41192291f6f0bb2@group.calendar.google.com'
+          if old_test_id not in text:
+              raise SystemExit('Expected previous Calendar ID not found in calendar identity test')
+          test.write_text(text.replace(old_test_id, new_id, 1))
+          PY
+
+      - name: Verify preserved V6.3 hardening
+        shell: bash
+        run: |
+          set -euo pipefail
+          OUT='apps-script/IGS_Staging_CRM_V6_3_HARDENED_CDS_CALENDAR.gs'
+          grep -Fq "CALENDAR_NAME: 'IGS Website Appointments'" "$OUT"
+          grep -Fq "CALENDAR_ID: '9a8c649815522b6ac9366068aa0a8e3b930046d1d5e6483a0db709f509156ca5@group.calendar.google.com'" "$OUT"
+          grep -Fq "const CRM_AUTH_V63_" "$OUT"
+          grep -Fq "verifyAuthenticatedRequestV63_" "$OUT"
+          grep -Fq "openClientCallBridgeV625_" "$OUT"
+          grep -Fq '>CALL CLIENT</a>' "$OUT"
+          grep -Fq "CUSTOMER_EMAIL_NOTIFICATIONS_ENABLED: false" "$OUT"
+          cp "$OUT" /tmp/igs-v63.js
+          node --check /tmp/igs-v63.js
+
+      - name: Run calendar identity regression
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm ci --ignore-scripts --no-audit --no-fund
+          npx vitest run apps-script/IGS_Staging_CRM_V6_2_5.calendar-identity.test.ts
+
+      - name: Commit calendar identity update
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'iscoutph-boop'
+          git config user.email 'i.scoutph@gmail.com'
+          git add \
+            apps-script/IGS_Staging_CRM_V6_2_5_PRODUCTION_READINESS_R2.gs \
+            apps-script/IGS_Staging_CRM_V6_3_HARDENED_CDS_CALENDAR.gs \
+            apps-script/IGS_Staging_CRM_V6_2_5.calendar-identity.test.ts
+          git commit -m 'fix: target CDS IGS Website Appointments calendar'
+          git push origin HEAD:feature/booking-email-staging-recovered-2
