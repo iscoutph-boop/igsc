@@ -580,11 +580,17 @@ function appendAppointmentRowV6_(reference, payload, status, noteText) {
   return appendRowByHeadersV6_(sheet, CONFIG.APPOINTMENTS_HEADER_ROW, rowData);
 }
 
+function safeSheetValueV63_(value) {
+  if (typeof value !== 'string') return value;
+  const inspected = value.replace(/^[\s\u00a0\u1680\u2000-\u200b\u2028\u2029\u202f\u205f\u3000]*/, '');
+  return /^[=+\-@]/.test(inspected) ? "'" + value : value;
+}
+
 function appendRowByHeadersV6_(sheet, headerRow, data) {
   const lastColumn = sheet.getLastColumn();
   const headers = sheet.getRange(headerRow, 1, 1, lastColumn).getDisplayValues()[0];
   const values = headers.map(function (header) {
-    return Object.prototype.hasOwnProperty.call(data, header) ? data[header] : '';
+    return safeSheetValueV63_(Object.prototype.hasOwnProperty.call(data, header) ? data[header] : '');
   });
   const row = Math.max(sheet.getLastRow() + 1, headerRow + 1);
   sheet.getRange(row, 1, 1, values.length).setValues([values]);
@@ -612,7 +618,7 @@ function setFieldsByHeadersV6_(sheet, headerRow, row, fields) {
   Object.keys(fields).forEach(function (header) {
     const index = headers.indexOf(header);
     if (index === -1) return;
-    sheet.getRange(row, index + 1).setValue(fields[header]);
+    sheet.getRange(row, index + 1).setValue(safeSheetValueV63_(fields[header]));
   });
 }
 
