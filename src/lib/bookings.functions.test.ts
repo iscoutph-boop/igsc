@@ -20,7 +20,7 @@ describe("booking payload schemas", () => {
       fullName: "=Juan Dela Cruz",
       phoneNumber: "+639171234567",
       emailAddress: "juan@example.com",
-      projectType: "Residential Construction",
+      projectType: "Residential",
       projectLocation: "Imus City, Cavite",
       preferredService: "Design-Build Services",
       approximateArea: "180 sqm",
@@ -30,6 +30,7 @@ describe("booking payload schemas", () => {
       projectDetails: "New two-storey home",
       privacyConsent: "accepted",
       leadSource: "Website",
+      companyWebsite: "",
     });
 
     expect(result.fullName).toBe("Juan Dela Cruz");
@@ -49,8 +50,93 @@ describe("booking payload schemas", () => {
       createBookingPayloadSchema.parse({
         fullName: "Juan Dela Cruz",
         phoneNumber: "09171234567",
-        projectType: "Residential Construction",
+        projectType: "Residential",
         privacyConsent: "",
+      }),
+    ).toThrow();
+  });
+
+  it("rejects a malformed optional email address", () => {
+    expect(() =>
+      createBookingPayloadSchema.parse({
+        submissionId: "7c7f0a90-ec47-4a0d-9f51-a4939d71ea0d",
+        fullName: "Juan Dela Cruz",
+        phoneNumber: "09171234567",
+        emailAddress: "not-an-email",
+        projectType: "Residential",
+        projectLocation: "Imus City, Cavite",
+        preferredService: "Project Consultation",
+        preferredDate: "2026-09-01",
+        preferredTime: "10:00",
+        projectDetails: "New two-storey home",
+        privacyConsent: "accepted",
+        leadSource: "Website",
+        companyWebsite: "",
+      }),
+    ).toThrow("Invalid email address");
+  });
+
+  it("rejects values outside the approved project and service options", () => {
+    const base = {
+      submissionId: "7c7f0a90-ec47-4a0d-9f51-a4939d71ea0d",
+      fullName: "Juan Dela Cruz",
+      phoneNumber: "09171234567",
+      emailAddress: "juan@example.com",
+      projectType: "Residential",
+      projectLocation: "Imus City, Cavite",
+      preferredService: "Project Consultation",
+      preferredDate: "2026-09-01",
+      preferredTime: "10:00",
+      projectDetails: "New two-storey home",
+      privacyConsent: "accepted",
+      leadSource: "Website",
+      companyWebsite: "",
+    };
+
+    expect(() =>
+      createBookingPayloadSchema.parse({ ...base, projectType: "Injected option" }),
+    ).toThrow();
+    expect(() =>
+      createBookingPayloadSchema.parse({ ...base, preferredService: "Injected service" }),
+    ).toThrow();
+  });
+
+  it("rejects obviously malformed phone numbers", () => {
+    expect(() =>
+      createBookingPayloadSchema.parse({
+        submissionId: "7c7f0a90-ec47-4a0d-9f51-a4939d71ea0d",
+        fullName: "Juan Dela Cruz",
+        phoneNumber: "123",
+        emailAddress: "juan@example.com",
+        projectType: "Residential",
+        projectLocation: "Imus City, Cavite",
+        preferredService: "Project Consultation",
+        preferredDate: "2026-09-01",
+        preferredTime: "10:00",
+        projectDetails: "New two-storey home",
+        privacyConsent: "accepted",
+        leadSource: "Website",
+        companyWebsite: "",
+      }),
+    ).toThrow("Invalid phone number");
+  });
+
+  it("rejects a filled honeypot when it reaches server validation", () => {
+    expect(() =>
+      createBookingPayloadSchema.parse({
+        submissionId: "7c7f0a90-ec47-4a0d-9f51-a4939d71ea0d",
+        fullName: "Juan Dela Cruz",
+        phoneNumber: "09171234567",
+        emailAddress: "juan@example.com",
+        projectType: "Residential",
+        projectLocation: "Imus City, Cavite",
+        preferredService: "Project Consultation",
+        preferredDate: "2026-09-01",
+        preferredTime: "10:00",
+        projectDetails: "New two-storey home",
+        privacyConsent: "accepted",
+        leadSource: "Website",
+        companyWebsite: "https://spam.example",
       }),
     ).toThrow();
   });
