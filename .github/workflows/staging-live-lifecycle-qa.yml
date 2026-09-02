@@ -10,6 +10,7 @@ permissions:
 
 env:
   ENDPOINT: https://script.google.com/macros/s/AKfycbxzturj6dLWZklbXQ1Lilkfo4W1REcGyJpLJX9s6l-BEPOl-Atg4CgefRwiQR8Ai0QW/exec
+  PREVIEW_URL: https://deploy-preview-4--darling-sunburst-da0a5d.netlify.app
 
 jobs:
   lifecycle:
@@ -121,3 +122,129 @@ jobs:
           path: staging-live-lifecycle-evidence.txt
           if-no-files-found: ignore
           retention-days: 7
+
+  bridge:
+    if: "${{ github.event.head_commit.message == 'test(staging): verify bridge and preview integration' }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Verify hardened live bridges
+        shell: bash
+        run: |
+          set -euo pipefail
+          INVALID_PHONE=$(curl -fsSL --retry 2 --connect-timeout 15 --max-time 45 "$ENDPOINT?open=call&phone=%2B639171234567")
+          echo "$INVALID_PHONE" | grep -F 'Phone number unavailable' >/dev/null
+          if echo "$INVALID_PHONE" | grep -F 'tel:' >/dev/null; then
+            echo 'Arbitrary phone input unexpectedly exposed tel target.' >&2
+            exit 1
+          fi
+
+          MISMATCH=$(curl -fsSL --retry 2 --connect-timeout 15 --max-time 45 "$ENDPOINT?open=call&ref=IGS-2026-9999&row=18")
+          echo "$MISMATCH" | grep -F 'Phone number unavailable' >/dev/null
+          if echo "$MISMATCH" | grep -F 'tel:' >/dev/null; then
+            echo 'Mismatched ref/row unexpectedly exposed tel target.' >&2
+            exit 1
+          fi
+
+          VALID=$(curl -fsSL --retry 2 --connect-timeout 15 --max-time 45 "$ENDPOINT?open=call&ref=IGS-2026-0010&row=18")
+          echo "$VALID" | grep -F 'Opening phone dialer' >/dev/null
+          echo "$VALID" | grep -F 'tel:+639000000000' >/dev/null
+          echo "$VALID" | grep -F 'CALL CLIENT' >/dev/null
+
+          CRM=$(curl -fsSL --retry 2 --connect-timeout 15 --max-time 45 "$ENDPOINT?open=crm&ref=IGS-2026-0010&row=18")
+          echo "$CRM" | grep -F 'Opening CRM record' >/dev/null
+          echo "$CRM" | grep -F 'range=A18' >/dev/null
+
+  preview_e2e:
+    if: "${{ github.event.head_commit.message == 'test(staging): verify bridge and preview integration' }}"
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install dependencies
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+      - name: Wait for Deploy Preview
+        shell: bash
+        run: |
+          set -euo pipefail
+          for i in $(seq 1 24); do
+            if curl -fsSL --connect-timeout 10 --max-time 25 "$PREVIEW_URL/consultation" | grep -F 'Request a consultation' >/dev/null; then
+              exit 0
+            fi
+            sleep 10
+          done
+          echo 'Deploy Preview consultation page did not become ready.' >&2
+          exit 1
+      - name: Submit through live website and clean up booking
+        shell: bash
+        run: |
+          set -euo pipefail
+          node --input-type=module <<'NODE'
+          import { chromium } from '@playwright/test';
+
+          const preview = process.env.PREVIEW_URL;
+          const endpoint = process.env.ENDPOINT;
+          const phone = '+639000000001';
+          const email = 'qa-preview-integration@igsabroso.invalid';
+          const browser = await chromium.launch({ headless: true });
+          const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
+
+          try {
+            await page.goto(`${preview}/consultation`, { waitUntil: 'networkidle', timeout: 60000 });
+            await page.locator('input[name="fullName"]').fill('IGS PREVIEW SERVER INTEGRATION QA');
+            await page.locator('input[name="phoneNumber"]').fill(phone);
+            await page.locator('input[name="emailAddress"]').fill(email);
+            await page.locator('select[name="projectType"]').selectOption({ label: 'Residential' });
+            await page.locator('select[name="preferredService"]').selectOption({ label: 'Project Consultation' });
+            await page.locator('input[name="projectLocation"]').fill('Cagayan de Oro City');
+            await page.locator('input[name="approximateArea"]').fill('QA');
+
+            await page.getByRole('button', { name: /Pick a date/i }).click();
+            const day = page.getByRole('button', { name: /September 24.*2026/i }).first();
+            await day.waitFor({ state: 'visible', timeout: 15000 });
+            await day.click();
+
+            const timeControl = page.getByRole('combobox', { name: /Preferred Time/i });
+            await timeControl.click();
+            await page.getByRole('option', { name: '2:00 PM' }).click();
+
+            await page.locator('select[name="budgetRange"]').selectOption({ label: 'PHP 3,000,000 - PHP 5,000,000' });
+            await page.locator('textarea[name="projectDetails"]').fill('Controlled live Deploy Preview server-to-Apps-Script integration QA.');
+            await page.locator('input[name="privacyConsent"]').check();
+            await page.getByRole('button', { name: /Submit consultation request/i }).click();
+
+            await page.locator('#consultation-confirmation').waitFor({ state: 'visible', timeout: 60000 });
+            const confirmation = await page.locator('#consultation-confirmation').innerText();
+            const match = confirmation.match(/IGS-\d{4}-\d{4}/);
+            if (!match) throw new Error(`Booking reference missing from success panel: ${confirmation}`);
+            const reference = match[0];
+            console.log(`PREVIEW_QA_REFERENCE=${reference}`);
+
+            const cancelResponse = await fetch(endpoint, {
+              method: 'POST',
+              headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+              body: JSON.stringify({
+                action: 'cancelBooking',
+                payload: {
+                  bookingReference: reference,
+                  contact: phone,
+                  cancellationReason: 'Controlled Deploy Preview integration QA cleanup.'
+                }
+              })
+            });
+            if (!cancelResponse.ok) throw new Error(`Cleanup HTTP ${cancelResponse.status}`);
+            const cancel = await cancelResponse.json();
+            if (!cancel.success || cancel.booking?.bookingStatus !== 'Cancelled' || (cancel.warnings || []).length) {
+              throw new Error(`Cleanup failed: ${JSON.stringify(cancel)}`);
+            }
+            console.log(`PREVIEW_QA_CANCELLED=${reference}`);
+          } finally {
+            await browser.close();
+          }
+          NODE
