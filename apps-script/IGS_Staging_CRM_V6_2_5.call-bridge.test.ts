@@ -60,7 +60,7 @@ describe("mobile Call Client bridge", () => {
     expect(links.callUrl).not.toContain("phone=");
   });
 
-  it("resolves the phone from the matching CRM row before rendering the native tel fallback", () => {
+  it("renders a professional branded CRM-verified call surface with native dialer handoff", () => {
     const context = loadScript();
     let html = "";
     context.HtmlService = {
@@ -71,11 +71,20 @@ describe("mobile Call Client bridge", () => {
     };
     context.readBookingByRowV6_ = () => ({
       bookingReference: "IGS-2026-0042",
+      fullName: "Juan Dela Cruz",
       phoneNumber: "+63 (917) 123-4567",
     });
 
     context.openClientCallBridgeV625_({ parameter: { ref: "IGS-2026-0042", row: "9" } });
 
+    expect(html).toContain("IG SABROSO CONSTRUCTION");
+    expect(html).toContain("Call client");
+    expect(html).toContain("Verified CRM contact");
+    expect(html).toContain("Juan Dela Cruz");
+    expect(html).toContain("IGS-2026-0042");
+    expect(html).toContain("+639171234567");
+    expect(html).toContain("Opens your device phone app");
+    expect(html).toContain("Powered by CDS");
     expect(html).toContain("tel:+639171234567");
     expect(html).toContain("window.location.replace");
     expect(html).toContain("CALL CLIENT");
@@ -95,6 +104,9 @@ describe("mobile Call Client bridge", () => {
     context.openClientCallBridgeV625_({ parameter: { phone: "+639171234567" } });
 
     expect(html).toContain("Phone number unavailable");
+    expect(html).toContain("IG SABROSO CONSTRUCTION");
+    expect(html).toContain("Verified CRM contact required");
+    expect(html).toContain("Powered by CDS");
     expect(html).not.toContain("tel:");
   });
 
@@ -115,6 +127,7 @@ describe("mobile Call Client bridge", () => {
     context.openClientCallBridgeV625_({ parameter: { ref: "IGS-2026-0042", row: "9" } });
 
     expect(html).toContain("Phone number unavailable");
+    expect(html).toContain("Verified CRM contact required");
     expect(html).not.toContain("tel:");
   });
 });
