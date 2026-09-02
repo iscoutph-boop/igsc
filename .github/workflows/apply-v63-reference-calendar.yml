@@ -1,0 +1,206 @@
+name: Apply V6.3 Reference and Calendar Hardening
+
+on:
+  push:
+    branches:
+      - feature/booking-email-staging-recovered-2
+    paths:
+      - .github/workflows/apply-v63-reference-calendar.yml
+
+permissions:
+  contents: write
+
+jobs:
+  patch-and-verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/booking-email-staging-recovered-2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Apply isolated Apps Script security patch
+        shell: bash
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+
+          path = Path('apps-script/IGS_Staging_CRM_V6_2_5_PRODUCTION_READINESS_R2.gs')
+          source = path.read_text(encoding='utf-8')
+
+          old_calendar = "9a8c649815522b6ac9366068aa0a8e3b930046d1d5e6483a0db709f509156ca5@group.calendar.google.com"
+          canonical_calendar = "cbaff5b7abd586ce7e993fbd1809c7f99eda329da29d053af41192291f6f0bb2@group.calendar.google.com"
+          if source.count(old_calendar) != 1:
+              raise SystemExit('Expected exactly one old Calendar ID in Apps Script source')
+          source = source.replace(old_calendar, canonical_calendar, 1)
+
+          old_find = """function findBookingV6_(payload) {
+            const reference = normalizeBookingReferenceV6_(payload.bookingReference);
+            const contact = cleanTextV6_(payload.contact);
+            if (!reference || !contact) throw new Error('Booking reference and contact are required.');
+            const record = findBookingRecordV6_(reference);
+            if (!record || !contactMatchesV6_(record.booking, contact)) {
+              throw new Error('Booking not found. Please check your booking reference and contact detail.');
+            }
+            return { booking: record.booking };
+          }
+          """
+          new_find = """function findBookingV6_(payload) {
+            const reference = normalizeBookingReferenceV6_(payload.bookingReference);
+            const contact = cleanTextV6_(payload.contact);
+            if (!reference || !contact) throw new Error('Booking reference and contact are required.');
+            const record = authorizeBookingContactV63_(reference, contact);
+            return { booking: record.booking };
+          }
+          """
+          if old_find not in source:
+              raise SystemExit('Expected findBookingV6_ target not found')
+          source = source.replace(old_find, new_find, 1)
+
+          old_manage_auth = """  const record = findBookingRecordV6_(reference);
+            if (!record || !contactMatchesV6_(record.booking, contact)) {
+              throw new Error('Booking not found. Please check your booking reference and contact detail.');
+            }
+          """
+          if source.count(old_manage_auth) != 2:
+              raise SystemExit(f'Expected two reschedule/cancel auth targets, found {source.count(old_manage_auth)}')
+          source = source.replace(old_manage_auth, """  const record = authorizeBookingContactV63_(reference, contact);
+          """, 2)
+
+          old_reference = """function nextBookingReferenceV6_(sheet, now) {
+            const year = Utilities.formatDate(now || new Date(), CONFIG.TIMEZONE, 'yyyy');
+            const lastRow = sheet.getLastRow();
+            let max = 0;
+            if (lastRow > CONFIG.BOOKINGS_HEADER_ROW) {
+              const values = sheet.getRange(CONFIG.BOOKINGS_HEADER_ROW + 1, 1, lastRow - CONFIG.BOOKINGS_HEADER_ROW, 1).getDisplayValues();
+              values.forEach(function (row) {
+                const match = new RegExp('^IGS-' + year + '-(\\\\d{4})$', 'i').exec(cleanTextV6_(row[0]));
+                if (match) max = Math.max(max, Number(match[1]));
+              });
+            }
+            return 'IGS-' + year + '-' + String(max + 1).padStart(4, '0');
+          }
+          """
+          new_reference = """function nextBookingReferenceV6_(sheet, now) {
+            const year = Utilities.formatDate(now || new Date(), CONFIG.TIMEZONE, 'yyyy');
+            for (let attempt = 0; attempt < 5; attempt += 1) {
+              const uuid = cleanTextV6_(Utilities.getUuid()).replace(/-/g, '').toUpperCase();
+              if (!/^[0-9A-F]{32}$/.test(uuid)) continue;
+              const reference = 'IGS-' + year + '-' + uuid;
+              if (!findRowByReferenceV6_(sheet, CONFIG.BOOKINGS_HEADER_ROW, reference)) return reference;
+            }
+            throw new Error('Unable to generate a booking reference. Please try again.');
+          }
+          """
+          if old_reference not in source:
+              raise SystemExit('Expected nextBookingReferenceV6_ target not found')
+          source = source.replace(old_reference, new_reference, 1)
+
+          old_normalize = """function normalizeBookingReferenceV6_(value) {
+            return cleanTextV6_(value).toUpperCase();
+          }
+
+          function normalizePhoneV6_(value) {
+          """
+          hardened = """const BOOKING_LOOKUP_SECURITY_V63_ = {
+            FAILED_LIMIT: 5,
+            TTL_SECONDS: 300,
+            CACHE_PREFIX: 'igs-lookup-v63-'
+          };
+
+          function normalizeBookingReferenceV6_(value) {
+            return cleanTextV6_(value).toUpperCase();
+          }
+
+          function isValidBookingReferenceV63_(value) {
+            const reference = normalizeBookingReferenceV6_(value);
+            return /^IGS-\\d{4}-(?:\\d{4}|[0-9A-F]{32})$/.test(reference);
+          }
+
+          function bookingLookupCacheKeyV63_(reference) {
+            let hash = 5381;
+            const normalized = normalizeBookingReferenceV6_(reference);
+            for (let index = 0; index < normalized.length; index += 1) {
+              hash = ((hash * 33) ^ normalized.charCodeAt(index)) >>> 0;
+            }
+            return BOOKING_LOOKUP_SECURITY_V63_.CACHE_PREFIX + hash.toString(36);
+          }
+
+          function getFailedBookingLookupAttemptsV63_(reference) {
+            const cache = getAbuseCacheV63_();
+            if (!cache) return 0;
+            try {
+              const current = Number(cache.get(bookingLookupCacheKeyV63_(reference)) || 0);
+              return Number.isFinite(current) && current > 0 ? Math.floor(current) : 0;
+            } catch (_) {
+              return 0;
+            }
+          }
+
+          function enforceBookingLookupThrottleV63_(reference) {
+            if (getFailedBookingLookupAttemptsV63_(reference) >= BOOKING_LOOKUP_SECURITY_V63_.FAILED_LIMIT) {
+              throw new Error('Too many booking lookup attempts. Please wait a few minutes and try again.');
+            }
+          }
+
+          function recordFailedBookingLookupV63_(reference) {
+            const cache = getAbuseCacheV63_();
+            if (!cache) return;
+            try {
+              const count = getFailedBookingLookupAttemptsV63_(reference) + 1;
+              cache.put(
+                bookingLookupCacheKeyV63_(reference),
+                String(count),
+                BOOKING_LOOKUP_SECURITY_V63_.TTL_SECONDS
+              );
+            } catch (_) {}
+          }
+
+          function clearFailedBookingLookupV63_(reference) {
+            const cache = getAbuseCacheV63_();
+            if (!cache || typeof cache.remove !== 'function') return;
+            try { cache.remove(bookingLookupCacheKeyV63_(reference)); } catch (_) {}
+          }
+
+          function authorizeBookingContactV63_(reference, contact) {
+            if (!isValidBookingReferenceV63_(reference)) {
+              throw new Error('Booking not found. Please check your booking reference and contact detail.');
+            }
+            enforceBookingLookupThrottleV63_(reference);
+            const record = findBookingRecordV6_(reference);
+            if (!record || !contactMatchesV6_(record.booking, contact)) {
+              recordFailedBookingLookupV63_(reference);
+              throw new Error('Booking not found. Please check your booking reference and contact detail.');
+            }
+            clearFailedBookingLookupV63_(reference);
+            return record;
+          }
+
+          function normalizePhoneV6_(value) {
+          """
+          if old_normalize not in source:
+              raise SystemExit('Expected reference normalization target not found')
+          source = source.replace(old_normalize, hardened, 1)
+
+          path.write_text(source, encoding='utf-8')
+          PY
+      - name: Clean install
+        run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Runtime dependency audit
+        run: npm audit --omit=dev --audit-level=high
+      - name: Unit tests
+        run: npm test
+      - name: Production build
+        run: npm run build
+      - name: Commit verified reference and Calendar hardening
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps-script/IGS_Staging_CRM_V6_2_5_PRODUCTION_READINESS_R2.gs
+          git commit -m "feat: harden booking references and canonical Calendar"
+          git pull --rebase origin feature/booking-email-staging-recovered-2
+          git push origin HEAD:feature/booking-email-staging-recovered-2
