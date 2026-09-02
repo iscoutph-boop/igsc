@@ -8,6 +8,24 @@ import {
   rescheduleBookingPayloadSchema,
 } from "./bookings.functions";
 
+const validCreatePayload = {
+  submissionId: "7c7f0a90-ec47-4a0d-9f51-a4939d71ea0d",
+  fullName: "Juan Dela Cruz",
+  phoneNumber: "+639171234567",
+  emailAddress: "juan@example.com",
+  projectType: "Residential",
+  projectLocation: "Imus City, Cavite",
+  preferredService: "Design-Build Services",
+  approximateArea: "180 sqm",
+  preferredDate: "2026-09-01",
+  preferredTime: "10:00",
+  budgetRange: "PHP 3,000,000 - PHP 5,000,000",
+  projectDetails: "New two-storey home",
+  privacyConsent: "accepted",
+  leadSource: "Website",
+  companyWebsite: "",
+};
+
 afterEach(() => {
   vi.useRealTimers();
   vi.unstubAllGlobals();
@@ -16,20 +34,8 @@ afterEach(() => {
 describe("booking payload schemas", () => {
   it("requires the production inquiry fields and sanitizes spreadsheet prefixes", () => {
     const result = createBookingPayloadSchema.parse({
-      submissionId: "7c7f0a90-ec47-4a0d-9f51-a4939d71ea0d",
+      ...validCreatePayload,
       fullName: "=Juan Dela Cruz",
-      phoneNumber: "+639171234567",
-      emailAddress: "juan@example.com",
-      projectType: "Residential Construction",
-      projectLocation: "Imus City, Cavite",
-      preferredService: "Design-Build Services",
-      approximateArea: "180 sqm",
-      preferredDate: "2026-09-01",
-      preferredTime: "10:00",
-      budgetRange: "PHP 3,000,000 - PHP 5,000,000",
-      projectDetails: "New two-storey home",
-      privacyConsent: "accepted",
-      leadSource: "Website",
     });
 
     expect(result.fullName).toBe("Juan Dela Cruz");
@@ -47,12 +53,51 @@ describe("booking payload schemas", () => {
   it("rejects submissions without required schedule and consent fields", () => {
     expect(() =>
       createBookingPayloadSchema.parse({
-        fullName: "Juan Dela Cruz",
-        phoneNumber: "09171234567",
-        projectType: "Residential Construction",
+        ...validCreatePayload,
+        preferredDate: "",
+        preferredTime: "",
         privacyConsent: "",
       }),
     ).toThrow();
+  });
+
+  it("accepts an empty optional email address", () => {
+    expect(
+      createBookingPayloadSchema.parse({ ...validCreatePayload, emailAddress: "" }).emailAddress,
+    ).toBe("");
+  });
+
+  it("rejects a malformed non-empty email address", () => {
+    expect(() =>
+      createBookingPayloadSchema.parse({
+        ...validCreatePayload,
+        emailAddress: "not-an-email",
+      }),
+    ).toThrow();
+  });
+
+  it("rejects forged select values and lead sources", () => {
+    expect(() =>
+      createBookingPayloadSchema.parse({ ...validCreatePayload, projectType: "Forged Project" }),
+    ).toThrow();
+    expect(() =>
+      createBookingPayloadSchema.parse({ ...validCreatePayload, preferredService: "Forged Service" }),
+    ).toThrow();
+    expect(() =>
+      createBookingPayloadSchema.parse({ ...validCreatePayload, budgetRange: "Unlimited" }),
+    ).toThrow();
+    expect(() =>
+      createBookingPayloadSchema.parse({ ...validCreatePayload, leadSource: "Forged Source" }),
+    ).toThrow();
+  });
+
+  it("requires an empty server-validated honeypot", () => {
+    expect(() =>
+      createBookingPayloadSchema.parse({ ...validCreatePayload, companyWebsite: "spam.example" }),
+    ).toThrow();
+
+    const { companyWebsite: _companyWebsite, ...withoutHoneypot } = validCreatePayload;
+    expect(() => createBookingPayloadSchema.parse(withoutHoneypot)).toThrow();
   });
 
   it("accepts the normalized cancellationReason contract", () => {
