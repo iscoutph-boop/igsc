@@ -1,0 +1,35 @@
+name: Apply V6.3 Security Hardening
+
+on:
+  push:
+    branches:
+      - feature/booking-email-staging-recovered-2
+    paths:
+      - ".github/workflows/apply-security-hardening-v63.yml"
+      - "scripts/apply-security-hardening-v63.py"
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/booking-email-staging-recovered-2
+      - name: Apply isolated security patch
+        run: python3 scripts/apply-security-hardening-v63.py
+      - name: Commit patched Apps Script source
+        shell: bash
+        run: |
+          if git diff --quiet -- apps-script/IGS_Staging_CRM_V6_2_5_PRODUCTION_READINESS_R2.gs; then
+            echo "No source changes required."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add apps-script/IGS_Staging_CRM_V6_2_5_PRODUCTION_READINESS_R2.gs
+          git commit -m "feat: enforce authenticated Apps Script requests"
+          git push origin HEAD:feature/booking-email-staging-recovered-2
