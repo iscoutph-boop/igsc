@@ -105,7 +105,7 @@ export function ConsultationPage() {
                       href={`mailto:${IGS_EMAIL}`}
                       className="flex items-start gap-3 hover:text-primary"
                     >
-                      <Mail aria-hidden="true" size={19} className="text-primary" />
+                      <Mail aria-hidden="true" size={19} className="mt-0.5 shrink-0 text-primary" />
                       <span className="break-all">{IGS_EMAIL}</span>
                     </a>
                     <a
