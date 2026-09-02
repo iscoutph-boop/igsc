@@ -43,4 +43,5 @@ jobs:
             exit 0
           fi
           git commit -m "chore: record V6.3 build diagnostic"
+          git pull --rebase origin feature/booking-email-staging-recovered-2
           git push origin HEAD:feature/booking-email-staging-recovered-2
