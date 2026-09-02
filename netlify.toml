@@ -13,3 +13,14 @@
     X-Frame-Options = "SAMEORIGIN"
     Referrer-Policy = "strict-origin-when-cross-origin"
     Permissions-Policy = "camera=(), microphone=(), geolocation=()"
+    Content-Security-Policy = "base-uri 'self'; object-src 'none'; frame-ancestors 'self'"
+
+[[redirects]]
+  from = "/_serverFn/*"
+  to = "/_serverFn/:splat"
+  status = 200
+  force = true
+  [redirects.rate_limit]
+    window_limit = 12
+    window_size = 60
+    aggregate_by = ["ip", "domain"]
