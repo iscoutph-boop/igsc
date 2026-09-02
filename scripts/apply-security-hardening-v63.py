@@ -197,5 +197,33 @@ if NEW_DO_POST not in source:
         raise SystemExit("Expected exactly one legacy doPost block")
     source = source.replace(OLD_DO_POST, NEW_DO_POST, 1)
 
+SHEET_HELPER = r'''function safeSheetValueV63_(value) {
+  if (typeof value !== 'string') return value;
+  const inspected = value.replace(/^[\s\u00a0\u1680\u2000-\u200b\u2028\u2029\u202f\u205f\u3000]*/, '');
+  return /^[=+\-@]/.test(inspected) ? "'" + value : value;
+}
+
+'''
+
+SHEET_MARKER = "function appendRowByHeadersV6_(sheet, headerRow, data) {"
+if "function safeSheetValueV63_(value)" not in source:
+    if source.count(SHEET_MARKER) != 1:
+        raise SystemExit("Expected exactly one appendRowByHeadersV6_ marker")
+    source = source.replace(SHEET_MARKER, SHEET_HELPER + SHEET_MARKER, 1)
+
+OLD_APPEND_VALUE = "return Object.prototype.hasOwnProperty.call(data, header) ? data[header] : '';"
+NEW_APPEND_VALUE = "return safeSheetValueV63_(Object.prototype.hasOwnProperty.call(data, header) ? data[header] : '');"
+if NEW_APPEND_VALUE not in source:
+    if source.count(OLD_APPEND_VALUE) != 1:
+        raise SystemExit("Expected exactly one append-row value expression")
+    source = source.replace(OLD_APPEND_VALUE, NEW_APPEND_VALUE, 1)
+
+OLD_UPDATE_VALUE = "sheet.getRange(row, index + 1).setValue(fields[header]);"
+NEW_UPDATE_VALUE = "sheet.getRange(row, index + 1).setValue(safeSheetValueV63_(fields[header]));"
+if NEW_UPDATE_VALUE not in source:
+    if source.count(OLD_UPDATE_VALUE) != 1:
+        raise SystemExit("Expected exactly one update-field value expression")
+    source = source.replace(OLD_UPDATE_VALUE, NEW_UPDATE_VALUE, 1)
+
 TARGET.write_text(source, encoding="utf-8")
-print("Applied V6.3 Apps Script request authentication hardening.")
+print("Applied V6.3 Apps Script request authentication and Sheet write hardening.")
