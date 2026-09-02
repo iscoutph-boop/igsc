@@ -70,7 +70,10 @@ describe("ConsultationForm", () => {
   });
 
   it("forwards the honeypot value to server validation", async () => {
-    callCRMMock.mockRejectedValue(new Error("Spam submission rejected"));
+    callCRMMock.mockResolvedValue({
+      success: true,
+      bookingReference: "IGS-2026-0043",
+    });
 
     const { container } = render(<ConsultationForm onSuccess={() => undefined} />);
     fillValidForm();
