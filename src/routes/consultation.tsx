@@ -181,10 +181,6 @@ export function ConsultationForm({ onSuccess }: { onSuccess: (reference: string)
     const form = event.currentTarget;
     const formData = new FormData(form);
     const honeypot = String(formData.get("companyWebsite") ?? "").trim();
-    if (honeypot) {
-      setErrorMessage("We could not submit this request.");
-      return;
-    }
 
     if (!submissionIdRef.current) submissionIdRef.current = crypto.randomUUID();
     const payload = {
@@ -202,6 +198,7 @@ export function ConsultationForm({ onSuccess }: { onSuccess: (reference: string)
       projectDetails: String(formData.get("projectDetails") ?? "").trim(),
       privacyConsent: formData.get("privacyConsent") === "accepted" ? "accepted" : "",
       leadSource: "Website",
+      companyWebsite: honeypot,
     };
 
     if (!payload.preferredDate || !payload.preferredTime) {
