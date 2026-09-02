@@ -1,4 +1,4 @@
-import { createServerFn } from "@tanstack/react-start";
+import { createServerFn, createServerOnlyFn } from "@tanstack/react-start";
 import { z } from "zod";
 import { buildSignedCrmEnvelope, requireCrmSharedSecret } from "./crm-auth.server";
 
@@ -141,15 +141,15 @@ const crmInputSchema = z.discriminatedUnion("action", [
 
 export const CRM_UPSTREAM_TIMEOUT_MS = 12_000;
 
-export function buildCRMRequestBody(
-  action: string,
-  payload: unknown,
-  secret: string,
-  nowSeconds?: number,
-  nonce?: string,
-): string {
-  return JSON.stringify(buildSignedCrmEnvelope(action, payload, secret, nowSeconds, nonce));
-}
+export const buildCRMRequestBody = createServerOnlyFn(
+  (
+    action: string,
+    payload: unknown,
+    secret: string,
+    nowSeconds?: number,
+    nonce?: string,
+  ): string => JSON.stringify(buildSignedCrmEnvelope(action, payload, secret, nowSeconds, nonce)),
+);
 
 export async function fetchCRMUpstream(url: string, body: string): Promise<Response> {
   const controller = new AbortController();
