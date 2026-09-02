@@ -1,5 +1,6 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
+import { buildSignedCrmEnvelope, requireCrmSharedSecret } from "./crm-auth.server";
 
 const PROJECT_TYPES = [
   "Residential",
@@ -140,6 +141,16 @@ const crmInputSchema = z.discriminatedUnion("action", [
 
 export const CRM_UPSTREAM_TIMEOUT_MS = 12_000;
 
+export function buildCRMRequestBody(
+  action: string,
+  payload: unknown,
+  secret: string,
+  nowSeconds?: number,
+  nonce?: string,
+): string {
+  return JSON.stringify(buildSignedCrmEnvelope(action, payload, secret, nowSeconds, nonce));
+}
+
 export async function fetchCRMUpstream(url: string, body: string): Promise<Response> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), CRM_UPSTREAM_TIMEOUT_MS);
@@ -168,11 +179,10 @@ export const callCRMFn = createServerFn({ method: "POST" })
     if (!url) {
       throw new Error("Booking service is not configured.");
     }
+    const secret = requireCrmSharedSecret(process.env.CRM_SHARED_SECRET);
+    const body = buildCRMRequestBody(data.action, data.payload, secret);
 
-    const response = await fetchCRMUpstream(
-      url,
-      JSON.stringify({ action: data.action, payload: data.payload }),
-    );
+    const response = await fetchCRMUpstream(url, body);
 
     if (!response.ok) {
       throw new Error(`Booking service returned ${response.status}.`);
