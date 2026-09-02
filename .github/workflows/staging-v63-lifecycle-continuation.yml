@@ -1,0 +1,150 @@
+name: Staging V6.3 Lifecycle Continuation
+
+on:
+  push:
+    branches:
+      - feature/booking-email-staging-recovered-2
+    paths:
+      - .github/workflows/staging-v63-lifecycle-continuation.yml
+
+permissions:
+  contents: read
+
+jobs:
+  qa:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci --ignore-scripts --no-audit --no-fund
+      - run: npx playwright install --with-deps chromium
+      - name: Continue live lifecycle
+        env:
+          QA_URL: https://deploy-preview-4--darling-sunburst-da0a5d.netlify.app/consultation
+          QA_REF: IGS-2026-A7D99861E27940318D464492E244DBFE
+          QA_EMAIL: caballerodigitals+v63qa1788356120822@gmail.com
+        run: |
+          cat > .tmp-v63-continuation.mjs <<'EOF'
+          import { chromium } from '@playwright/test';
+          import fs from 'node:fs';
+
+          const url = process.env.QA_URL;
+          const ref = process.env.QA_REF;
+          const email = process.env.QA_EMAIL;
+          const browser = await chromium.launch({ headless: true });
+          const page = await browser.newPage({ viewport: { width: 1440, height: 1100 } });
+          const consoleProblems = [];
+          page.on('console', msg => {
+            if (msg.type() === 'error' || msg.type() === 'warning') consoleProblems.push(`${msg.type()}: ${msg.text()}`);
+          });
+          page.on('pageerror', err => consoleProblems.push(`pageerror: ${err.message}`));
+
+          async function directClick(locator) {
+            await locator.evaluate(el => el.click());
+          }
+
+          async function freshPage() {
+            await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 });
+            if (!/Book a Consultation/i.test(await page.title())) throw new Error(`Unexpected title: ${await page.title()}`);
+          }
+
+          async function openManageAndFind() {
+            const header = page.locator('header');
+            await directClick(header.getByRole('button', { name: /manage booking/i }));
+            await page.getByPlaceholder(/Example: IGS-/i).fill(ref);
+            await page.getByPlaceholder(/Enter your email or phone number/i).fill(email);
+            await directClick(page.getByRole('button', { name: /find my booking/i }));
+            await page.getByRole('heading', { name: /Appointment request found/i }).waitFor({ timeout: 30000 });
+          }
+
+          async function chooseDate(ymd) {
+            const text = page.getByText('Pick a date', { exact: true });
+            await directClick(text.locator('xpath=ancestor::button[1]'));
+            const exact = page.locator(`button[data-day="${ymd}"]`);
+            if (await exact.count()) return directClick(exact.first());
+            throw new Error(`Unable to choose date ${ymd}`);
+          }
+
+          async function chooseTime(label) {
+            const text = page.getByText('Pick a time', { exact: true });
+            await directClick(text.locator('xpath=ancestor::button[1]'));
+            const option = page.getByRole('option', { name: label, exact: true });
+            await option.waitFor({ state: 'visible', timeout: 10000 });
+            await directClick(option);
+          }
+
+          try {
+            // Continue the existing booking from a fresh page.
+            await freshPage();
+            await openManageAndFind();
+            const beforeCancel = await page.locator('body').innerText();
+            if (!/Rescheduled/i.test(beforeCancel)) throw new Error('Expected Rescheduled status before cancellation');
+            await page.screenshot({ path: '/tmp/05-found-rescheduled.png', fullPage: false });
+
+            await directClick(page.getByRole('button', { name: /cancel booking/i }));
+            await page.getByLabel(/Cancellation reason/i).fill('Automated V6.3 staging cancellation QA');
+            await directClick(page.getByRole('button', { name: /yes, cancel booking/i }));
+            await page.getByRole('heading', { name: /Booking cancelled/i }).waitFor({ timeout: 30000 });
+            await page.screenshot({ path: '/tmp/06-cancelled.png', fullPage: false });
+
+            // Fresh session verifies persistence rather than relying on modal state.
+            await freshPage();
+            await openManageAndFind();
+            const afterCancel = await page.locator('body').innerText();
+            if (!/Cancelled/i.test(afterCancel)) throw new Error('Fresh Find did not show Cancelled status');
+            await page.screenshot({ path: '/tmp/07-found-cancelled.png', fullPage: false });
+
+            // Re-submit the original create payload while its duplicate fingerprint is still cached.
+            await freshPage();
+            await page.getByLabel('Full name').fill('V63 QA 1788356120822');
+            await page.getByLabel('Mobile number').fill('09171234567');
+            await page.getByLabel('Email address').fill(email);
+            await page.getByLabel('Project type').selectOption({ label: 'Residential' });
+            await page.getByLabel('Preferred service').selectOption({ label: 'Project Consultation' });
+            await page.getByLabel('Project location').fill('Cagayan de Oro');
+            await page.getByLabel('Approximate lot or floor area').fill('150 sqm');
+            await page.getByLabel('Budget range').selectOption({ label: 'PHP 3,000,000 - PHP 5,000,000' });
+            await page.getByLabel(/Project description/).fill('V6.3 staging lifecycle QA 1788356120822');
+            await chooseDate('2026-09-04');
+            await chooseTime('9:00 AM');
+            await page.getByRole('checkbox').check();
+            await page.waitForTimeout(1700);
+            await directClick(page.getByRole('button', { name: /submit consultation request/i }));
+            const alert = page.getByRole('alert');
+            await alert.waitFor({ timeout: 30000 });
+            const duplicateMessage = await alert.innerText();
+            if (!/matching request|received recently|wait before trying again/i.test(duplicateMessage)) {
+              throw new Error(`Duplicate suppression did not trigger: ${duplicateMessage}`);
+            }
+            await page.screenshot({ path: '/tmp/08-duplicate-blocked.png', fullPage: false });
+
+            const report = { ref, email, duplicateMessage, consoleProblems };
+            fs.writeFileSync('/tmp/v63-continuation.json', JSON.stringify(report, null, 2));
+            console.log(`QA_CONTINUATION_RESULT=${JSON.stringify(report)}`);
+          } catch (error) {
+            await page.screenshot({ path: '/tmp/99-continuation-failure.png', fullPage: true }).catch(() => {});
+            fs.writeFileSync('/tmp/v63-continuation-failure.txt', String(error?.stack || error));
+            throw error;
+          } finally {
+            await browser.close();
+            fs.rmSync('.tmp-v63-continuation.mjs', { force: true });
+          }
+          EOF
+          node .tmp-v63-continuation.mjs
+      - name: Upload evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: v63-staging-lifecycle-continuation
+          path: |
+            /tmp/v63-continuation.json
+            /tmp/v63-continuation-failure.txt
+            /tmp/05-found-rescheduled.png
+            /tmp/06-cancelled.png
+            /tmp/07-found-cancelled.png
+            /tmp/08-duplicate-blocked.png
+            /tmp/99-continuation-failure.png
+          if-no-files-found: warn
