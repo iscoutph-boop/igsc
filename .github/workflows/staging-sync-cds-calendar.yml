@@ -10,7 +10,7 @@ permissions:
 
 jobs:
   sync:
-    if: github.event.head_commit.message != 'chore(staging): sync CDS calendar identity'
+    if: "${{ github.event.head_commit.message != 'chore(staging): sync CDS calendar identity' }}"
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
