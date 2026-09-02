@@ -25,8 +25,8 @@ jobs:
         env:
           QA_URL: https://deploy-preview-4--darling-sunburst-da0a5d.netlify.app/consultation
         run: |
-          cat > /tmp/v63-qa.mjs <<'EOF'
-          import { chromium } from 'playwright';
+          cat > .tmp-v63-qa.mjs <<'EOF'
+          import { chromium } from '@playwright/test';
           import fs from 'node:fs';
 
           const url = process.env.QA_URL;
@@ -93,74 +93,82 @@ jobs:
             await page.waitForTimeout(1700);
           }
 
-          await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 });
-          if (!/Book a Consultation/i.test(await page.title())) throw new Error(`Unexpected title: ${await page.title()}`);
-          if (!await page.getByRole('heading', { name: /Let’s build something great together/i }).isVisible()) throw new Error('Consultation page did not render');
-          await fillForm();
-          await page.getByRole('button', { name: /submit consultation request/i }).click();
-          await page.getByRole('heading', { name: /Consultation request received/i }).waitFor({ timeout: 45000 });
-          const successText = await page.locator('#consultation-confirmation').innerText();
-          const refMatch = successText.match(/IGS-\d{4}-(?:[0-9A-F]{32}|\d{4})/i);
-          if (!refMatch) throw new Error(`Booking reference not found in success state: ${successText}`);
-          const ref = refMatch[0].toUpperCase();
-          await page.screenshot({ path: '/tmp/01-created.png', fullPage: false });
+          try {
+            await page.goto(url, { waitUntil: 'networkidle', timeout: 60000 });
+            if (!/Book a Consultation/i.test(await page.title())) throw new Error(`Unexpected title: ${await page.title()}`);
+            if (!await page.getByRole('heading', { name: /Let’s build something great together/i }).isVisible()) throw new Error('Consultation page did not render');
+            await fillForm();
+            await page.getByRole('button', { name: /submit consultation request/i }).click();
+            await page.getByRole('heading', { name: /Consultation request received/i }).waitFor({ timeout: 45000 });
+            const successText = await page.locator('#consultation-confirmation').innerText();
+            const refMatch = successText.match(/IGS-\d{4}-(?:[0-9A-F]{32}|\d{4})/i);
+            if (!refMatch) throw new Error(`Booking reference not found in success state: ${successText}`);
+            const ref = refMatch[0].toUpperCase();
+            await page.screenshot({ path: '/tmp/01-created.png', fullPage: false });
 
-          await page.getByRole('button', { name: /manage booking/i }).click();
-          const refInput = page.getByPlaceholder(/Example: IGS-/i);
-          if ((await refInput.inputValue()).toUpperCase() !== ref) throw new Error('Manage booking reference was not prefilled');
-          await page.getByPlaceholder(/Enter your email or phone number/i).fill(qa.email);
-          await page.getByRole('button', { name: /find my booking/i }).click();
-          await page.getByRole('heading', { name: /Appointment request found/i }).waitFor({ timeout: 30000 });
-          if (!(await page.locator('body').innerText()).includes(ref)) throw new Error('Find result missing booking reference');
+            await page.getByRole('button', { name: /manage booking/i }).click();
+            const refInput = page.getByPlaceholder(/Example: IGS-/i);
+            if ((await refInput.inputValue()).toUpperCase() !== ref) throw new Error('Manage booking reference was not prefilled');
+            await page.getByPlaceholder(/Enter your email or phone number/i).fill(qa.email);
+            await page.getByRole('button', { name: /find my booking/i }).click();
+            await page.getByRole('heading', { name: /Appointment request found/i }).waitFor({ timeout: 30000 });
+            if (!(await page.locator('body').innerText()).includes(ref)) throw new Error('Find result missing booking reference');
 
-          await page.getByRole('button', { name: /reschedule booking/i }).click();
-          await chooseDate(rescheduledDate);
-          await chooseTime('10:30 AM');
-          await page.getByLabel(/Reason \/ notes/i).fill('Automated V6.3 staging reschedule QA');
-          await page.getByRole('button', { name: /confirm new schedule/i }).click();
-          await page.getByRole('heading', { name: /Booking rescheduled/i }).waitFor({ timeout: 30000 });
-          await page.screenshot({ path: '/tmp/02-rescheduled.png', fullPage: false });
+            await page.getByRole('button', { name: /reschedule booking/i }).click();
+            await chooseDate(rescheduledDate);
+            await chooseTime('10:30 AM');
+            await page.getByLabel(/Reason \/ notes/i).fill('Automated V6.3 staging reschedule QA');
+            await page.getByRole('button', { name: /confirm new schedule/i }).click();
+            await page.getByRole('heading', { name: /Booking rescheduled/i }).waitFor({ timeout: 30000 });
+            await page.screenshot({ path: '/tmp/02-rescheduled.png', fullPage: false });
 
-          await page.getByRole('button', { name: /^close$/i }).click();
-          await page.getByRole('button', { name: /manage booking/i }).click();
-          await page.getByPlaceholder(/Enter your email or phone number/i).fill(qa.email);
-          await page.getByRole('button', { name: /find my booking/i }).click();
-          await page.getByRole('heading', { name: /Appointment request found/i }).waitFor({ timeout: 30000 });
-          const afterReschedule = await page.locator('body').innerText();
-          if (!/Rescheduled/i.test(afterReschedule)) throw new Error('Find after reschedule did not show Rescheduled status');
+            await page.getByRole('button', { name: /^close$/i }).click();
+            await page.getByRole('button', { name: /manage booking/i }).click();
+            await page.getByPlaceholder(/Enter your email or phone number/i).fill(qa.email);
+            await page.getByRole('button', { name: /find my booking/i }).click();
+            await page.getByRole('heading', { name: /Appointment request found/i }).waitFor({ timeout: 30000 });
+            const afterReschedule = await page.locator('body').innerText();
+            if (!/Rescheduled/i.test(afterReschedule)) throw new Error('Find after reschedule did not show Rescheduled status');
 
-          await page.getByRole('button', { name: /cancel booking/i }).click();
-          await page.getByLabel(/Cancellation reason/i).fill('Automated V6.3 staging cancellation QA');
-          await page.getByRole('button', { name: /yes, cancel booking/i }).click();
-          await page.getByRole('heading', { name: /Booking cancelled/i }).waitFor({ timeout: 30000 });
-          await page.screenshot({ path: '/tmp/03-cancelled.png', fullPage: false });
+            await page.getByRole('button', { name: /cancel booking/i }).click();
+            await page.getByLabel(/Cancellation reason/i).fill('Automated V6.3 staging cancellation QA');
+            await page.getByRole('button', { name: /yes, cancel booking/i }).click();
+            await page.getByRole('heading', { name: /Booking cancelled/i }).waitFor({ timeout: 30000 });
+            await page.screenshot({ path: '/tmp/03-cancelled.png', fullPage: false });
 
-          await page.getByRole('button', { name: /^close$/i }).click();
-          await page.getByRole('button', { name: /manage booking/i }).click();
-          await page.getByPlaceholder(/Enter your email or phone number/i).fill(qa.email);
-          await page.getByRole('button', { name: /find my booking/i }).click();
-          await page.getByRole('heading', { name: /Appointment request found/i }).waitFor({ timeout: 30000 });
-          const afterCancel = await page.locator('body').innerText();
-          if (!/Cancelled/i.test(afterCancel)) throw new Error('Find after cancel did not show Cancelled status');
-          await page.getByLabel('Close manage booking').click();
+            await page.getByRole('button', { name: /^close$/i }).click();
+            await page.getByRole('button', { name: /manage booking/i }).click();
+            await page.getByPlaceholder(/Enter your email or phone number/i).fill(qa.email);
+            await page.getByRole('button', { name: /find my booking/i }).click();
+            await page.getByRole('heading', { name: /Appointment request found/i }).waitFor({ timeout: 30000 });
+            const afterCancel = await page.locator('body').innerText();
+            if (!/Cancelled/i.test(afterCancel)) throw new Error('Find after cancel did not show Cancelled status');
+            await page.getByLabel('Close manage booking').click();
 
-          await page.reload({ waitUntil: 'networkidle' });
-          await fillForm();
-          await page.getByRole('button', { name: /submit consultation request/i }).click();
-          const alert = page.getByRole('alert');
-          await alert.waitFor({ timeout: 30000 });
-          const duplicateMessage = await alert.innerText();
-          if (!/matching request|received recently|wait before trying again/i.test(duplicateMessage)) {
-            throw new Error(`Duplicate suppression did not trigger: ${duplicateMessage}`);
+            await page.reload({ waitUntil: 'networkidle' });
+            await fillForm();
+            await page.getByRole('button', { name: /submit consultation request/i }).click();
+            const alert = page.getByRole('alert');
+            await alert.waitFor({ timeout: 30000 });
+            const duplicateMessage = await alert.innerText();
+            if (!/matching request|received recently|wait before trying again/i.test(duplicateMessage)) {
+              throw new Error(`Duplicate suppression did not trigger: ${duplicateMessage}`);
+            }
+            await page.screenshot({ path: '/tmp/04-duplicate-blocked.png', fullPage: false });
+
+            const report = { ref, qa, initialDate, rescheduledDate, duplicateMessage, consoleProblems };
+            fs.writeFileSync('/tmp/v63-qa.json', JSON.stringify(report, null, 2));
+            console.log(`QA_RESULT=${JSON.stringify(report)}`);
+          } catch (error) {
+            await page.screenshot({ path: '/tmp/99-failure.png', fullPage: true }).catch(() => {});
+            fs.writeFileSync('/tmp/v63-qa-failure.txt', String(error?.stack || error));
+            throw error;
+          } finally {
+            await browser.close();
+            fs.rmSync('.tmp-v63-qa.mjs', { force: true });
           }
-          await page.screenshot({ path: '/tmp/04-duplicate-blocked.png', fullPage: false });
-
-          const report = { ref, qa, initialDate, rescheduledDate, duplicateMessage, consoleProblems };
-          fs.writeFileSync('/tmp/v63-qa.json', JSON.stringify(report, null, 2));
-          console.log(`QA_RESULT=${JSON.stringify(report)}`);
-          await browser.close();
           EOF
-          node /tmp/v63-qa.mjs
+          node .tmp-v63-qa.mjs
       - name: Upload screenshots
         if: always()
         uses: actions/upload-artifact@v4
@@ -168,8 +176,10 @@ jobs:
           name: v63-staging-lifecycle-qa
           path: |
             /tmp/v63-qa.json
+            /tmp/v63-qa-failure.txt
             /tmp/01-created.png
             /tmp/02-rescheduled.png
             /tmp/03-cancelled.png
             /tmp/04-duplicate-blocked.png
+            /tmp/99-failure.png
           if-no-files-found: warn
