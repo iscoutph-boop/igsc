@@ -28,22 +28,64 @@ const mediumText = z.string().max(500).transform(sanitizeText);
 const longText = z.string().max(2500).transform(sanitizeText);
 const optionalShortText = shortText.optional().default("");
 const submissionIdText = z.string().trim().uuid("Invalid submission ID");
+const optionalEmailText = z
+  .string()
+  .trim()
+  .max(254)
+  .refine(
+    (value) => value === "" || z.string().email().safeParse(value).success,
+    "Invalid email address",
+  )
+  .optional()
+  .default("");
+
+const projectTypeText = z.enum([
+  "Residential",
+  "Commercial",
+  "Renovation",
+  "Multi-unit / Apartment",
+  "Other",
+]);
+
+const preferredServiceText = z.enum([
+  "General Contracting",
+  "Design-Build Services",
+  "Construction Management",
+  "Renovation and Remodeling",
+  "Project Consultation",
+]);
+
+const budgetRangeText = z.enum([
+  "",
+  "Below PHP 1,000,000",
+  "PHP 1,000,000 - PHP 3,000,000",
+  "PHP 3,000,000 - PHP 5,000,000",
+  "PHP 5,000,000 - PHP 10,000,000",
+  "Above PHP 10,000,000",
+]);
+
+const honeypotText = z
+  .string()
+  .max(200)
+  .refine((value) => value.trim() === "", "Invalid submission")
+  .transform((value) => value.trim());
 
 export const createBookingPayloadSchema = z.object({
   submissionId: submissionIdText,
   fullName: shortText.refine((value) => value.length > 0, "Name is required"),
   phoneNumber: phoneText.refine((value) => value.length > 0, "Phone number is required"),
-  emailAddress: optionalShortText,
-  projectType: shortText.refine((value) => value.length > 0, "Project type is required"),
+  emailAddress: optionalEmailText,
+  projectType: projectTypeText,
   projectLocation: mediumText.refine((value) => value.length > 0, "Project location is required"),
-  preferredService: shortText.refine((value) => value.length > 0, "Preferred service is required"),
+  preferredService: preferredServiceText,
   approximateArea: optionalShortText,
   preferredDate: shortText.refine((value) => value.length > 0, "Preferred date is required"),
   preferredTime: shortText.refine((value) => value.length > 0, "Preferred time is required"),
-  budgetRange: optionalShortText,
+  budgetRange: budgetRangeText,
   projectDetails: longText.refine((value) => value.length > 0, "Project details are required"),
-  privacyConsent: shortText.refine((value) => value === "accepted", "Privacy consent is required"),
-  leadSource: optionalShortText,
+  privacyConsent: z.literal("accepted"),
+  leadSource: z.literal("Website"),
+  companyWebsite: honeypotText,
 });
 
 export const findBookingPayloadSchema = z.object({
