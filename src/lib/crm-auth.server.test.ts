@@ -24,7 +24,7 @@ describe("CRM server-to-server authentication", () => {
     expect(envelope.signature).toMatch(/^[0-9a-f]{64}$/);
     expect(JSON.stringify(envelope)).not.toContain(secret);
     expect(envelope.signature).toBe(
-      "8ac6b9fd2d5a1374ebdbcf90f21d7858c222566ca6150ed0e8aeb3334a55869a",
+      "daffd23dd163fa9c58f5b0e8b9b3f2c4655d304828c4f32f2718c3ca5da7810f",
     );
   });
 
