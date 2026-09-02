@@ -237,7 +237,6 @@ jobs:
           if old_date not in source:
               raise SystemExit('Expected booking date validation target not found')
           source = source.replace(old_date, new_date, 1)
-
           apps_path.write_text(source, encoding='utf-8')
 
           consultation_path = Path('src/routes/consultation.tsx')
@@ -281,5 +280,6 @@ jobs:
             exit 0
           fi
           git commit -m "feat: complete V6.3 booking hardening"
-          git pull --rebase origin feature/booking-email-staging-recovered-2
+          git reset --hard HEAD
+          git clean -fd
           git push origin HEAD:feature/booking-email-staging-recovered-2
