@@ -1,0 +1,45 @@
+name: Upgrade V6.3 Netlify Adapter
+
+on:
+  push:
+    branches:
+      - feature/booking-email-staging-recovered-2
+    paths:
+      - .github/workflows/upgrade-netlify-adapter-v63.yml
+
+permissions:
+  contents: write
+
+jobs:
+  upgrade:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/booking-email-staging-recovered-2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Upgrade only the Netlify TanStack adapter
+        run: npm install --save-dev @netlify/vite-plugin-tanstack-start@1.3.19 --ignore-scripts --no-audit --no-fund
+      - name: Require complete dependency audit clean
+        run: npm audit --audit-level=moderate
+      - name: Unit tests
+        run: npm test
+      - name: Production build
+        run: npm run build
+      - name: Commit verified adapter upgrade
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add package.json package-lock.json
+          if git diff --cached --quiet; then
+            echo "No dependency changes required."
+            exit 0
+          fi
+          git commit -m "chore: upgrade Netlify adapter security patch"
+          git pull --rebase origin feature/booking-email-staging-recovered-2
+          git push origin HEAD:feature/booking-email-staging-recovered-2
