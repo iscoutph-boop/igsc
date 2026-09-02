@@ -173,6 +173,7 @@ export function ConsultationForm({ onSuccess }: { onSuccess: (reference: string)
   const [preferredDate, setPreferredDate] = useState<Date | undefined>();
   const [preferredTime, setPreferredTime] = useState("");
   const submissionIdRef = useRef<string | null>(null);
+  const formOpenedAtRef = useRef(Date.now());
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -199,6 +200,7 @@ export function ConsultationForm({ onSuccess }: { onSuccess: (reference: string)
       privacyConsent: formData.get("privacyConsent") === "accepted" ? "accepted" : "",
       leadSource: "Website",
       companyWebsite: honeypot,
+      formElapsedMs: Date.now() - formOpenedAtRef.current,
     };
 
     if (!payload.preferredDate || !payload.preferredTime) {

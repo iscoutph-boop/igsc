@@ -16,7 +16,7 @@ const CONFIG = {
   BOOKINGS_SHEET: 'Bookings',
   APPOINTMENTS_SHEET: 'Appointments',
   CALENDAR_NAME: 'IGS Website Appointments',
-  CALENDAR_ID: '9a8c649815522b6ac9366068aa0a8e3b930046d1d5e6483a0db709f509156ca5@group.calendar.google.com',
+  CALENDAR_ID: 'cbaff5b7abd586ce7e993fbd1809c7f99eda329da29d053af41192291f6f0bb2@group.calendar.google.com',
   ADMIN_EMAIL: 'caballerodigitals@gmail.com',
   CUSTOMER_EMAIL_NOTIFICATIONS_ENABLED: false,
   TIMEZONE: 'Asia/Manila',
@@ -365,10 +365,7 @@ function findBookingV6_(payload) {
   const reference = normalizeBookingReferenceV6_(payload.bookingReference);
   const contact = cleanTextV6_(payload.contact);
   if (!reference || !contact) throw new Error('Booking reference and contact are required.');
-  const record = findBookingRecordV6_(reference);
-  if (!record || !contactMatchesV6_(record.booking, contact)) {
-    throw new Error('Booking not found. Please check your booking reference and contact detail.');
-  }
+  const record = authorizeBookingContactV63_(reference, contact);
   return { booking: record.booking };
 }
 
@@ -379,10 +376,7 @@ function rescheduleBookingV6_(payload) {
 
   const newDate = parseBookingDateV6_(payload.newPreferredDate).normalized;
   const newTimeInfo = parseBookingTimeV6_(payload.newPreferredTime);
-  const record = findBookingRecordV6_(reference);
-  if (!record || !contactMatchesV6_(record.booking, contact)) {
-    throw new Error('Booking not found. Please check your booking reference and contact detail.');
-  }
+  const record = authorizeBookingContactV63_(reference, contact);
   if (String(record.booking.bookingStatus || '').toLowerCase().indexOf('cancel') !== -1) {
     throw new Error('Cancelled bookings cannot be rescheduled.');
   }
@@ -472,10 +466,7 @@ function cancelBookingV6_(payload) {
   const contact = cleanTextV6_(payload.contact);
   if (!reference || !contact) throw new Error('Booking reference and contact are required.');
 
-  const record = findBookingRecordV6_(reference);
-  if (!record || !contactMatchesV6_(record.booking, contact)) {
-    throw new Error('Booking not found. Please check your booking reference and contact detail.');
-  }
+  const record = authorizeBookingContactV63_(reference, contact);
 
   // Idempotent customer behavior: an already-cancelled booking stays cancelled without duplicate work.
   if (String(record.booking.bookingStatus || '').toLowerCase().indexOf('cancel') !== -1) {
@@ -821,16 +812,13 @@ function bookingObjectFromRowV6_(row) {
 
 function nextBookingReferenceV6_(sheet, now) {
   const year = Utilities.formatDate(now || new Date(), CONFIG.TIMEZONE, 'yyyy');
-  const lastRow = sheet.getLastRow();
-  let max = 0;
-  if (lastRow > CONFIG.BOOKINGS_HEADER_ROW) {
-    const values = sheet.getRange(CONFIG.BOOKINGS_HEADER_ROW + 1, 1, lastRow - CONFIG.BOOKINGS_HEADER_ROW, 1).getDisplayValues();
-    values.forEach(function (row) {
-      const match = new RegExp('^IGS-' + year + '-(\\d{4})$', 'i').exec(cleanTextV6_(row[0]));
-      if (match) max = Math.max(max, Number(match[1]));
-    });
+  for (let attempt = 0; attempt < 5; attempt += 1) {
+    const uuid = cleanTextV6_(Utilities.getUuid()).replace(/-/g, '').toUpperCase();
+    if (!/^[0-9A-F]{32}$/.test(uuid)) continue;
+    const reference = 'IGS-' + year + '-' + uuid;
+    if (!findRowByReferenceV6_(sheet, CONFIG.BOOKINGS_HEADER_ROW, reference)) return reference;
   }
-  return 'IGS-' + year + '-' + String(max + 1).padStart(4, '0');
+  throw new Error('Unable to generate a booking reference. Please try again.');
 }
 
 function contactMatchesV6_(booking, contact) {
@@ -896,6 +884,9 @@ function parseBookingTimeV6_(value) {
     if (period === 'AM' && hour === 12) hour = 0;
   }
   if (hour < 0 || hour > 23 || minute < 0 || minute > 59) throw new Error('Invalid booking time: ' + text);
+  if (hour < 8 || hour > 17 || (minute !== 0 && minute !== 30) || (hour === 17 && minute !== 0)) {
+    throw new Error('Invalid booking time: ' + text);
+  }
   const normalized24 = pad2V6_(hour) + ':' + pad2V6_(minute);
   const display = (hour % 12 || 12) + ':' + pad2V6_(minute) + ' ' + (hour >= 12 ? 'PM' : 'AM');
   return { hour24: hour, minute: minute, normalized24: normalized24, display: display };
@@ -909,6 +900,14 @@ function parseBookingDateV6_(value) {
   const month = Number(match[2]);
   const day = Number(match[3]);
   if (month < 1 || month > 12 || day < 1 || day > 31) throw new Error('Invalid booking date: ' + text);
+  const candidate = new Date(Date.UTC(year, month - 1, day));
+  if (
+    candidate.getUTCFullYear() !== year ||
+    candidate.getUTCMonth() !== month - 1 ||
+    candidate.getUTCDate() !== day
+  ) {
+    throw new Error('Invalid booking date: ' + text);
+  }
   return { year: year, month: month, day: day, normalized: match[1] + '-' + match[2] + '-' + match[3] };
 }
 
@@ -1558,8 +1557,78 @@ function normalizeDateOutputV6_(value) {
   return match ? match[1] : text;
 }
 
+const BOOKING_LOOKUP_SECURITY_V63_ = {
+  FAILED_LIMIT: 5,
+  TTL_SECONDS: 300,
+  CACHE_PREFIX: 'igs-lookup-v63-'
+};
+
 function normalizeBookingReferenceV6_(value) {
   return cleanTextV6_(value).toUpperCase();
+}
+
+function isValidBookingReferenceV63_(value) {
+  const reference = normalizeBookingReferenceV6_(value);
+  return /^IGS-\d{4}-(?:\d{4}|[0-9A-F]{32})$/.test(reference);
+}
+
+function bookingLookupCacheKeyV63_(reference) {
+  let hash = 5381;
+  const normalized = normalizeBookingReferenceV6_(reference);
+  for (let index = 0; index < normalized.length; index += 1) {
+    hash = ((hash * 33) ^ normalized.charCodeAt(index)) >>> 0;
+  }
+  return BOOKING_LOOKUP_SECURITY_V63_.CACHE_PREFIX + hash.toString(36);
+}
+
+function getFailedBookingLookupAttemptsV63_(reference) {
+  const cache = getAbuseCacheV63_();
+  if (!cache) return 0;
+  try {
+    const current = Number(cache.get(bookingLookupCacheKeyV63_(reference)) || 0);
+    return Number.isFinite(current) && current > 0 ? Math.floor(current) : 0;
+  } catch (_) {
+    return 0;
+  }
+}
+
+function enforceBookingLookupThrottleV63_(reference) {
+  if (getFailedBookingLookupAttemptsV63_(reference) >= BOOKING_LOOKUP_SECURITY_V63_.FAILED_LIMIT) {
+    throw new Error('Too many booking lookup attempts. Please wait a few minutes and try again.');
+  }
+}
+
+function recordFailedBookingLookupV63_(reference) {
+  const cache = getAbuseCacheV63_();
+  if (!cache) return;
+  try {
+    const count = getFailedBookingLookupAttemptsV63_(reference) + 1;
+    cache.put(
+      bookingLookupCacheKeyV63_(reference),
+      String(count),
+      BOOKING_LOOKUP_SECURITY_V63_.TTL_SECONDS
+    );
+  } catch (_) {}
+}
+
+function clearFailedBookingLookupV63_(reference) {
+  const cache = getAbuseCacheV63_();
+  if (!cache || typeof cache.remove !== 'function') return;
+  try { cache.remove(bookingLookupCacheKeyV63_(reference)); } catch (_) {}
+}
+
+function authorizeBookingContactV63_(reference, contact) {
+  if (!isValidBookingReferenceV63_(reference)) {
+    throw new Error('Booking not found. Please check your booking reference and contact detail.');
+  }
+  enforceBookingLookupThrottleV63_(reference);
+  const record = findBookingRecordV6_(reference);
+  if (!record || !contactMatchesV6_(record.booking, contact)) {
+    recordFailedBookingLookupV63_(reference);
+    throw new Error('Booking not found. Please check your booking reference and contact detail.');
+  }
+  clearFailedBookingLookupV63_(reference);
+  return record;
 }
 
 function normalizePhoneV6_(value) {
