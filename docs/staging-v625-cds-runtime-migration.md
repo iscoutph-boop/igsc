@@ -6,9 +6,9 @@ This staging-only record documents the Google-side runtime migration completed a
 
 ## CDS Apps Script Web App
 
-A new staging Web App deployment was created under `caballerodigitals@gmail.com`. The exact `/exec` endpoint is intentionally not committed to the repository; it is stored only in the Netlify Deploy Preview secret environment.
+A new staging Web App deployment was created under `caballerodigitals@gmail.com`. The exact `/exec` endpoint is intentionally not committed in release documentation; it is stored in the Netlify Deploy Preview secret environment.
 
-The Apps Script source reports version `6.2.5-production-readiness-r2`.
+The Apps Script health response reports version `6.2.5-production-readiness-r2`.
 
 ## CDS-owned booking calendar
 
@@ -26,13 +26,50 @@ The prior `cbaff5...@group.calendar.google.com` Calendar must be retained until 
 
 ## Netlify boundary
 
-The Apps Script endpoint was updated only in the `deploy-preview` context. Production remains untouched until the fresh lifecycle, Gmail, Call Client, cleanup, and smoke gates pass.
+The Apps Script endpoint was updated only in the `deploy-preview` context. Production remains untouched until the remaining live staging gates, cleanup, and smoke gates pass.
 
 ## Release integrity
 
 Repository source synchronization completed in `d75811c38a52dcb4dedb54ef065ca882a59b86aa`:
-- Apps Script `CONFIG.CALENDAR_ID` now pins the CDS-owned Calendar ID.
+- Apps Script `CONFIG.CALENDAR_ID` pins the CDS-owned Calendar ID.
 - Calendar identity tests expect the same CDS-owned Calendar ID.
 - name-only Calendar lookup remains forbidden.
 
-A fresh verification run must pass on the post-sync staging head before any production promotion.
+Post-sync Staging Final Verification run `33582866433` completed successfully.
+
+## Fresh staging lifecycle QA
+
+Staging Live Lifecycle QA run `33582901903` completed successfully against the CDS Web App.
+
+Controlled QA identity:
+- booking reference: `IGS-2026-0010`
+- submission ID: `aedf68d0-81a4-47bc-b0a9-64979327c60c`
+- test customer email used the `.invalid` domain
+
+Verified lifecycle:
+1. health: PASS — version `6.2.5-production-readiness-r2`
+2. create: PASS — status `New`, zero warnings
+3. duplicate create with identical submission ID: PASS — same booking reference, `duplicatePrevented=true`, zero warnings
+4. find new: PASS
+5. reschedule: PASS — status `Rescheduled`, zero warnings
+6. find rescheduled: PASS
+7. cancel: PASS — status `Cancelled`, zero warnings
+8. find cancelled: PASS
+
+Independent side-effect checks:
+- exactly one Bookings row for `IGS-2026-0010`, row 18, final status `Cancelled`
+- exactly one Appointments row for `IGS-2026-0010`, row 18, final status `Cancelled`
+- exactly three internal lifecycle emails: New, Rescheduled, Cancelled
+- all three were sent from and to `caballerodigitals@gmail.com`
+- exactly one New/create admin email; duplicate create generated no duplicate admin notification
+- zero lifecycle emails sent to the `.invalid` customer address
+- admin messages have no attachments
+- `OPEN CRM RECORD` uses the HTTPS Apps Script CRM bridge
+- `CALL CLIENT` uses the HTTPS CRM-bound Apps Script bridge with booking reference + CRM row; Gmail no longer uses a direct `tel:` CTA
+- `REPLY TO CLIENT` remains a customer mailto action
+- `Powered by CDS` remains present
+
+Remaining release gates before production promotion:
+- independently verify no `IGS-2026-0010` Calendar orphan remains on the CDS-owned Calendar after cancellation
+- physical mobile Gmail `CALL CLIENT` → native dialer verification
+- remove temporary verification workflow(s), obtain a final clean Deploy Preview with zero secret matches, then re-check PR/main boundaries
