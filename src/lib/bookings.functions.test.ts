@@ -1,6 +1,7 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
 import {
   CRM_UPSTREAM_TIMEOUT_MS,
+  buildCRMRequestBody,
   cancelBookingPayloadSchema,
   createBookingPayloadSchema,
   fetchCRMUpstream,
@@ -182,6 +183,29 @@ describe("booking payload schemas", () => {
       newPreferredDate: "2026-09-05",
       newPreferredTime: "15:00",
     });
+  });
+});
+
+describe("CRM upstream authentication", () => {
+  it("wraps the validated action and payload in a signed envelope", () => {
+    const body = buildCRMRequestBody(
+      "findBooking",
+      { bookingReference: "IGS-2026-0018", contact: "qa@example.com" },
+      "staging-test-secret-0123456789abcdef",
+      1_788_336_000,
+      "7c7f0a90-ec47-4a0d-9f51-a4939d71ea0d",
+    );
+    const envelope = JSON.parse(body) as { request: string; signature: string };
+    const request = JSON.parse(envelope.request) as Record<string, unknown>;
+
+    expect(request).toMatchObject({
+      version: 1,
+      timestamp: 1_788_336_000,
+      nonce: "7c7f0a90-ec47-4a0d-9f51-a4939d71ea0d",
+      action: "findBooking",
+      payload: { bookingReference: "IGS-2026-0018", contact: "qa@example.com" },
+    });
+    expect(envelope.signature).toMatch(/^[0-9a-f]{64}$/);
   });
 });
 
