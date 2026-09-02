@@ -9,7 +9,7 @@ const SOURCE_PATH = path.resolve(
 );
 const SOURCE_TEXT = fs.readFileSync(SOURCE_PATH, "utf8");
 const EXPECTED_CALENDAR_ID =
-  "cbaff5b7abd586ce7e993fbd1809c7f99eda329da29d053af41192291f6f0bb2@group.calendar.google.com";
+  "9a8c649815522b6ac9366068aa0a8e3b930046d1d5e6483a0db709f509156ca5@group.calendar.google.com";
 
 type ScriptContext = Record<string, any>;
 
