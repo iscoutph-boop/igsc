@@ -52,7 +52,8 @@ jobs:
           grep -Fq "openClientCallBridgeV625_" "$OUT"
           grep -Fq '>CALL CLIENT</a>' "$OUT"
           grep -Fq "CUSTOMER_EMAIL_NOTIFICATIONS_ENABLED: false" "$OUT"
-          node --check "$OUT"
+          cp "$OUT" /tmp/igs-v63-cds-calendar.js
+          node --check /tmp/igs-v63-cds-calendar.js
           python - <<'PY'
           from pathlib import Path
           import difflib
