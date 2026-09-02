@@ -5,6 +5,7 @@ import { describe, expect, it } from "vitest";
 const root = process.cwd();
 const startSource = fs.readFileSync(path.join(root, "src/start.ts"), "utf8");
 const netlifyConfig = fs.readFileSync(path.join(root, "netlify.toml"), "utf8");
+const envExample = fs.readFileSync(path.join(root, ".env.example"), "utf8");
 
 describe("production security configuration", () => {
   it("installs same-origin CSRF protection for TanStack server functions", () => {
@@ -26,5 +27,12 @@ describe("production security configuration", () => {
     expect(netlifyConfig).toContain("base-uri 'self'");
     expect(netlifyConfig).toContain("object-src 'none'");
     expect(netlifyConfig).toContain("frame-ancestors 'self'");
+  });
+
+  it("documents the CRM signing secret as an empty server-only environment variable", () => {
+    expect(envExample).toMatch(/^CRM_SHARED_SECRET=$/m);
+    expect(envExample).toMatch(/CRM_SHARED_SECRET[\s\S]*(server-only|server only)/i);
+    expect(envExample).toMatch(/CRM_SHARED_SECRET[\s\S]*(Script Property|Script Properties)/i);
+    expect(envExample).not.toMatch(/^CRM_SHARED_SECRET=.+$/m);
   });
 });
