@@ -1,6 +1,31 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+const PROJECT_TYPES = [
+  "Residential",
+  "Commercial",
+  "Renovation",
+  "Multi-unit / Apartment",
+  "Other",
+] as const;
+
+const PREFERRED_SERVICES = [
+  "General Contracting",
+  "Design-Build Services",
+  "Construction Management",
+  "Renovation and Remodeling",
+  "Project Consultation",
+] as const;
+
+const BUDGET_RANGES = [
+  "",
+  "Below PHP 1,000,000",
+  "PHP 1,000,000 - PHP 3,000,000",
+  "PHP 3,000,000 - PHP 5,000,000",
+  "PHP 5,000,000 - PHP 10,000,000",
+  "Above PHP 10,000,000",
+] as const;
+
 function sanitizeText(value: unknown): string {
   if (typeof value !== "string") return "";
   let sanitized = value.trim();
@@ -22,46 +47,87 @@ function sanitizePhone(value: unknown): string {
   return sanitized;
 }
 
+function isValidPhone(value: string): boolean {
+  if (!/^[+()0-9\s.-]+$/.test(value)) return false;
+  const digits = value.replace(/\D/g, "");
+  return digits.length >= 7 && digits.length <= 15;
+}
+
 const shortText = z.string().max(200).transform(sanitizeText);
-const phoneText = z.string().max(50).transform(sanitizePhone);
+const phoneText = z
+  .string()
+  .max(50)
+  .transform(sanitizePhone)
+  .refine(isValidPhone, "Invalid phone number");
+const emailText = z
+  .string()
+  .trim()
+  .max(254)
+  .refine(
+    (value) => value === "" || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value),
+    "Invalid email address",
+  );
 const mediumText = z.string().max(500).transform(sanitizeText);
 const longText = z.string().max(2500).transform(sanitizeText);
 const optionalShortText = shortText.optional().default("");
 const submissionIdText = z.string().trim().uuid("Invalid submission ID");
+const bookingReferenceText = z
+  .string()
+  .trim()
+  .max(32)
+  .regex(/^IGS-\d{4}-\d{4}$/i, "Invalid booking reference")
+  .transform((value) => value.toUpperCase());
+const contactText = z
+  .string()
+  .trim()
+  .max(254)
+  .refine(
+    (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value) || isValidPhone(value),
+    "Invalid booking contact",
+  );
+const dateText = z.string().trim().regex(/^\d{4}-\d{2}-\d{2}$/, "Invalid booking date");
+const timeText = z.string().trim().regex(/^\d{2}:\d{2}$/, "Invalid booking time");
+const honeypotText = z
+  .string()
+  .trim()
+  .max(0, "Spam submission rejected")
+  .optional()
+  .default("");
 
 export const createBookingPayloadSchema = z.object({
   submissionId: submissionIdText,
   fullName: shortText.refine((value) => value.length > 0, "Name is required"),
-  phoneNumber: phoneText.refine((value) => value.length > 0, "Phone number is required"),
-  emailAddress: optionalShortText,
-  projectType: shortText.refine((value) => value.length > 0, "Project type is required"),
+  phoneNumber: phoneText,
+  emailAddress: emailText.optional().default(""),
+  projectType: z.enum(PROJECT_TYPES),
   projectLocation: mediumText.refine((value) => value.length > 0, "Project location is required"),
-  preferredService: shortText.refine((value) => value.length > 0, "Preferred service is required"),
+  preferredService: z.enum(PREFERRED_SERVICES),
   approximateArea: optionalShortText,
-  preferredDate: shortText.refine((value) => value.length > 0, "Preferred date is required"),
-  preferredTime: shortText.refine((value) => value.length > 0, "Preferred time is required"),
-  budgetRange: optionalShortText,
+  preferredDate: dateText,
+  preferredTime: timeText,
+  budgetRange: z.enum(BUDGET_RANGES).optional().default(""),
   projectDetails: longText.refine((value) => value.length > 0, "Project details are required"),
-  privacyConsent: shortText.refine((value) => value === "accepted", "Privacy consent is required"),
-  leadSource: optionalShortText,
+  privacyConsent: z.literal("accepted", { errorMap: () => ({ message: "Privacy consent is required" }) }),
+  leadSource: z.literal("Website").optional().default("Website"),
+  companyWebsite: honeypotText,
 });
 
 export const findBookingPayloadSchema = z.object({
-  bookingReference: shortText,
-  contact: phoneText.optional().default(""),
+  bookingReference: bookingReferenceText,
+  contact: contactText,
 });
 
 export const rescheduleBookingPayloadSchema = z.object({
-  bookingReference: shortText,
-  contact: phoneText.optional().default(""),
-  newPreferredDate: optionalShortText,
-  newPreferredTime: optionalShortText,
+  bookingReference: bookingReferenceText,
+  contact: contactText,
+  newPreferredDate: dateText,
+  newPreferredTime: timeText,
   rescheduleNotes: longText.optional().default(""),
 });
 
 export const cancelBookingPayloadSchema = z.object({
-  bookingReference: shortText,
-  contact: phoneText.optional().default(""),
+  bookingReference: bookingReferenceText,
+  contact: contactText,
   cancellationReason: longText.optional().default(""),
 });
 
