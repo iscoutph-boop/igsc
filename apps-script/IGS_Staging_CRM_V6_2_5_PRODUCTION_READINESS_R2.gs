@@ -1052,33 +1052,69 @@ function openClientCallBridgeV625_(e) {
   }
 
   const tel = booking ? buildValidTelV625_(booking.phoneNumber) : '';
+  const safeReference = escapeHtmlSimpleV6_(reference || '');
+
   if (!tel) {
+    const referenceLine = safeReference
+      ? '<div style="margin-top:18px;padding-top:16px;border-top:1px solid #e7ebf0;font-size:12px;line-height:1.5;color:#7b8797;">Booking reference&nbsp;&nbsp;·&nbsp;&nbsp;<strong style="color:#34445a;">' + safeReference + '</strong></div>'
+      : '';
+
     return HtmlService.createHtmlOutput(
-      '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head>' +
-      '<body style="margin:0;font-family:Arial,Helvetica,sans-serif;background:#f4f6f9;color:#16263f">' +
-      '<div style="max-width:460px;margin:72px auto;padding:28px;background:#fff;border-radius:18px;box-shadow:0 12px 36px rgba(22,38,63,.12);text-align:center">' +
-      '<div style="font-size:12px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#ff4b18">IG Sabroso Internal</div>' +
-      '<h2 style="margin:12px 0 8px">Phone number unavailable</h2>' +
-      '<p style="margin:0;line-height:1.55;color:#687487">Open the latest appointment notification and confirm the client phone number.</p>' +
-      '</div></body></html>'
+      '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">' +
+      '<meta name="format-detection" content="telephone=no"></head>' +
+      '<body style="margin:0;min-height:100vh;background:#f3f6fa;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Arial,Helvetica,sans-serif;color:#16263f;">' +
+      '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px 16px calc(28px + env(safe-area-inset-bottom));box-sizing:border-box;">' +
+      '<main style="width:100%;max-width:430px;background:#ffffff;border:1px solid #e4e9ef;border-top:4px solid #ff4b18;border-radius:18px;box-shadow:0 18px 50px rgba(22,38,63,.10);overflow:hidden;">' +
+      '<header style="padding:22px 24px 18px;border-bottom:1px solid #edf0f4;">' +
+      '<div style="font-size:13px;font-weight:800;letter-spacing:.45px;color:#16263f;">IG SABROSO CONSTRUCTION</div>' +
+      '<div style="margin-top:4px;font-size:12px;color:#7b8797;">Internal client contact</div>' +
+      '</header>' +
+      '<section style="padding:26px 24px 24px;">' +
+      '<div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#a23b2a;">' +
+      '<span aria-hidden="true" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#d65a45;"></span>' +
+      'Verified CRM contact required</div>' +
+      '<h1 style="margin:16px 0 8px;font-size:27px;line-height:1.18;letter-spacing:-.4px;color:#16263f;">Phone number unavailable</h1>' +
+      '<p style="margin:0;font-size:14px;line-height:1.65;color:#667386;">For security, CALL CLIENT only opens when the booking reference and CRM row match a valid stored contact. Return to the latest IG Sabroso appointment notification and try again.</p>' +
+      referenceLine +
+      '<div style="margin-top:24px;padding-top:18px;border-top:1px solid #edf0f4;font-size:11px;color:#8a95a5;">Internal use only&nbsp;&nbsp;·&nbsp;&nbsp;Powered by CDS</div>' +
+      '</section></main></div></body></html>'
     ).setTitle('IG Sabroso Call Client');
   }
 
   const telHref = 'tel:' + tel;
   const safeTelHref = escapeHtmlSimpleV6_(telHref);
   const safePhone = escapeHtmlSimpleV6_(tel);
+  const safeName = escapeHtmlSimpleV6_(booking.fullName || 'Client');
   const jsTelHref = JSON.stringify(telHref);
+
   return HtmlService.createHtmlOutput(
-    '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1">' +
+    '<!doctype html><html><head><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">' +
     '<meta name="format-detection" content="telephone=no"></head>' +
-    '<body style="margin:0;font-family:Arial,Helvetica,sans-serif;background:#f4f6f9;color:#16263f">' +
-    '<div style="max-width:460px;margin:72px auto;padding:28px;background:#fff;border-radius:18px;box-shadow:0 12px 36px rgba(22,38,63,.12);text-align:center">' +
-    '<div style="font-size:12px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:#ff4b18">IG Sabroso Internal</div>' +
-    '<h2 style="margin:12px 0 8px">Opening phone dialer</h2>' +
-    '<p style="margin:0 0 20px;line-height:1.55;color:#687487">Calling <strong>' + safePhone + '</strong>. If the dialer does not open automatically, use the button below.</p>' +
-    '<a href="' + safeTelHref + '" style="display:block;background:#16263f;color:#fff;text-decoration:none;font-weight:800;padding:15px 18px;border-radius:10px">CALL CLIENT</a>' +
+    '<body style="margin:0;min-height:100vh;background:#f3f6fa;font-family:-apple-system,BlinkMacSystemFont,Segoe UI,Arial,Helvetica,sans-serif;color:#16263f;">' +
+    '<div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:28px 16px calc(28px + env(safe-area-inset-bottom));box-sizing:border-box;">' +
+    '<main style="width:100%;max-width:430px;background:#ffffff;border:1px solid #e4e9ef;border-top:4px solid #ff4b18;border-radius:18px;box-shadow:0 18px 50px rgba(22,38,63,.10);overflow:hidden;">' +
+    '<header style="padding:22px 24px 18px;border-bottom:1px solid #edf0f4;">' +
+    '<div style="font-size:13px;font-weight:800;letter-spacing:.45px;color:#16263f;">IG SABROSO CONSTRUCTION</div>' +
+    '<div style="margin-top:4px;font-size:12px;color:#7b8797;">Internal client contact</div>' +
+    '</header>' +
+    '<section style="padding:26px 24px 24px;">' +
+    '<div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;color:#2f6e52;">' +
+    '<span aria-hidden="true" style="display:inline-block;width:8px;height:8px;border-radius:50%;background:#3d8c68;"></span>' +
+    'Verified CRM contact</div>' +
+    '<h1 style="margin:16px 0 8px;font-size:30px;line-height:1.14;letter-spacing:-.6px;color:#16263f;">Call client</h1>' +
+    '<p style="margin:0;font-size:14px;line-height:1.65;color:#667386;">The number below was verified against the matching IG Sabroso CRM booking record.</p>' +
+    '<div style="margin-top:22px;padding:18px 18px 17px;background:#f7f9fc;border:1px solid #e5eaf0;border-radius:14px;">' +
+    '<div style="font-size:12px;font-weight:700;color:#657286;">Client</div>' +
+    '<div style="margin-top:5px;font-size:17px;font-weight:800;line-height:1.35;color:#16263f;word-break:break-word;">' + safeName + '</div>' +
+    '<div style="margin-top:14px;font-size:12px;font-weight:700;color:#657286;">Phone</div>' +
+    '<div style="margin-top:5px;font-size:22px;font-weight:800;letter-spacing:.2px;color:#16263f;word-break:break-word;">' + safePhone + '</div>' +
+    '<div style="margin-top:14px;padding-top:14px;border-top:1px solid #e3e8ee;font-size:11px;line-height:1.5;color:#7b8797;">Booking reference&nbsp;&nbsp;·&nbsp;&nbsp;<strong style="color:#34445a;">' + safeReference + '</strong></div>' +
     '</div>' +
-    '<script>try{window.location.replace(' + jsTelHref + ');}catch(e){window.location.href=' + jsTelHref + ';}</script>' +
+    '<a href="' + safeTelHref + '" aria-label="Call ' + safeName + ' at ' + safePhone + '" style="display:block;margin-top:20px;background:#16263f;color:#ffffff;text-decoration:none;text-align:center;font-size:13px;font-weight:800;letter-spacing:.45px;padding:16px 18px;border-radius:11px;box-shadow:0 8px 18px rgba(22,38,63,.14);">CALL CLIENT</a>' +
+    '<div style="margin-top:12px;text-align:center;font-size:12px;line-height:1.55;color:#7b8797;">Opens your device phone app. Your phone will ask for confirmation before the call is placed.</div>' +
+    '<div style="margin-top:24px;padding-top:18px;border-top:1px solid #edf0f4;font-size:11px;color:#8a95a5;">Internal use only&nbsp;&nbsp;·&nbsp;&nbsp;Powered by CDS</div>' +
+    '</section></main></div>' +
+    '<script>try{window.location.replace(' + jsTelHref + ');}catch(e){try{window.location.href=' + jsTelHref + ';}catch(_){}}</script>' +
     '</body></html>'
   ).setTitle('IG Sabroso Call Client');
 }
