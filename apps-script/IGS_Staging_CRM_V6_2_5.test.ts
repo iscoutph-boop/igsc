@@ -101,6 +101,7 @@ function bookingHarness() {
   let appointmentExists = false;
   let calendarExists = false;
   let adminCreateNotificationExists = false;
+  let customerCreateNotificationExists = false;
 
   context.LockService = {
     getScriptLock: () => ({ waitLock: vi.fn(), releaseLock: vi.fn() }),
@@ -125,12 +126,16 @@ function bookingHarness() {
   adminSend.mockImplementation(() => {
     adminCreateNotificationExists = true;
   });
+  customerSend.mockImplementation(() => {
+    customerCreateNotificationExists = true;
+  });
   context.appendAppointmentRowV6_ = appointmentWrite;
   context.getCalendarV6_ = () => ({});
   context.createBookingCalendarEventV6_ = calendarWrite;
   context.hasAppointmentRowV625_ = () => appointmentExists;
   context.hasBookingCalendarEventV625_ = () => calendarExists;
   context.hasSentAdminCreateNotificationV625_ = () => adminCreateNotificationExists;
+  context.hasSentCustomerCreateNotificationV625_ = () => customerCreateNotificationExists;
   context.sendCustomerBookingConfirmationV6_ = customerSend;
   context.sendAdminLifecycleNotificationV62_ = adminSend;
   context.updateBookingFieldsV6_ = (row: number, fields: Record<string, string>) => {
@@ -163,7 +168,6 @@ describe("Apps Script V6.2.5 production-readiness behavior", () => {
   it("locks the R2 release identity and notification policy without disabling Calendar sync", () => {
     expect(SOURCE_TEXT).toContain("version: '6.2.5-production-readiness-r2'");
     expect(SOURCE_TEXT).toContain("ADMIN_EMAIL: 'caballerodigitals@gmail.com'");
-    expect(SOURCE_TEXT).toContain("CUSTOMER_EMAIL_NOTIFICATIONS_ENABLED: false");
     expect(SOURCE_TEXT).not.toContain("vencemichael06@gmail.com");
     expect(SOURCE_TEXT).toContain("CALENDAR_NAME: 'IGS Website Appointments'");
     expect(SOURCE_TEXT).toContain("function createBookingCalendarEventV6_");
@@ -172,7 +176,8 @@ describe("Apps Script V6.2.5 production-readiness behavior", () => {
   });
 
   it("returns the original booking without repeating create side effects", () => {
-    const { context, rows, adminSend, appointmentWrite, calendarWrite } = bookingHarness();
+    const { context, rows, adminSend, customerSend, appointmentWrite, calendarWrite } =
+      bookingHarness();
 
     const first = context.createBookingV6_(createPayload);
     const retry = context.createBookingV6_(createPayload);
@@ -182,15 +187,16 @@ describe("Apps Script V6.2.5 production-readiness behavior", () => {
     expect(rows).toHaveLength(1);
     expect(appointmentWrite).toHaveBeenCalledTimes(1);
     expect(calendarWrite).toHaveBeenCalledTimes(1);
+    expect(customerSend).toHaveBeenCalledTimes(1);
     expect(adminSend).toHaveBeenCalledTimes(1);
   });
 
-  it("keeps customer create mail disabled while admin mail remains active", () => {
+  it("sends one customer confirmation while admin mail remains active", () => {
     const { context, adminSend, customerSend } = bookingHarness();
 
     context.createBookingV6_(createPayload);
 
-    expect(customerSend).not.toHaveBeenCalled();
+    expect(customerSend).toHaveBeenCalledTimes(1);
     expect(adminSend).toHaveBeenCalledTimes(1);
   });
 
@@ -269,7 +275,7 @@ describe("Apps Script V6.2.5 production-readiness behavior", () => {
     expect(rows[0].notes).toContain("[Create completed: admin email]");
   });
 
-  it("keeps customer reschedule mail disabled while admin mail remains active", () => {
+  it("sends customer reschedule mail while admin mail remains active", () => {
     const context = loadScript();
     const customerSend = vi.fn();
     const adminSend = vi.fn();
@@ -311,11 +317,11 @@ describe("Apps Script V6.2.5 production-readiness behavior", () => {
       rescheduleNotes: "QA reschedule",
     });
 
-    expect(customerSend).not.toHaveBeenCalled();
+    expect(customerSend).toHaveBeenCalledTimes(1);
     expect(adminSend).toHaveBeenCalledTimes(1);
   });
 
-  it("keeps customer cancellation mail disabled while admin mail remains active", () => {
+  it("sends customer cancellation mail while admin mail remains active", () => {
     const context = loadScript();
     const customerSend = vi.fn();
     const adminSend = vi.fn();
@@ -348,8 +354,27 @@ describe("Apps Script V6.2.5 production-readiness behavior", () => {
       cancellationReason: "QA cancellation",
     });
 
-    expect(customerSend).not.toHaveBeenCalled();
+    expect(customerSend).toHaveBeenCalledTimes(1);
     expect(adminSend).toHaveBeenCalledTimes(1);
+  });
+
+  it("uses the production website in the customer booking email", () => {
+    const context = loadScript();
+    let sent: Record<string, string> | undefined;
+    context.formatBookingScheduleV6_ = () => "September 15, 2026 — 10:30 AM";
+    context.MailApp = {
+      sendEmail: (options: Record<string, string>) => {
+        sent = options;
+      },
+    };
+
+    context.sendCustomerBookingConfirmationV6_("IGS-2026-0042", createPayload);
+
+    expect(sent?.to).toBe("qa@example.com");
+    expect(sent?.htmlBody).toContain('href="https://igsabroso.com/consultation"');
+    expect(sent?.htmlBody).not.toContain(
+      "deploy-preview-4--darling-sunburst-da0a5d.netlify.app",
+    );
   });
 
   it("keeps legacy create requests available during the staging rollout", () => {

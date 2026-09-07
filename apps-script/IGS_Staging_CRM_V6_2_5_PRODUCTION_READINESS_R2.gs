@@ -18,9 +18,9 @@ const CONFIG = {
   CALENDAR_NAME: 'IGS Website Appointments',
   CALENDAR_ID: '9a8c649815522b6ac9366068aa0a8e3b930046d1d5e6483a0db709f509156ca5@group.calendar.google.com',
   ADMIN_EMAIL: 'caballerodigitals@gmail.com',
-  CUSTOMER_EMAIL_NOTIFICATIONS_ENABLED: false,
+  CUSTOMER_EMAIL_NOTIFICATIONS_ENABLED: true,
   TIMEZONE: 'Asia/Manila',
-  SOURCE_WEBSITE: 'https://deploy-preview-4--darling-sunburst-da0a5d.netlify.app',
+  SOURCE_WEBSITE: 'https://igsabroso.com',
   BOOKING_DURATION_MINUTES: 60,
   BOOKINGS_HEADER_ROW: 8,
   APPOINTMENTS_HEADER_ROW: 8,
@@ -706,10 +706,27 @@ function hasSentAdminCreateNotificationV625_(reference) {
   });
 }
 
+function hasSentCustomerCreateNotificationV625_(reference, emailAddress) {
+  const recipient = cleanTextV6_(emailAddress).toLowerCase();
+  if (!isEmailAddressV6_(recipient)) return false;
+  const subject = 'IG Sabroso Appointment Request Received — ' + reference;
+  const query = 'in:sent to:' + recipient +
+    ' subject:"IG Sabroso Appointment Request Received" "' + reference + '"';
+  const threads = GmailApp.search(query, 0, 20);
+  return threads.some(function (thread) {
+    return thread.getMessages().some(function (message) {
+      const messageRecipient = cleanTextV6_(message.getTo()).toLowerCase();
+      return messageRecipient.indexOf(recipient) !== -1 &&
+        cleanTextV6_(message.getSubject()) === subject;
+    });
+  });
+}
+
 function reconcileCreateSideEffectsV625_(bookingRow, bookingReference, calendarPayload, isRetry) {
   const warnings = [];
   const appointmentMarker = createSideEffectMarkerV625_('appointment');
   const calendarMarker = createSideEffectMarkerV625_('calendar');
+  const customerEmailMarker = createSideEffectMarkerV625_('customer email');
   const adminEmailMarker = createSideEffectMarkerV625_('admin email');
   let booking = readBookingByRowV6_(bookingRow);
 
@@ -737,9 +754,20 @@ function reconcileCreateSideEffectsV625_(bookingRow, bookingReference, calendarP
     }
   }
 
-  if (CONFIG.CUSTOMER_EMAIL_NOTIFICATIONS_ENABLED && isEmailAddressV6_(calendarPayload.emailAddress)) {
+  booking = readBookingByRowV6_(bookingRow);
+  if (
+    CONFIG.CUSTOMER_EMAIL_NOTIFICATIONS_ENABLED &&
+    isEmailAddressV6_(calendarPayload.emailAddress) &&
+    !hasBookingNoteMarkerV625_(booking, customerEmailMarker)
+  ) {
     try {
-      sendCustomerBookingConfirmationV6_(bookingReference, calendarPayload);
+      if (
+        !isRetry ||
+        !hasSentCustomerCreateNotificationV625_(bookingReference, calendarPayload.emailAddress)
+      ) {
+        sendCustomerBookingConfirmationV6_(bookingReference, calendarPayload);
+      }
+      markCreateSideEffectV625_(bookingRow, customerEmailMarker);
     } catch (error) {
       warnings.push('Customer email: ' + safeErrorV6_(error));
     }
