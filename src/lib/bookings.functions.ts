@@ -115,7 +115,10 @@ const bookingReferenceText = z
   .string()
   .trim()
   .max(48)
-  .regex(/^IGS-\d{4}-(?:\d{4}|[0-9A-F]{32})$/i, "Invalid booking reference")
+  .regex(
+    /^IGS-(?:[0-9A-HJKMNP-TV-Z]{6}|\d{4}-(?:\d{4}|[0-9A-F]{32}))$/i,
+    "Invalid booking reference",
+  )
   .transform((value) => value.toUpperCase());
 const contactText = z
   .string()

@@ -32,7 +32,7 @@ vi.mock("@/components/schedule-picker", () => ({
 }));
 
 const booking = {
-  bookingReference: "IGS-2026-0018",
+  bookingReference: "IGS-Y7Y2MG",
   fullName: "VMM QA",
   phoneNumber: "09171234567",
   emailAddress: "customer@example.com",
@@ -58,7 +58,7 @@ describe("CheckBookingModal immediate self-service", () => {
 
     render(<CheckBookingModal open onClose={() => {}} />);
 
-    await user.type(screen.getByPlaceholderText(/IGS-2026/i), booking.bookingReference);
+    await user.type(screen.getByPlaceholderText(/IGS-Y7Y2MG/i), booking.bookingReference);
     await user.type(screen.getByPlaceholderText(/email or phone/i), booking.emailAddress);
     await user.click(screen.getByRole("button", { name: /find my booking/i }));
 
@@ -87,7 +87,7 @@ describe("CheckBookingModal immediate self-service", () => {
 
     render(<CheckBookingModal open onClose={() => {}} />);
 
-    await user.type(screen.getByPlaceholderText(/IGS-2026/i), booking.bookingReference);
+    await user.type(screen.getByPlaceholderText(/IGS-Y7Y2MG/i), booking.bookingReference);
     await user.type(screen.getByPlaceholderText(/email or phone/i), booking.emailAddress);
     await user.click(screen.getByRole("button", { name: /find my booking/i }));
 
@@ -108,7 +108,7 @@ describe("CheckBookingModal immediate self-service", () => {
     });
 
     render(<CheckBookingModal open onClose={() => {}} />);
-    await user.type(screen.getByPlaceholderText(/IGS-2026/i), booking.bookingReference);
+    await user.type(screen.getByPlaceholderText(/IGS-Y7Y2MG/i), booking.bookingReference);
     await user.type(screen.getByPlaceholderText(/email or phone/i), booking.emailAddress);
     await user.click(screen.getByRole("button", { name: /find my booking/i }));
     await user.click(await screen.findByRole("button", { name: /^reschedule booking$/i }));
