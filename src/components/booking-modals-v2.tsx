@@ -299,7 +299,7 @@ export function CheckBookingModal({
                         <input
                           value={reference}
                           onChange={(event) => setReference(event.target.value)}
-                          placeholder="Example: IGS-2026-0142"
+                          placeholder="Example: IGS-Y7Y2MG"
                           autoComplete="off"
                           className="mt-2 h-12 w-full rounded-xl border border-[#d0d5dd] px-4 text-sm text-[#16263f] outline-none transition focus:border-[#ff4b18] focus:ring-2 focus:ring-[#ff4b18]/15"
                         />

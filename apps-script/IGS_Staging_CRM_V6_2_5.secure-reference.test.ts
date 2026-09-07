@@ -9,10 +9,17 @@ const SOURCE_PATH = path.resolve(
 );
 const SOURCE_TEXT = fs.readFileSync(SOURCE_PATH, "utf8");
 
-type ScriptContext = Record<string, any>;
+type ScriptContext = Record<string, unknown> & {
+  Utilities: {
+    formatDate: () => string;
+    getUuid: () => string | undefined;
+  };
+  nextBookingReferenceV6_: (sheet: unknown, now?: Date) => string;
+  isValidBookingReferenceV63_: (value: string) => boolean;
+};
 
 function loadScript(): ScriptContext {
-  const context: ScriptContext = {
+  const context = {
     console,
     Date,
     JSON,
@@ -24,7 +31,7 @@ function loadScript(): ScriptContext {
     Array,
     encodeURIComponent,
     decodeURIComponent,
-  };
+  } as unknown as ScriptContext;
   vm.createContext(context);
   vm.runInContext(SOURCE_TEXT, context);
   return context;
@@ -38,25 +45,56 @@ function emptySheet() {
   };
 }
 
+function sheetContaining(reference: string) {
+  return {
+    getLastRow: () => 9,
+    getLastColumn: () => 1,
+    getRange: (row: number) => ({
+      getDisplayValues: () => (row === 8 ? [["Booking Reference"]] : [[reference]]),
+    }),
+  };
+}
+
 describe("secure booking references", () => {
-  it("generates a high-entropy UUID-derived reference for new bookings", () => {
+  it("generates a branded 10-character reference for new bookings", () => {
     const context = loadScript();
     context.Utilities = {
       formatDate: () => "2026",
       getUuid: () => "7c7f0a90-ec47-4a0d-9f51-a4939d71ea0d",
     };
 
-    expect(context.nextBookingReferenceV6_(emptySheet(), new Date("2026-09-02T00:00:00Z"))).toBe(
-      "IGS-2026-7C7F0A90EC474A0D9F51A4939D71EA0D",
+    const reference = context.nextBookingReferenceV6_(
+      emptySheet(),
+      new Date("2026-09-02T00:00:00Z"),
     );
+
+    expect(reference).toBe("IGS-Y7Y2MG");
+    expect(reference).toHaveLength(10);
   });
 
-  it("keeps legacy sequential references valid while recognizing secure references", () => {
+  it("retries with a different short reference when the first token already exists", () => {
     const context = loadScript();
-    expect(context.isValidBookingReferenceV63_("IGS-2026-0042")).toBe(true);
+    const uuids = ["7c7f0a90-ec47-4a0d-9f51-a4939d71ea0d", "12345678-1234-4abc-8def-1234567890ab"];
+    context.Utilities = {
+      formatDate: () => "2026",
+      getUuid: () => uuids.shift(),
+    };
+
     expect(
-      context.isValidBookingReferenceV63_("IGS-2026-7C7F0A90EC474A0D9F51A4939D71EA0D"),
-    ).toBe(true);
+      context.nextBookingReferenceV6_(
+        sheetContaining("IGS-Y7Y2MG"),
+        new Date("2026-09-02T00:00:00Z"),
+      ),
+    ).toBe("IGS-938NKR");
+  });
+
+  it("accepts short references while keeping both legacy formats valid", () => {
+    const context = loadScript();
+    expect(context.isValidBookingReferenceV63_("IGS-Y7Y2MG")).toBe(true);
+    expect(context.isValidBookingReferenceV63_("IGS-2026-0042")).toBe(true);
+    expect(context.isValidBookingReferenceV63_("IGS-2026-7C7F0A90EC474A0D9F51A4939D71EA0D")).toBe(
+      true,
+    );
     expect(context.isValidBookingReferenceV63_("IGS-2026-guessable")).toBe(false);
   });
 });

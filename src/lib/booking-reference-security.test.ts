@@ -7,10 +7,11 @@ import {
 
 const LEGACY_REFERENCE = "IGS-2026-0042";
 const SECURE_REFERENCE = "IGS-2026-7C7F0A90EC474A0D9F51A4939D71EA0D";
+const SHORT_REFERENCE = "IGS-Y7Y2MG";
 
 describe("booking reference compatibility", () => {
-  it("accepts both legacy and high-entropy references for lookup", () => {
-    for (const bookingReference of [LEGACY_REFERENCE, SECURE_REFERENCE]) {
+  it("accepts short, legacy, and high-entropy references for lookup", () => {
+    for (const bookingReference of [SHORT_REFERENCE, LEGACY_REFERENCE, SECURE_REFERENCE]) {
       expect(
         findBookingPayloadSchema.parse({
           bookingReference,
@@ -20,24 +21,26 @@ describe("booking reference compatibility", () => {
     }
   });
 
-  it("accepts secure references for reschedule and cancellation", () => {
-    expect(
-      rescheduleBookingPayloadSchema.parse({
-        bookingReference: SECURE_REFERENCE,
-        contact: "owner@example.com",
-        newPreferredDate: "2026-09-05",
-        newPreferredTime: "15:00",
-        rescheduleNotes: "",
-      }).bookingReference,
-    ).toBe(SECURE_REFERENCE);
+  it("accepts short and secure references for reschedule and cancellation", () => {
+    for (const bookingReference of [SHORT_REFERENCE, SECURE_REFERENCE]) {
+      expect(
+        rescheduleBookingPayloadSchema.parse({
+          bookingReference,
+          contact: "owner@example.com",
+          newPreferredDate: "2026-09-05",
+          newPreferredTime: "15:00",
+          rescheduleNotes: "",
+        }).bookingReference,
+      ).toBe(bookingReference);
 
-    expect(
-      cancelBookingPayloadSchema.parse({
-        bookingReference: SECURE_REFERENCE,
-        contact: "owner@example.com",
-        cancellationReason: "",
-      }).bookingReference,
-    ).toBe(SECURE_REFERENCE);
+      expect(
+        cancelBookingPayloadSchema.parse({
+          bookingReference,
+          contact: "owner@example.com",
+          cancellationReason: "",
+        }).bookingReference,
+      ).toBe(bookingReference);
+    }
   });
 
   it("rejects malformed reference shapes", () => {

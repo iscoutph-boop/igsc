@@ -838,12 +838,25 @@ function bookingObjectFromRowV6_(row) {
   };
 }
 
+const BOOKING_REFERENCE_ALPHABET_V64_ = '0123456789ABCDEFGHJKMNPQRSTVWXYZ';
+
+function shortBookingTokenFromUuidV64_(uuid) {
+  const hex = cleanTextV6_(uuid).replace(/-/g, '').toUpperCase();
+  if (!/^[0-9A-F]{32}$/.test(hex)) return '';
+  let value = parseInt(hex.slice(0, 8), 16) % Math.pow(32, 6);
+  let token = '';
+  for (let index = 0; index < 6; index += 1) {
+    token = BOOKING_REFERENCE_ALPHABET_V64_.charAt(value % 32) + token;
+    value = Math.floor(value / 32);
+  }
+  return token;
+}
+
 function nextBookingReferenceV6_(sheet, now) {
-  const year = Utilities.formatDate(now || new Date(), CONFIG.TIMEZONE, 'yyyy');
   for (let attempt = 0; attempt < 5; attempt += 1) {
-    const uuid = cleanTextV6_(Utilities.getUuid()).replace(/-/g, '').toUpperCase();
-    if (!/^[0-9A-F]{32}$/.test(uuid)) continue;
-    const reference = 'IGS-' + year + '-' + uuid;
+    const token = shortBookingTokenFromUuidV64_(Utilities.getUuid());
+    if (!token) continue;
+    const reference = 'IGS-' + token;
     if (!findRowByReferenceV6_(sheet, CONFIG.BOOKINGS_HEADER_ROW, reference)) return reference;
   }
   throw new Error('Unable to generate a booking reference. Please try again.');
@@ -1597,7 +1610,7 @@ function normalizeBookingReferenceV6_(value) {
 
 function isValidBookingReferenceV63_(value) {
   const reference = normalizeBookingReferenceV6_(value);
-  return /^IGS-\d{4}-(?:\d{4}|[0-9A-F]{32})$/.test(reference);
+  return /^IGS-(?:[0-9A-HJKMNP-TV-Z]{6}|\d{4}-(?:\d{4}|[0-9A-F]{32}))$/.test(reference);
 }
 
 function bookingLookupCacheKeyV63_(reference) {
