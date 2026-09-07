@@ -5,9 +5,39 @@
 - [ ] `npm.cmd run lint`
 - [ ] `npm.cmd test`
 - [ ] `npm.cmd run build`
+- [ ] `npm audit --omit=dev --audit-level=high` reports zero production vulnerabilities
 - [ ] No browser console errors
 - [ ] No missing-image requests
 - [ ] No exposed server environment values
+
+## Security hardening V6.3
+
+- [ ] `CRM_SHARED_SECRET` exists only in the Netlify Deploy Preview server/runtime context during staging
+- [ ] `CRM_SHARED_SECRET` is configured as the matching Google Apps Script Script Property
+- [ ] Secret value is at least 32 random bytes and is never committed, logged, displayed, or exposed in client bundles
+- [ ] Rotate the Netlify value and Apps Script Script Property together when rotation is required
+- [ ] Direct legacy/unsigned Apps Script POST is rejected with a generic failure and creates no CRM, Calendar, or Gmail side effect
+- [ ] Invalid HMAC signature is rejected before action dispatch
+- [ ] Signed request older/newer than the allowed clock window is rejected
+- [ ] Reusing an accepted nonce is rejected during the replay-cache window
+- [ ] Valid signed Deploy Preview request reaches the Apps Script lifecycle successfully
+- [ ] Formula-triggering Sheet inputs beginning with `=`, `+`, `-`, or `@`, including leading-whitespace variants, are stored as literal inert text
+- [ ] Normal CRM values remain unchanged after final-boundary Sheet sanitization
+- [ ] Server-function rate limiting returns a safe throttling response when deliberately exceeded with a small controlled test
+- [ ] CSRF/origin checks reject inappropriate cross-site server-function requests
+- [ ] Honeypot and spam screening reject controlled bot/solicitation fixtures without affecting legitimate inquiries
+- [ ] Security headers are verified from the actual Deploy Preview response, not only from `netlify.toml`
+- [ ] Secret scan of source and final deployed client assets reports no credential exposure
+
+### Staging secret setup / rotation procedure
+
+1. Generate a cryptographically random value of at least 32 bytes. Do not paste it into source code or documentation.
+2. Store it in Netlify as secret environment variable `CRM_SHARED_SECRET`, scoped to Deploy Preview server runtime/functions only while staging.
+3. Store the identical value in the existing CDS Apps Script project under **Project Settings → Script Properties → `CRM_SHARED_SECRET`**.
+4. Redeploy the existing staging Web App while preserving the approved `/exec` URL.
+5. Run the negative unsigned/invalid-signature/stale/replay checks before any positive lifecycle test.
+6. Run Create → duplicate Create → Find → Reschedule → Find → Cancel → Find through the Deploy Preview and verify CRM, Calendar, and Gmail side effects.
+7. If rotating, replace both sides in one controlled maintenance window; a mismatched value intentionally fails closed.
 
 ## Core navigation
 

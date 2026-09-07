@@ -147,7 +147,7 @@ const lResidenceCover = image(
   "Completed Projects / L Residence",
 );
 const townhouseProjectCover = image(
-  "/assets/projects/townhouse-project/thumbnail.png",
+  "/assets/projects/townhouse-project/thumbnail.webp",
   "Townhouse Project exterior photograph",
   "Projects.zip / Townhouse Project / Thumbnail.png",
 );
