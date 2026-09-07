@@ -1899,46 +1899,18 @@ function fieldHtmlV4_(label, escapedValue, addGap) {
 }
 
 function buildClientActionV4_(emailAddress, phoneNumber, bookingReference, mobileCallUrl) {
-  const actions = [];
-  const plainText = [];
   if (isEmailAddressV4_(emailAddress)) {
     const href = 'mailto:' + encodeURIComponent(emailAddress) +
       '?subject=' + encodeURIComponent('Re: IG Sabroso consultation request ' + bookingReference);
-    plainText.push('Reply to client: ' + emailAddress);
-    actions.push(
-      '<a class="button" href="' + href + '" style="display:block;box-sizing:border-box;width:100%;background:#ff4b18;color:#fff;text-align:center;text-decoration:none;font-size:13px;line-height:1;font-weight:800;letter-spacing:.3px;padding:16px 18px;border-radius:11px;">REPLY TO CLIENT</a>'
-    );
-  }
-
-  const phone = cleanEmailValue_(phoneNumber);
-  const tel = buildValidTelV625_(phone);
-  if (tel) {
-    const safeMobileCallUrl = cleanEmailValue_(mobileCallUrl);
-    const callHref = /^https:\/\//i.test(safeMobileCallUrl)
-      ? escapeHtmlV4_(safeMobileCallUrl)
-      : 'tel:' + escapeHtmlV4_(tel);
-    plainText.push('Call client: ' + phone);
-    actions.push(
-      '<a class="button" href="' + callHref + '" style="display:block;box-sizing:border-box;width:100%;background:#16263f;color:#fff;text-align:center;text-decoration:none;font-size:13px;line-height:1;font-weight:800;letter-spacing:.3px;padding:16px 18px;border-radius:11px;">CALL CLIENT</a>'
-    );
-  }
-
-  if (actions.length === 2) {
     return {
-      plainText: plainText.join('\n'),
-      html: '<table role="presentation" class="contact-actions" width="100%" cellspacing="0" cellpadding="0" border="0"><tr>' +
-        '<td class="contact-action-cell" width="49%" valign="top">' + actions[0] + '</td>' +
-        '<td class="contact-action-gap" width="2%">&nbsp;</td>' +
-        '<td class="contact-action-cell" width="49%" valign="top">' + actions[1] + '</td>' +
-        '</tr></table>',
+      plainText: 'Reply to client: ' + emailAddress,
+      html: '<a class="button" href="' + href + '" style="display:block;box-sizing:border-box;width:100%;background:#ff4b18;color:#fff;text-align:center;text-decoration:none;font-size:13px;line-height:1;font-weight:800;letter-spacing:.3px;padding:16px 18px;border-radius:11px;">REPLY TO CLIENT</a>',
     };
   }
 
-  if (actions.length === 1) return { plainText: plainText[0], html: actions[0] };
-
   return {
-    plainText: 'Client contact details were not provided.',
-    html: '<div style="font-size:13px;line-height:1.5;color:#687487;">Client contact details were not provided.</div>',
+    plainText: '',
+    html: '',
   };
 }
 

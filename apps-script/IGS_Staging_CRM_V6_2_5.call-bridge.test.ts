@@ -32,7 +32,7 @@ function loadScript(): ScriptContext {
 }
 
 describe("mobile Call Client bridge", () => {
-  it("routes admin Call Client through an HTTPS CRM-bound link instead of a Gmail tel link", () => {
+  it("keeps the secure call bridge available without exposing it in admin email actions", () => {
     const context = loadScript();
     context.ScriptApp = {
       getService: () => ({ getUrl: () => "https://script.google.com/macros/s/staging/exec" }),
@@ -53,10 +53,8 @@ describe("mobile Call Client bridge", () => {
     expect(links.callUrl).toBe(
       "https://script.google.com/macros/s/staging/exec?open=call&ref=IGS-2026-0042&row=9",
     );
-    expect(actions.html).toContain(
-      'href="https://script.google.com/macros/s/staging/exec?open=call&amp;ref=IGS-2026-0042&amp;row=9"',
-    );
-    expect(actions.html).toContain("CALL CLIENT");
+    expect(actions.html).not.toContain("open=call");
+    expect(actions.html).not.toContain("CALL CLIENT");
     expect(actions.html).not.toContain('href="tel:');
     expect(links.callUrl).not.toContain("phone=");
   });

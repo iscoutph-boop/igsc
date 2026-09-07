@@ -361,7 +361,7 @@ describe("Apps Script V6.2.5 production-readiness behavior", () => {
     expect(rows).toHaveLength(1);
   });
 
-  it("renders separate reply and call CTAs with a valid sanitized tel URI", () => {
+  it("renders the reply CTA without exposing a Call Client action", () => {
     const context = loadScript();
     const actions = context.buildClientActionV4_(
       "qa@example.com",
@@ -373,10 +373,10 @@ describe("Apps Script V6.2.5 production-readiness behavior", () => {
     expect(actions.html).toContain(
       "mailto:qa%40example.com?subject=Re%3A%20IG%20Sabroso%20consultation%20request%20IGS-2026-0042",
     );
-    expect(actions.html).toContain("CALL CLIENT");
-    expect(actions.html).toContain('href="tel:+639171234567"');
+    expect(actions.html).not.toContain("CALL CLIENT");
+    expect(actions.html).not.toContain("open=call");
+    expect(actions.html).not.toContain('href="tel:');
     expect(actions.html).not.toContain("REPLY TO CLIENT →");
-    expect(actions.html).not.toContain("CALL CLIENT →");
   });
 
   it("hides Call Client when the phone value is not dialable", () => {
@@ -425,7 +425,9 @@ describe("Apps Script V6.2.5 production-readiness behavior", () => {
 
     expect(sent?.to).toBe("caballerodigitals@gmail.com");
     expect(sent?.htmlBody).toContain("REPLY TO CLIENT");
-    expect(sent?.htmlBody).toContain("CALL CLIENT");
+    expect(sent?.htmlBody).not.toContain("CALL CLIENT");
+    expect(sent?.htmlBody).not.toContain("open=call");
+    expect(sent?.body).not.toContain("Call client");
     expect(sent?.htmlBody).toContain("OPEN CRM RECORD");
     expect(sent?.htmlBody).not.toContain("VIEW APPOINTMENT");
     expect(sent?.htmlBody).not.toContain("VIEW UPDATED APPOINTMENT");
