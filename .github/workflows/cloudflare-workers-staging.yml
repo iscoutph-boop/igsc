@@ -36,3 +36,20 @@ jobs:
         run: npm run build:workers
       - name: Verify deploy bundle without publishing
         run: npx wrangler deploy --dry-run
+      - name: Inventory Cloudflare built files
+        run: |
+          echo "Build output directories:"
+          find dist .output -maxdepth 4 -type f 2>/dev/null | head -n 30 || true
+          echo "Build output totals:"
+          du -sh dist .output 2>/dev/null || true
+      - name: Preserve validated Cloudflare build as short-lived artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: igsabroso-site-verified-worker-build
+          path: |
+            dist/
+            .output/
+            .wrangler/deploy/
+          include-hidden-files: true
+          retention-days: 2
+          if-no-files-found: error
