@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useRouterState } from "@tanstack/react-router";
 import { CheckBookingModal } from "@/components/booking-modals";
+import { ONLINE_BOOKING_ENABLED } from "@/lib/booking-mode";
 import { PageTransition } from "@/components/page-transition";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
@@ -51,7 +52,9 @@ export function DetailsPage() {
         <ConsultationClose onManageBooking={() => setManageBookingOpen(true)} />
       </main>
       <SiteFooter />
-      <CheckBookingModal open={manageBookingOpen} onClose={() => setManageBookingOpen(false)} />
+      {ONLINE_BOOKING_ENABLED ? (
+        <CheckBookingModal open={manageBookingOpen} onClose={() => setManageBookingOpen(false)} />
+      ) : null}
     </PageTransition>
   );
 }
