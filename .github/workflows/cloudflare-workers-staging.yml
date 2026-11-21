@@ -65,8 +65,14 @@ jobs:
           fi
       - name: Install locked dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
+      - name: Exclude temporary review website from search indexing
+        run: |
+          printf 'User-agent: *\\nDisallow: /\\n' > public/robots.txt
+          printf '/*\\n  X-Robots-Tag: noindex, nofollow, noarchive\\n' > public/_headers
       - name: Build Cloudflare Workers staging
         run: npm run build:workers
+        env:
+          VITE_IGSC_STAGING: 'true'
       - name: Deploy ONLY igsabroso-staging Worker
         run: npx wrangler deploy
         env:
