@@ -1,0 +1,38 @@
+name: IG Sabroso Cloudflare Workers staging verification
+
+on:
+  push:
+    branches:
+      - migration/igsc-cloudflare-workers-20261122
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+      - name: Check isolated Workers configuration
+        run: |
+          test -f wrangler.jsonc
+          test -f vite.config.ts
+          grep -q '@cloudflare/vite-plugin' vite.config.ts
+          if grep -q 'from "@netlify/vite-plugin-tanstack-start"' vite.config.ts; then
+            echo "FAIL: Netlify deployment adapter must not be active on the Workers branch"
+            exit 1
+          fi
+      - name: Install dependencies
+        run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Unit tests
+        run: npm test -- --run
+      - name: Production build on Workers target
+        run: npm run build
+      - name: Package validation without publishing
+        run: npx wrangler deploy --dry-run
