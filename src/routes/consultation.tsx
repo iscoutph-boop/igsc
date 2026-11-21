@@ -19,6 +19,7 @@ import { SchedulePicker } from "@/components/schedule-picker";
 import { SiteFooter } from "@/components/site-footer";
 import { SiteHeader } from "@/components/site-header";
 import { callCRM } from "@/lib/bookings";
+import { ONLINE_BOOKING_ENABLED } from "@/lib/booking-mode";
 import { trackEvent } from "@/lib/analytics";
 import { buildCanonicalUrl, DEFAULT_SOCIAL_IMAGE } from "@/lib/seo";
 import {
@@ -70,8 +71,9 @@ export function ConsultationPage() {
                 Let’s build something great together.
               </h1>
               <p className="mt-6 max-w-2xl text-base leading-8 text-[#667085] sm:text-lg">
-                Share the essential project details. The IG Sabroso team will review your inquiry
-                and contact you to confirm the next step or preferred appointment schedule.
+                {ONLINE_BOOKING_ENABLED
+                  ? "Share the essential project details. Our team will review your request and confirm next steps."
+                  : "Online booking is temporarily unavailable. Speak directly with the IG Sabroso team about your project."}
               </p>
             </div>
 
@@ -143,7 +145,38 @@ export function ConsultationPage() {
               </aside>
 
               <div className="rounded-[1.75rem] border border-border bg-white p-6 shadow-[0_18px_54px_rgba(21,34,56,0.08)] sm:p-8 lg:p-10">
-                {bookingReference ? (
+                {!ONLINE_BOOKING_ENABLED ? (
+                  <section aria-label="Contact IG Sabroso for consultation" className="space-y-6">
+                    <div>
+                      <p className="text-xs font-extrabold uppercase tracking-[0.16em] text-primary">
+                        Project enquiries
+                      </p>
+                      <h2 className="mt-3 text-3xl font-extrabold tracking-[-0.03em] text-[#152238]">
+                        Let’s discuss your project.
+                      </h2>
+                      <p className="mt-4 text-sm leading-7 text-[#667085]">
+                        Online appointment booking is temporarily unavailable. Please call or email
+                        our team to discuss your requirements and preferred schedule.
+                      </p>
+                    </div>
+                    <div className="grid gap-3 sm:grid-cols-2">
+                      <a
+                        href={`tel:${IGS_PHONE_TEL}`}
+                        className="inline-flex min-h-14 items-center justify-center gap-3 rounded-xl bg-primary px-6 text-sm font-extrabold text-white"
+                      >
+                        <Phone aria-hidden="true" size={19} />
+                        Call our team
+                      </a>
+                      <a
+                        href={`mailto:${IGS_EMAIL}?subject=Project%20consultation%20enquiry`}
+                        className="inline-flex min-h-14 items-center justify-center gap-3 rounded-xl border border-[#dce1e7] bg-white px-6 text-sm font-extrabold text-[#152238]"
+                      >
+                        <Mail aria-hidden="true" size={19} />
+                        Email your enquiry
+                      </a>
+                    </div>
+                  </section>
+                ) : bookingReference ? (
                   <SuccessPanel
                     bookingReference={bookingReference}
                     onManage={() => setManageOpen(true)}
@@ -158,11 +191,13 @@ export function ConsultationPage() {
         </section>
       </main>
       <SiteFooter />
-      <CheckBookingModal
-        open={manageOpen}
-        onClose={() => setManageOpen(false)}
-        initialReference={bookingReference ?? undefined}
-      />
+      {ONLINE_BOOKING_ENABLED ? (
+        <CheckBookingModal
+          open={manageOpen}
+          onClose={() => setManageOpen(false)}
+          initialReference={bookingReference ?? undefined}
+        />
+      ) : null}
     </PageTransition>
   );
 }
