@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "framer-motion";
 import { useEffect, useState } from "react";
+import { ONLINE_BOOKING_ENABLED } from "@/lib/booking-mode";
 import teamEvent from "@/assets/real/team-event.webp";
 import turnoverTeam from "@/assets/real/turnover-team.webp";
 import { SiteHeader } from "@/components/site-header";
@@ -598,15 +599,18 @@ function ConsultationCallout() {
                 Let’s build something great together.
               </h2>
               <p className="mt-5 max-w-2xl text-base leading-8 text-[#5e6976]">
-                Tell us about your location, project type, priorities, and preferred timeline. The
-                consultation form connects directly to the existing booking workflow.
+                {ONLINE_BOOKING_ENABLED
+                  ? "Tell us about your location, project type, priorities, and preferred timeline using our online consultation form."
+                  : "Tell us about your project. Contact our team directly by phone or email to discuss your requirements and next steps."}
               </p>
             </div>
             <div className="rounded-2xl border border-white/90 bg-white p-6 shadow-[0_18px_45px_rgba(21,34,56,0.09)] sm:p-8">
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-1">
                 <div className="flex items-center gap-3">
                   <CalendarDays aria-hidden="true" className="text-primary" />
-                  <span className="text-sm font-bold text-[#344054]">Schedule a consultation</span>
+                  <span className="text-sm font-bold text-[#344054]">
+                    {ONLINE_BOOKING_ENABLED ? "Schedule a consultation" : "Speak with our team"}
+                  </span>
                 </div>
                 <div className="flex items-center gap-3">
                   <Building2 aria-hidden="true" className="text-primary" />
@@ -619,7 +623,7 @@ function ConsultationCallout() {
                 to="/consultation"
                 className="mt-7 flex min-h-14 w-full items-center justify-center gap-3 rounded-xl bg-primary px-6 text-sm font-extrabold uppercase tracking-[0.06em] text-white"
               >
-                Book a consultation
+                {ONLINE_BOOKING_ENABLED ? "Book a consultation" : "Contact our team"}
                 <ArrowRight aria-hidden="true" size={19} />
               </Link>
             </div>
