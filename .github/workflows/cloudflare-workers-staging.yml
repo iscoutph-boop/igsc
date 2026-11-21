@@ -1,9 +1,9 @@
-name: IG Sabroso Cloudflare Workers staging verification
+name: IG Sabroso Cloudflare Release Verification
 
 on:
   push:
     branches:
-      - migration/igsc-cloudflare-workers-20261122
+      - cloudflare-release
   workflow_dispatch:
 
 permissions:
@@ -19,62 +19,20 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-      - name: Check isolated Workers configuration
+      - name: Confirm Cloudflare-only deployment settings
         run: |
           test -f wrangler.jsonc
-          test -f vite.config.ts
+          grep -q '"name": "igsabroso-site"' wrangler.jsonc
           grep -q '@cloudflare/vite-plugin' vite.config.ts
-          if grep -q 'from "@netlify/vite-plugin-tanstack-start"' vite.config.ts; then
-            echo "FAIL: Netlify deployment adapter must not be active on the Workers branch"
+          if grep -q '@netlify/vite-plugin-tanstack-start' vite.config.ts; then
+            echo "::error::Netlify adapter must not be active."
             exit 1
           fi
-      - name: Resolve exact migration dependencies
-        run: npm install --package-lock-only --ignore-scripts --no-audit --no-fund
       - name: Install locked dependencies
         run: npm ci --ignore-scripts --no-audit --no-fund
-      - name: Unit tests
+      - name: Run unit and integration tests
         run: npm test -- --run
-      - name: Production build on Workers target
-        run: npm run build
-      - name: Package validation without publishing
-        run: npx wrangler deploy --dry-run
-
-  deploy_staging:
-    # Never deploy from main or PRs, and keep staging disabled until the
-    # repository owner explicitly enables it after creating a scoped token.
-    if: ${{ github.ref == 'refs/heads/migration/igsc-cloudflare-workers-20261122' && vars.IGSC_CLOUDFLARE_STAGING_DEPLOY == 'enabled' }}
-    needs: verify
-    runs-on: ubuntu-latest
-    timeout-minutes: 20
-    environment: igs-cloudflare-staging
-    permissions:
-      contents: read
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: '22'
-          cache: npm
-      - name: Validate Cloudflare staging authentication
-        env:
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-        run: |
-          if [ -z "${CLOUDFLARE_API_TOKEN}" ]; then
-            echo "::error::Missing CLOUDFLARE_API_TOKEN in the igs-cloudflare-staging environment."
-            exit 1
-          fi
-      - name: Install locked dependencies
-        run: npm ci --ignore-scripts --no-audit --no-fund
-      - name: Exclude temporary review website from search indexing
-        run: |
-          printf 'User-agent: *\nDisallow: /\n' > public/robots.txt
-          printf '/*\n  X-Robots-Tag: noindex, nofollow, noarchive\n' > public/_headers
-      - name: Build Cloudflare Workers staging
+      - name: Build for Cloudflare Workers
         run: npm run build:workers
-        env:
-          VITE_IGSC_STAGING: 'true'
-      - name: Deploy ONLY igsabroso-staging Worker
-        run: npx wrangler deploy
-        env:
-          CLOUDFLARE_ACCOUNT_ID: cad0f4193e7115f79edbdd82f7365bcf
-          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      - name: Verify deploy bundle without publishing
+        run: npx wrangler deploy --dry-run
