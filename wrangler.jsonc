@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/wrangler/config-schema.json",
-  "name": "igsabroso-staging",
+  "name": "igsabroso-site",
   "main": "@tanstack/react-start/server-entry",
   "compatibility_date": "2026-11-22",
   "compatibility_flags": [
