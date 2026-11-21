@@ -4,6 +4,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { MessageCircle, Bot, Headphones, X, Send, ArrowRight } from "lucide-react";
 import officialLogo from "@/assets/igs-official-logo.png";
 import { IGS_PHONE_WA } from "@/lib/contact";
+import { ONLINE_BOOKING_ENABLED } from "@/lib/booking-mode";
 
 type Mode = null | "menu" | "bot" | "agent";
 type Msg = { from: "bot" | "user"; text: string };
@@ -144,7 +145,7 @@ export function FloatingContact() {
           ...m,
           {
             from: "bot",
-            text: "Thank you! Our team will reach out shortly. Ready to lock in a slot? Tap 'Book Consultation' below.",
+            text: "Your answers are saved only in this chat. Please contact our team through WhatsApp to send your project inquiry.",
           },
         ]);
       }
@@ -229,6 +230,7 @@ export function FloatingContact() {
                     className="text-muted-foreground group-hover:translate-x-1 transition"
                   />
                 </button>
+                {ONLINE_BOOKING_ENABLED ? (
                 <button
                   onClick={startBot}
                   className="w-full flex items-center gap-3 rounded-2xl p-3 border border-border hover:border-primary/60 hover:bg-primary/5 transition text-left group"
@@ -247,6 +249,7 @@ export function FloatingContact() {
                     className="text-muted-foreground group-hover:translate-x-1 transition"
                   />
                 </button>
+                ) : null}
                 <button
                   onClick={startAgent}
                   className="w-full flex items-center gap-3 rounded-2xl p-3 border border-border hover:border-primary/60 hover:bg-primary/5 transition text-left group"
