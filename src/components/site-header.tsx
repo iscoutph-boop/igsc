@@ -1,5 +1,5 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { ArrowRight, CalendarSearch, Menu, X } from "lucide-react";
+import { ArrowRight, CalendarSearch, Menu, Phone, X } from "lucide-react";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { BrandLockup } from "@/components/brand/brand-lockup";
@@ -9,6 +9,8 @@ import {
   PRIMARY_NAVIGATION,
 } from "@/content/navigation";
 import { CheckBookingModal } from "./booking-modals";
+import { ONLINE_BOOKING_ENABLED } from "@/lib/booking-mode";
+import { IGS_PHONE_TEL } from "@/lib/contact";
 
 const routeTargets = ["/", "/details", "/projects", "/consultation"] as const;
 type RouteTarget = (typeof routeTargets)[number];
@@ -125,20 +127,30 @@ export function SiteHeader({ floating = false }: { floating?: boolean }) {
           </nav>
 
           <div className="ml-auto flex items-center gap-2 sm:gap-3">
-            <button
-              type="button"
-              onClick={() => setManageOpen(true)}
-              className="hidden min-h-11 items-center gap-2 rounded-lg px-3 text-[0.82rem] font-bold text-[#152238] transition hover:bg-[#f7f8fa] hover:text-primary lg:inline-flex"
-            >
-              <CalendarSearch aria-hidden="true" size={17} />
-              Manage booking
-            </button>
+            {ONLINE_BOOKING_ENABLED ? (
+              <button
+                type="button"
+                onClick={() => setManageOpen(true)}
+                className="hidden min-h-11 items-center gap-2 rounded-lg px-3 text-[0.82rem] font-bold text-[#152238] transition hover:bg-[#f7f8fa] hover:text-primary lg:inline-flex"
+              >
+                <CalendarSearch aria-hidden="true" size={17} />
+                Manage booking
+              </button>
+            ) : (
+              <a
+                href={`tel:${IGS_PHONE_TEL}`}
+                className="hidden min-h-11 items-center gap-2 rounded-lg px-3 text-[0.82rem] font-bold text-[#152238] transition hover:bg-[#f7f8fa] hover:text-primary lg:inline-flex"
+              >
+                <Phone aria-hidden="true" size={17} />
+                Call our team
+              </a>
+            )}
             <Link
               to="/consultation"
               activeOptions={{ exact: true }}
               className="hidden min-h-11 items-center gap-3 rounded-lg bg-primary px-4 text-[0.78rem] font-extrabold uppercase tracking-[0.045em] text-white shadow-[0_10px_28px_rgba(244,81,30,0.18)] transition hover:-translate-y-0.5 hover:bg-[#dd3e12] md:inline-flex md:px-5"
             >
-              <span>Book a consultation</span>
+              <span>{ONLINE_BOOKING_ENABLED ? "Book a consultation" : "Contact our team"}</span>
               <ArrowRight aria-hidden="true" size={18} />
             </Link>
             <button
@@ -248,24 +260,35 @@ export function SiteHeader({ floating = false }: { floating?: boolean }) {
               </nav>
 
               <div className="mt-auto space-y-3 pt-8">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setMenuOpen(false);
-                    setManageOpen(true);
-                  }}
-                  className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-[#dce1e7] bg-white px-5 font-bold text-[#152238]"
-                >
-                  <CalendarSearch aria-hidden="true" size={18} />
-                  Manage booking
-                </button>
+                {ONLINE_BOOKING_ENABLED ? (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setMenuOpen(false);
+                      setManageOpen(true);
+                    }}
+                    className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-[#dce1e7] bg-white px-5 font-bold text-[#152238]"
+                  >
+                    <CalendarSearch aria-hidden="true" size={18} />
+                    Manage booking
+                  </button>
+                ) : (
+                  <a
+                    href={`tel:${IGS_PHONE_TEL}`}
+                    onClick={() => setMenuOpen(false)}
+                    className="flex min-h-12 w-full items-center justify-center gap-2 rounded-xl border border-[#dce1e7] bg-white px-5 font-bold text-[#152238]"
+                  >
+                    <Phone aria-hidden="true" size={18} />
+                    Call our team
+                  </a>
+                )}
                 <Link
                   to="/consultation"
                   activeOptions={{ exact: true }}
                   onClick={() => setMenuOpen(false)}
                   className="flex min-h-13 w-full items-center justify-center gap-3 rounded-xl bg-primary px-5 font-extrabold text-white"
                 >
-                  Book a consultation
+                  {ONLINE_BOOKING_ENABLED ? "Book a consultation" : "Contact our team"}
                   <ArrowRight aria-hidden="true" size={18} />
                 </Link>
               </div>
@@ -274,7 +297,9 @@ export function SiteHeader({ floating = false }: { floating?: boolean }) {
         ) : null}
       </AnimatePresence>
 
-      <CheckBookingModal open={manageOpen} onClose={() => setManageOpen(false)} />
+      {ONLINE_BOOKING_ENABLED ? (
+        <CheckBookingModal open={manageOpen} onClose={() => setManageOpen(false)} />
+      ) : null}
     </>
   );
 }
