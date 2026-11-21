@@ -9,6 +9,7 @@ import {
   IGS_PHONE_TEL,
 } from "@/lib/contact";
 import { RefinementSection } from "./refinement-shell";
+import { ONLINE_BOOKING_ENABLED } from "@/lib/booking-mode";
 
 export function ConsultationClose({ onManageBooking }: { onManageBooking: () => void }) {
   return (
@@ -32,17 +33,27 @@ export function ConsultationClose({ onManageBooking }: { onManageBooking: () => 
                 to="/consultation"
                 className="inline-flex min-h-13 items-center justify-center gap-3 rounded-xl bg-primary px-6 text-sm font-extrabold text-white"
               >
-                Book a consultation
+                {ONLINE_BOOKING_ENABLED ? "Book a consultation" : "Contact our team"}
                 <ArrowRight aria-hidden="true" size={18} />
               </Link>
-              <button
-                type="button"
-                onClick={onManageBooking}
-                className="inline-flex min-h-13 items-center justify-center gap-3 rounded-xl border border-[#d8c9c1] bg-white px-6 text-sm font-extrabold text-[#152238]"
-              >
-                <CalendarSearch aria-hidden="true" size={18} />
-                Manage booking
-              </button>
+              {ONLINE_BOOKING_ENABLED ? (
+                <button
+                  type="button"
+                  onClick={onManageBooking}
+                  className="inline-flex min-h-13 items-center justify-center gap-3 rounded-xl border border-[#d8c9c1] bg-white px-6 text-sm font-extrabold text-[#152238]"
+                >
+                  <CalendarSearch aria-hidden="true" size={18} />
+                  Manage booking
+                </button>
+              ) : (
+                <a
+                  href={`tel:${IGS_PHONE_TEL}`}
+                  className="inline-flex min-h-13 items-center justify-center gap-3 rounded-xl border border-[#d8c9c1] bg-white px-6 text-sm font-extrabold text-[#152238]"
+                >
+                  <Phone aria-hidden="true" size={18} />
+                  Call our team
+                </a>
+              )}
             </div>
 
             <div className="mt-9 grid gap-4 text-sm text-[#53606e] sm:grid-cols-2">
