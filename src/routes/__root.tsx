@@ -124,6 +124,10 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       },
       { name: "twitter:image", content: DEFAULT_SOCIAL_IMAGE },
       { name: "theme-color", content: "#ffffff" },
+      // Preview builds are intentionally excluded from search indexing.
+      ...(import.meta.env.VITE_IGSC_STAGING === "true"
+        ? [{ name: "robots", content: "noindex, nofollow, noarchive" }]
+        : []),
     ],
     links: [
       { rel: "stylesheet", href: appCss },
